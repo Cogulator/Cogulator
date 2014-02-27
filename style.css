@@ -95,6 +95,17 @@ body {
     float:left;
 }
 
+#download{
+    height:auto;
+    width:600px;
+    margin:0 auto;
+    color:#555;
+    font-family: 'Droid Sans', sans-serif;
+    font-size: 32px;
+    font-weight:bold;
+    float:center;
+}
+
 
 #push {
     height:75px;
