@@ -1,0 +1,332 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<title>Cogulator : Primer</title>
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif:400,700' rel='stylesheet' type='text/css'>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script type='text/javascript' src='http://code.jquery.com/jquery-1.4.2.js'></script>    
+	<script type='text/javascript'>//<![CDATA[ 
+		$(window).load(function(){
+		 var topRange      = 200,  // measure from the top of the viewport to X pixels down
+			 edgeMargin    = 20,   // margin above the top or margin from the end of the page
+			 animationTime = 1200, // time in milliseconds
+			 contentTop = [];
+		
+		$(document).ready(function(){ 
+		
+		 // Stop animated scroll if the user does something
+		 $('html,body').bind('scroll mousedown DOMMouseScroll mousewheel keyup', function(e){
+		 if ( e.which > 0 || e.type == 'mousedown' || e.type == 'mousewheel' ){
+		  $('html,body').stop();
+		 }
+		})
+		
+		 // Set up content an array of locations
+		 $('#nav').find('a').each(function(){
+		  contentTop.push( $( $(this).attr('href') ).offset().top );
+		 })
+		
+		 // Animate menu scroll to content
+		  $('#nav').find('a').click(function(){
+		   var sel = this,
+			   newTop = Math.min( contentTop[ $('#nav a').index( $(this) ) ], $(document).height() - $(window).height() ); // get content top or top position if at the document bottom
+			   //newTop = newTop - 100; //SLE - added to account for fixed header
+		   $('html,body').stop().animate({ 'scrollTop' : newTop }, animationTime, function(){
+			window.location.hash = $(sel).attr('href');
+		   });
+		   return false;
+		 })
+		 
+		  // adjust side menu
+		 $(window).scroll(function(){
+		  var winTop = $(window).scrollTop(),
+			  bodyHt = $(document).height(),
+			  vpHt = $(window).height() + edgeMargin;  // viewport height + margin
+		  $.each( contentTop, function(i,loc){
+		   if ( ( loc > winTop - edgeMargin && ( loc < winTop + topRange || ( winTop + vpHt ) >= bodyHt ) ) ){
+			$('#nav li')
+			 .removeClass('selected')
+			 .eq(i).addClass('selected');
+		   }
+		  })
+		 })
+		
+		  
+		})
+		});//]]>  
+    
+    </script>
+</head>
+    
+    <body>
+        <div id="wrapper">
+            <div id="header_wrapper">
+                <div id="header">
+                    <div style="float:left"><a href="/index.html"><img src="images/cog-logo.png" alt="Cogulator Logo"></a></div>
+                    <div id="header_nav"><span id="current">PRIMER</span></div>
+                    <div id="header_nav"><a href="/screencast.html" class="nav_menu">SCREENCAST</a></div>
+                    <div id="header_nav"><a href="/download.html" class="nav_menu">DOWNLOAD</a></div>
+                    <div id="header_nav"><a href="/source.html" class="nav_menu">SOURCE</a></div>
+                </div>
+            </div>
+        
+        
+         <div id="content_wrapper">
+             
+            <div id="nav">
+                <ul>
+                    <li><a href="#PREFACE" class="nav_menu">PREFACE
+                    <li><a href="#DESIGN" class="nav_menu">DESIGN</a> </li>
+                    <li><a href="#SYNTAX" class="nav_menu">SYNTAX</a> </li>
+                    <li><a href="#CMN-GOMS" class="nav_menu">CMN-GOMS</a> </li>
+                    <li><a href="#OPERATORS" class="nav_menu">OPERATORS</a> </li>
+                    <li><a href="#INTERFACE" class="nav_menu">INTERFACE</a> </li>
+                    <li><a href="#NEW_MODELS" class="nav_menu">NEW MODELS</a> </li>
+                    <li><a href="#SAVING_MODELS" class="nav_menu">SAVING MODELS</a> </li>
+                    <li><a href="#MODEL_STATUS" class="nav_menu">MODEL STATUS</a> </li>
+                    <li><a href="#MANAGEMENT" class="nav_menu">MANAGEMENT</a> </li>
+                    <li><a href="#OPERATORS_CHI" class="nav_menu">OPERATORS CHI</a> </li>
+                    <li><a href="#ERRORS_CHI" class="nav_menu">ERRORS CHI</a> </li>
+                    <li><a href="#GANTT_CHART" class="nav_menu">GANTT CHART</a> </li>
+                    <li><a href="#MULTITASKING" class="nav_menu">MULTITASKING</a> </li>
+                    <li><a href="#WM_LOAD" class="nav_menu">WM LOAD</a> </li>
+                    <li><a href="#A_REPRIEVE" class="nav_menu">A REPRIEVE</a> </li>
+                </ul>
+            </div>
+        
+          
+            <div id="content">
+                <span class="anchor" id="PREFACE"></span>
+                <h1>Preface</h1>
+<p>This document serves as a brief introduction to the Cogulator software and is not intended to be an exhaustive user manual. It assumes some familiarity with GOMS. If that assumption is a poor one, you can learn more about GOMS via <a href="http://en.wikipedia.org/wiki/GOMS">Wikipedia</a> and the following references:</p>
+<blockquote>
+<p>Card, S., Moran, T., &amp; Newell, A. (1983). <a href="http://books.google.com/books?id=30UsZ8hy2ZsC&amp;lpg=PA461&amp;vq=GOMS&amp;pg=PA139#v=snippet&amp;q=GOMS&amp;f=false">The Psychology of Human Computer Interaction</a>. Lawrence Erlbaum Associates. ISBN 0-89859-859-1.</p>
+<p>Gray, W. D., John, B. E., &amp; Atwood, M. E. (1993). <a href="http://homepages.rpi.edu/~grayw/grayres/ernestine.html">Project Ernestine: Validating GOMS for predicting and explaining real-world task performance.</a></p>
+<p>John, B., &amp; Kieras, D. (1996) <a href="http://www.eecs.berkeley.edu/~jfc/hcc/courseSP05/lecs/Cognitive">Using GOMS for User Interface Design and Evaluation: Which Technique?</a> ACM Transactions on Computer-Human Interaction, 3, 287-319.</p>
+<p>Kieras, D (2006). <a href="http://web.eecs.umich.edu/~kieras/docs/GOMS/GOMSL_Guide.pdf">A Guide to GOMS Model Usability Evaluation using GOMSL and GLEAN4.</a> The University of Michigan. Retrieved from</p>
+</blockquote>
+
+<p>Cogulator, a portmanteau of Cognitive and Calculator, is a simple tool for task analysis and GOMS (Goals, Operators, Methods, and Selection Rules) modeling. It's designed to be approachable for new users and quick for experienced ones.  To that end, Cogulator has a fairly limited feature set.  You describe the task using CMN-GOMS (discussed more later) and Cogulator returns task time predictions and working memory load estimates.  Anything that gets in the way of those basic tasks has been eliminated. In fact, even the “S” in GOMS isn’t spared - there are no selection rules available in Cogulator. In short, we have tried to create a tightly focused application for building GOMS models by applying basic human factors to a basic human factors tool.</p>
+<br><br>
+                
+                
+                
+
+<span class="anchor" id="DESIGN"></span>
+<h1>Design</h1>
+<p>There are many different GOMS software tools available today. Those include efforts like <a href = "http://web.eecs.umich.edu/~kieras/goms.html">GLEAN</a> (a significant influence on Cogulator) and <a href "https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=9&cad=rja&ved=0CGAQFjAI&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.106.1374%26rep%3Drep1%26type%3Dpdf&ei=Ukn5UtLdAqPC0QHuzICYCA&usg=AFQjCNHpSWoFVltMhe_HERm-pB6MrAO6Ww&sig2=qarjUOetWFI7MUROvxSKoQ&bvm=bv.60983673,d.dmQ">APEX</a> which provide a quasi-programming language for developing models that can be embedded in real- and fast-time simulations. Other applications – <a href="http://cogtool.hcii.cs.cmu.edu/">CogTool</a> being a primary example – forgo programming in favor of graphical approaches to constructing models. Cogulator is not meant, necessarily, to compete with or replace any one of these and, depending on your goals, any one of these may be a better choice for you. What sort of goals would suggest the use of Cogulator? Primarily, building models quickly and flexibly.</p>
+<p>In most modeling systems adding new operators or changing default operator times requires changes to the codebase. We found that to be a major obstacle in modeling. Any time we learned something new about a domain - say, that rate at which air traffic controllers speak when issuing clearances - the proverbial hood on the modeling tool's codebase had to be opened. Cogulator, therefore, allows the user to quickly and easily add new operators; permanently change the execution time of existing operators based on domain knowledge, empirical evidence, or simple curiosity; or make a change to the execution time of a specific occurrence of an operator - all without touching the application source code.</p>
+<p>One of the side effects, or perhaps requirements, of allowing operator flexibility is a corresponding flexibility in the modeling language. As it happens, this also matched up well with our needs. For some projects a Keystroke Level Model (<a href="http://en.wikipedia.org/wiki/Keystroke-level_model">KLM</a>) model was adequate where others required a detailed, <a href="http://en.wikipedia.org/wiki/CPM-GOMS">CPM-GOMS</a> (Cognitive, Perceptual, Motor) or, at an even lower level, Human Information Processor (<a href="http://en.wikipedia.org/wiki/Human_processor_model">HIP</a>) model. Instead of focusing on a particular iteration of GOMS, Cogulator allows for building across a wide range of GOMS implementations including: KLM, NGOMSL (Natural GOMS Language), CPM-GOMS, CMN-GOMS (Card, Moran, &amp; Newell), or HIP. While this flexibility has obvious advantages, it also leaves it to the modeler determine what operators are appropriate for a particular model.</p>
+<p>Aside from flexibility, Cogulator was built for speed. In general, there’s a design tradeoff to be made between the approachability of a GUI based interface and the speed of a text-based interface. In the case of Cogulator, experience with other GUI-based modeling tools as well as recursive GOMS models of building GOMS models, as it were, indicated that there is just no faster way to build models than via a text-based interface. And, we found that with a flexible syntax, we could retain much of the approachability of a GUI.</p>
+<br><br>
+    
+<span class="anchor" id="SYNTAX"></span>
+<h1>Syntax</h1>  
+<p>For Cogulator we wanted a syntax that was linear and easily readable - even to someone unfamiliar with it.  At its simplest, that means something KLM-like.  So, in Cogulator perfectly acceptable to simply enter a series of operators to get a task time. For example, pointing to a target on screen with a mouse requires the user to first look where they want to point, move the cursor with the mouse until it is over the target, and often verify mentally that the cursor is in position.  In Cogulator, a perfectly valid model of this task is built with just three words:
+</p>
+                
+<blockquote>
+<code>
+<span style="color:#268BD2">Look <br>
+Point<br>
+Verify</span>
+</code>
+</blockquote> 
+    
+<p>Sometimes you'll want something a bit more detailed.  For that, we just add goal statements and hierarchy via CMN-GOMS.  
+</p>
+<br><br>
+                
+                
+                
+<span class="anchor" id="CMN-GOMS"></span>
+<h1>CMN-GOMS</h1>
+<p></p>            
+<p>CMN-GOMS was first introduced in Card, Moran, &amp; Newell’s 1983 book, <a href="http://books.google.com/books/about/The_Psychology_of_Human_Computer_Interac.html?id=30UsZ8hy2ZsC">the Psychology of Human Computer Interaction.</a> Our implementation is a mash-up with a KLM approach to operator definition and bears a very close resemblance to NGOMSL, as developed by David Kieras. CMN-GOMS is a hierarchical syntax (and, in fact, the original formulation of GOMS). This is a nice fit with task analysis as the model is essentially a step-by-step guide for completing some task (and avoids some conventions that may be foreign to non-programmers like functions or procedures). Returning to the previous example, we can add a goal statement and indents to indicate hierarchy, creating a CMN-GOMS version of the model:</p>
+<blockquote>
+<code> 
+<span style="color:#D33682">Goal:</span> Point and Click<br>
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Look</span> at target<br>
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Point</span> to target<br>
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Verify</span> the cursor is over target
+</code>
+</blockquote>
+             
+<p>To create a CMN-GOMS model we've added a goal statement that describes the task being completed and some periods to convey hierarchy.  Each operator required to accomplish the goal is preceded by a one period more than that of its goal (in this case, the goal had none, so each operator is preceded by one period).  Essentially, CMN-GOMS allows you to create an outline of the task.  The periods are important because they indicate to Cogulator where goals and operators lie within the hierarchy of the model. As a final example, if we wanted to add a subgoal to the Point and Click goal, it would have a single indent:</p>
+<blockquote>
+<pre>
+<code> 
+<span style="color:#D33682">Goal:</span> Point and Click
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Look</span> at target
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Point</span> to target
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Verify</span> the cursor is over target
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#D33682">Goal:</span> Subgoal of Point to target
+</code>
+</pre></blockquote>
+<br><br>
+               
+                
+<span class="anchor" id="OPERATORS"></span>
+<h1>Operators</h1>
+<p>Cogulator comes with twenty-one operators pre-installed, to which you can add more. Operators have three components: the operator name, an operator label, and an operator modifier. The name is the operator itself (e.g., Point for pointing a mouse or Look for looking at something on the screen). The label, which describes how the operator is being used, is typically optional (Type, Listen, and Say require a label in order to determine how long the step should take). So, if I wanted to indicate that a save button is what is being pointed to in a model, I could enter:</p>
+<blockquote><code>
+.&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Point</span> to Save Button
+</code></blockquote>        
+<p>You can enter anything you want for the label and it can be as long or short as you would like.</p>
+    
+<p>Each operator has a built-in task time.  Point, for example, has a default time of 950 milliseconds.  If you have a need to use something other than the default operator time, the execution time of the given instance can be changed by using a modifier.  Modifiers are contained in parentheticals added to the end of the line:</p>
+<blockquote><code>
+.&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#268BD2">Point</span> to Save Button <strong>(300 <span style="color:#859900">ms</span>)</strong>
+</code></blockquote>
+<p>where ms stands for milliseconds. You can also use "seconds" or, for audition and speech, "syllables".  A full list of operators, their definitions, and required parameters are shown in the table below.</p>
+<p><center><img src="images/operators-times-table.png" alt="Create new model" /></center></p>
+<p>You may find the need for operators not included in Cogulator, in which case you can add new operators to the operators.txt file in the Documents folder of your computer. Windows users will find the operators.txt file by going to:</p>
+<blockquote>
+<p>C:\Users\Documents\cogulator</p>
+</blockquote>
+<p>and opening the operators folder within the Cogulator directory. OS X users can find the cogulator directory in their Documents folder. When adding a new operator to the file, include the resource (see, hear, cognitive, hands, or speech), followed by a space, the operator name (no spaces in the name), another space, and the execution time in milliseconds. For example, if I wanted to add a new operator for touching a target on a touch screen device I could add the following line to the operators.txt file:</p>
+<blockquote>
+<p>hands Touch 250</p>
+</blockquote>
+<p>Once done, save the operators file and relaunch Cogulator. At some point in the future it will likely be possible to add new operators within Cogulator.</p>      
+<br><br>
+                
+                
+<span class="anchor" id="INTERFACE"></span>               
+<h1>Interface</h1>
+<p>At its most basic, Cogulator is a GOMS text editor and, as such, the primary interface component is for text entry (see image below). In addition, there are interface elements for managing existing models, reviewing and inserting operators into a model, a Gantt chart visualization of the model, and a display that provides the estimated task time and information on the current model state (Does it contain errors? Is it current?).</p>
+<p><center><img src="images/interface-overview.png" alt="interface overview" /></center></p>
+<br><br>
+                
+                
+                
+<span class="anchor" id="NEW_MODELS"></span>               
+<h1>New Models</h1>
+<p>To build a new model, click the new model button. Doing so presents a dialogue box with two blank fields. Input into the collection field is optional. Collections allow you to place models into groups (discussed in more detail in the <a href="#MANAGEMENT">Management</a> section). A model name is required. The name must be unique and contain no spaces (underscores will automatically be inserted in place of spaces as you type). If you try to enter a model name that already exists, a red “x” will appear next to the name field along with a note indicating the model name is already in use. Once a unique model name is entered into the text field, you can press the Enter key, which will create the new model.</p>
+<p><center><img src="images/create-new-model.png" alt="Create new model" /></center></p>      
+<br><br>       
+
+                
+                
+<span class="anchor" id="SAVING_MODELS"></span>
+<h1>Saving Models</h1>
+<p>In Cogulator, every time the application is closed or a new model is opened, the currently open model is saved automatically. You can manually save the model at any time by pressing the save button located to the right of the new model button.</p>
+<br><br>
+                
+                
+                
+<span class="anchor" id="MODEL_STATUS"></span>
+<h1>Model Status</h1>
+<p>Each time a new line is added to the model (i.e., each time the enter key is pressed), the task time estimate and Gantt chart (to be described shortly) is updated. In addition, the model can be updated manually by pressing the refresh button. If the model has been changed (text added or removed), but not updated, the task time fades. If there is an error in the model, the task time will be replaced with “...”.</p>
+<p><center><img src="images/refresh-model.png" alt="Refresh model" /></center></p>   
+<br><br>  
+          
+
+                          
+                
+<span class="anchor" id="MANAGEMENT"></span>              
+<h1>Model Management</h1>
+<p>It's often nice to be able to quickly open other models to borrow commonly used methods. As such, Cogulator takes a slightly different approach to file management. Rather than the traditional File &gt; Open process, all existing models are listed along the left side of the interface (a la <a href="http://brackets.io/">Brackets</a>) for easy access to other models. The currently open model is noted with a small arrow indicator. When you first install Cogulator, a default set of models will be included in the Examples collection.</p>
+<p>To open a model, find it in the list and click it. Models can be marked for deletion by hovering over the model name and then clicking the “x” that appears to the far left. At this point the model has not actually been deleted and you can undo this action by hovering over the name again and click the “u” button (located where the “x” was). Any models marked for deletion will be moved to the trash when the application is closed.</p>
+<p><center><img src="images/existing-models.png"  alt="Existing models" /></center></p>
+                
+                
+                
+                
+                
+<span class="anchor" id="OPERATORS_CHI"></span>                
+<h1>Operators Interface</h1>
+<p>Even those familiar with GOMS may have a difficult time remembering all the operators available and their specific formatting requirements. In order to help, we’ve provided an Operators sidebar in the tab menu on the left side of the interface. Influenced by Bret Victor’s <a href="http://worrydream.com/LearnableProgramming/">“dump the parts bucket on the floor”</a> strategy, the Operators sidebar lists all the operators, grouped by cognitive, perceptual, and motor resources. Hovering over an operator in the sidebar will temporarily insert it into the text editor at the cursor location. If the operator is not clicked, removing the cursor from the operator will remove the inserted text from the editor. Otherwise it will remain.</p>
+<p><center><img src="images/insert-operator.png"  alt="Insert Operator" /></center></p>
+<br><br>
+                
+
+                
+<span class="anchor" id="ERRORS_CHI"></span>
+<h1>Errors & Tips Interface</h1>
+<p>Inevitably you’ll make some errors as you begin working with the CMN-GOMS syntax. Cogulator has some initial, rudimentary error color-coding in place to help you along the way. When an error is detected, the text containing the error is colored red. In the example below, the operator has been misspelled and cannot be interpreted. </p>  
+<blockquote>
+<pre>
+<code>
+(correct)  . . <span style="color:#268BD2">Keystroke</span> Tab-Key
+  (error)  . . <span style="color:#DC312E">Keystrke</span> Tab-Key
+</code>
+</pre></blockquote>
+<p>In addition to error color-coding, Cogulator can walk you through both errors in the model and suggest hints for improving it.  For example, modelers often forget to use a Hands operator when the user moves their hands from the mouse to the keyboard (or vice versa).  Clicking on the hints button (which is only visible when errors/hints exist) will provide suggestions and some cases correct potential issues for you.  The line to which current hint is referring is highlighted in the code.  For example, clicking the word "Add" in the hint below would insert a Hands operator prior to the Type operator.</p>
+<p><center><img src="images/hints-tool.png" alt="Hints CHI" /></center></p>                
+<br><br>
+
+                
+                
+<span class="anchor" id="GANTT_CHART"></span>
+<h1>Gantt Chart</h1>
+<p>At the bottom of the interface is an up arrow which brings up the Gantt chart. The Gantt chart visualizes the model, showing each operator time, what resources it uses, and instances of parallel execution (discussed in the next section). Note that clicking on an operator in the Gantt chart will take you the corresponding line in the model syntax.  Clicking the camera icon located at the bottom left of the chart will save a screenshot of the chart to your desktop.</p>
+<p><center><img src="images/gantt-chart.png" alt="Gannt Chart" /></center></p>
+<br><br>
+                
+                
+                
+                
+<span class="anchor" id="MULTITASKING"></span>
+<h1>Multitasking</h1>
+<p>Borrowing from NGOMSL, Cogulator allows for multitasking via the Also statement. So, should a goal need to be executed in a parallel with another goal:</p>
+<blockquote>
+<pre>
+<code>
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#D33682">Goal:</span> Point and Click
+</code>
+</pre></blockquote>
+<p>would be replaced with</p>
+<blockquote>
+<pre>
+<code>
+.&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#D33682">Also:</span> Point and Click <span style="color:#D33682">as</span> Hands
+</code>
+</pre></blockquote>
+<p>Strickly speaking, the "as" is only required if more the one additional thread is going to be used to model multitasking (in most cases, one will be all you need). You can think of a thread as adding a new lane to a highway. Everything that has the same label after the "as" will be in the same lane and therefore will happen serially. Operators in other threads can occur in parallel to the new thread. As with operator labels, the thread label is user-defined. </p>
+<p>Parallel execution is visualized in the Gantt chart. An example of parallel and serial execution of the same tasks is depicted in the image below. In the example, an imagined telephone operator needs to log into a workstation just as they receive their first call. In the serial example (upper panel), the call is received and then the operator logs in. These tasks happen in parallel in the lower panel. Note that new threads are randomly assigned their own color (green in this example) to distinguish them from the base thread.</p>
+<p><center><img src="images/multitasking.png" alt="Multitasking" /></center></p>
+<br><br>
+                
+                
+                
+                
+<span class="anchor" id="WM_LOAD"></span>                
+<h1>Working Memory Load</h1>
+<p>One of the features we're currently working on in Cogulator is an analysis of Working Memory load. To simulate working memory load, Cogulator adds chunks to working memory each time certain operators are used. Those operators include: Store (which you can use to explicitly force a chunk into working memory), Recall, Look, Search, Perceptual_processor, Listen, or Think.  This may be a bit agressive as its possible to, for example, look at something and process it in the visual-spatial componment of working memory without encoding in the central executive. Automated working memory analysis can be disabled by click the underlined "Do" at the bottom left of the chart </p>
+<p><center><img src="images/working-memory.png" alt="Working Memory" /></center></p>
+<p>Each chunk added to working memory is represented as a colored block in the Gantt chart. Over time, those memories begin to decay, until they're no longer accessible. That decay is symbolized in the chart with the use of transparency - the blocks becoming more and more translucent until they leave memory altogether. Where memory load exceeds seven chunks, the display is marked with a red triangle.</p>          
+<br><br>
+                
+                
+                
+                
+<span class="anchor" id="A_REPRIEVE"></span>
+<h1>A Reprieve</h1>
+<p>That covers Cogulator at a high level. If this all seems a bit complex, remember that you can model at a lot of different levels of fidelity in Cogulator. Starting with some of the simpler modeling methods like KLM is a great way to get comfortable with GOMS and Cogulator. Take advantage of the example models that come installed with Cogulator.  You may also find the <a href="/screencast.html">primer video</a> helpful. It's brief and just covers the basics.</p>
+                
+                
+                
+            </div>
+             
+        </div>
+        
+            <div id="push"></div>
+            </div> <!-- close the wrapper -->
+
+        
+        <div id="footer"> 
+            <br>
+            <br>
+                <center>
+                        ©2014-The MITRE Corporation. All rights reserved. <br>
+                        Approved for Public Release; Distribution Unlimited. 14-0584
+        </div> 
+        
+
+        
+    </body>
+    
+    
+
