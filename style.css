@@ -96,14 +96,12 @@ body {
 }
 
 #download{
-    height:auto;
-    width:600px;
-    margin:0 auto;
+    width:800px;
     color:#555;
     font-family: 'Droid Sans', sans-serif;
-    font-size: 32px;
+    font-size: 18px;
     font-weight:bold;
-    float:center;
+    float:left;
 }
 
 
