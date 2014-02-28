@@ -8,224 +8,32 @@ body {
     background-color:#F8F8F8;
 }
 
-
-
-/*------ Wrapper -----*/
-#wrapper {
-    min-height: 100%;
-    height: auto !important;
-    height: 100%;
-    margin: 0 auto -75px; /* the bottom margin is the negative value of the footer's height */
-}
-
-/*------ Header -----*/
-#header_wrapper{
-    height:65px;
+#wrapper{
     width:100%;
+    margin:0 auto;
     border-bottom:solid #E7EAEC;
     border-width:1px;
-    background-color:white;
-    float:left;
 }
 
-#header {
-    height:65px;    
-    width:960px;
-    margin: 0 auto;
-}
-
-#header_nav{
-    height:30px;
-    padding-left:25px;
-    padding-top:35px;
-    float:left;
-}
-
-
-#mitre{
-    float:right;
-    margin-top:35px;
-    color:#555;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 13px;
-}
-
-
-
-
-/*------ Content -----*/
-#content_wrapper{
-    height:auto;
-    width:960px;
-    margin: 0 auto;
-}
-
-#nav {
-    height:auto;
-    width:140px;
-    margin-top:65px;
-    padding-top:20px;
-    padding-bottom:20px;
-    background-color:white;
-    border:solid #E7EAEC;
-    border-width:1px;
-    float:left;
-    position:fixed;
-}
-
-#content{
-    height:auto;
-    width:600px;
-    margin-left:150px;
+#centered{
+    width:400px;
+    height:inherit;
+    margin:0 auto;
     padding:30px;
-    float:left;
-}
-
-#single_column{
-    height:auto;
-    width:930px;
-    padding:15px;
-    float:left;
-}
-
-#two_column{
-    height:auto;
-    width:420px;
-    padding:15px;
-    float:left;
-}
-
-#download{
-    width:800px;
-    color:#555;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 18px;
-    font-weight:bold;
-    float:left;
-}
-
-
-#push {
-    height:75px;
-}
-
-
-
-/*------ Footer -----*/
-#footer{
-    height:75px;
-    width:100%;
-    clear:both;
-    border-top:solid #E7EAEC;
+    border-left:solid #E7EAEC;
+    border-right:solid #E7EAEC;
     border-width:1px;
-    background-color:white;
-    color:#555;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 13px;
-}
-
-
-/*------ Text Formatting -----*/
-p {
-    font-family: 'Droid Serif', serif;
-    font-size:15px;
-    line-height:150%;
-    color: #111;
-}
-
-
-h1 {
-    font-family: 'Droid Sans', sans-serif;
-    font-weight:normal;
-    font-size:28px;
-    color: #268BD2;
-    margin: 0; 
-    padding: 0;
-    line-height: 1em;
-}
-
-code {
-    font-family: 'Lato', sans-serif;
-    font-size:16px;
-}
-
-blockquote{
-    background-color:white;
-    padding:10px;
-    border:solid #E7EAEC;
-    border-width:1px;
-}
-
-pre{
-    margin-top: -1.00em;
-    margin-bottom: -1.00em;
+    float:center;
 }
 
 /*------ Link Formatting -----*/
 a:link{ /*styling for links must remain in this order */
-    font-family: 'Droid Serif', serif;
+    font-family: 'Droid Sans', sans-serif;
     color: #008ADF;
 } a:visited{
     color: #008ADF;
 } a:hover, a:active, a:focus {
-    color: #333;
-    text-decoration: underline;
+    color:white;
+    padding:3px;
+    background-color: #008ADF; 
 }
-
-a.nav_menu:link,a.nav_menu:visited{
-    color:#555;
-    display: inline-block;
-    text-decoration:none;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 13px;
-} a.nav_menu:hover, a.nav_menu:active, a.nav_menu:focus {
-    color: #008ADF;
-    text-decoration: underline;
-}
-
-a.header_nav_current_page{
-    color:#555;
-    display: inline-block;
-    text-decoration:none;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 13px;
-}
-
-#current {
-    color: #008ADF;
-    display: inline-block;
-    font-family: 'Droid Sans', sans-serif;
-    font-size: 13px;
-}
-
-
-ul{
-    list-style-type:none;
-    margin-left: 0; 
-    padding-left: 0;
-}
-
-.bulleted{ /* bulleted ul list */
-    font-size:14px;
-    font-family: 'Droid Serif', serif;
-    list-style-type:square;
-    margin: 1em;
-}
-
-li a{
-    margin-left: 15px;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-left: 1px solid #FFF;
-    border-right: 1px solid #FFF;
-}
-
-li.selected a{
-    border-left: 1px solid #126484;
-    border-right: 1px solid #126484;
-}
-
-
-
-
-
