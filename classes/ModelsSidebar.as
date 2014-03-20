@@ -380,7 +380,7 @@ package classes {
 		
 		private function nameAlreadyExists(txt:String):Boolean {
 			for each (var mB in modelButtons){
-				if (mB.modelField.text == txt) return true;
+				if ( mB.modelField.text.toLowerCase() == txt.toLowerCase() ) return true;
 			}
 			return false;
 		}

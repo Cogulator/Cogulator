@@ -112,8 +112,7 @@ package classes {
 		}
 		
 		private function initiate() {
-			
-			//try {
+			try {
 				var vars:Array = GomsProcessor.processGOMS();
 					maxEndTime = vars[0];
 					thrdOrdr = vars[1]; 
@@ -122,9 +121,9 @@ package classes {
 					allmthds = vars[4];
 					cntrlmthds = vars[5];
 				visualize(0);
-			//} catch (error:Error) {
-				//trace("try/catch fired");
-			//}
+			} catch (error:Error) {
+				trace("try/catch fired");
+			}
 		}
 		
 		
