@@ -13,7 +13,7 @@
 			// constructor code
 			updater = new ApplicationUpdaterUI();
 			//updater.updateURL = "http://employeeshare.mitre.org/s/sestes/transfer/updateDescriptor.2.5.xml";
-			updater.updateURL = "https://github.com/Cogulator/Cogulator/blob/master/updateDescriptor.2.5.xml";
+			updater.updateURL = "http://cogulator.github.io/Cogulator/updateDescriptor.2.5.xml";
 			updater.delay = 0;
 			updater.initialize();
 			updater.isCheckForUpdateVisible = false;
