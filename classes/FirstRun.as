@@ -26,6 +26,7 @@ package classes {
 	import flash.events.Event;
 	import flash.filesystem.*;
 	import flash.events.EventDispatcher;
+	import flash.display.MovieClip;
 	
 	public class FirstRun extends EventDispatcher{
 		
@@ -47,10 +48,13 @@ package classes {
 			settings = settings.resolvePath("cogulator/config/settings.txt");
 		}
 		
-		public function firstRunTest() {
+		public function firstRunTest(_firstRunQuickStart:MovieClip) {
 			if(config.exists) { 
 				ready(); 
 			} else { 
+				_firstRunQuickStart.x = 0;
+				_firstRunQuickStart.y = 0;
+				_firstRunQuickStart.visible = true;
 				itIsTheFirstRun(); 
 			} 
 		}

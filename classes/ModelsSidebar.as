@@ -366,6 +366,8 @@ package classes {
 				_newModelCHI.nameExists.visible = false;
 				if (_newModelCHI.modelField.text != "") {
 					_newModelCHI.goButton.visible = true;
+					_newModelCHI.goButton.alpha = 0;
+					TweenLite.to(_newModelCHI.goButton, .5, {alpha:1, ease:Quint.easeIn});
 					_newModelCHI.collectionField.addEventListener(KeyboardEvent.KEY_UP, onEnterPress);
 					_newModelCHI.modelField.addEventListener(KeyboardEvent.KEY_UP, onEnterPress);
 				}
