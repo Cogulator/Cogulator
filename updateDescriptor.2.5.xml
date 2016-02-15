@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
        <versionNumber>1.1</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.1/cogulator.air</url>
-       <description>cogulator v1.1</description> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.2/cogulator.air</url>
+       <description>cogulator v1.2</description>
     </update>

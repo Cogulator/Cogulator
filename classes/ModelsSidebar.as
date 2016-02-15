@@ -53,6 +53,7 @@ package classes {
 		private var files:Array = new Array();
 		
 		private var config = new File(File.documentsDirectory.nativePath);
+		private var settingsFile = new File(File.documentsDirectory.nativePath);
 		
 		private var lineY:int = 0;
 		private var labelX:int = 15;
@@ -60,6 +61,7 @@ package classes {
 		
 		private var code:TextLoader;
 		public var cnfg:TextLoader;
+		private var settingsLoader:XMLLoader;
 		
 		private var _saveButton:MovieClip;
 		private var _newButton:MovieClip;
@@ -69,6 +71,7 @@ package classes {
 		public var currentFilePath:String = new String();
 		private var configFilePath:String = new String();
 		private var configFileName:String = new String();
+		private var settingsFilePath:String = new String();
 		
 		private var lato = new Lato();
 		private var bold:TextFormat = new TextFormat();
@@ -102,9 +105,41 @@ package classes {
 			
 			_saveButton.addEventListener(MouseEvent.CLICK, saveModelClick);
 			
+			settingsFile = settingsFile.resolvePath("cogulator/config");
+			settingsFilePath = settingsFile.nativePath;
+			var slash:int = settingsFilePath.indexOf("\\");
+			if (slash < 0) settingsFilePath += "//settings.xml"; //mac or linux
+			else settingsFilePath += "\\settings.xml";
+
+			settingsLoader = new XMLLoader(settingsFilePath);
+			if (settingsLoader.fileExists) {
+				settingsLoader.load();
+				settingsLoader.addEventListener(settingsFilePath, setupConfig);
+			} else {
+				createSettingsFile();
+			}
+			
+		}
+		
+		private function createSettingsFile () {
+			var settingsXML:XML = <models>GOMS MODELS SETTINGS</models>;
+			
+			var localFile = new File(File.documentsDirectory.nativePath); 
+				localFile = localFile.resolvePath(settingsFilePath); 
+			var localFileStream:FileStream = new FileStream();
+				localFileStream.open(localFile, FileMode.WRITE);
+				localFileStream.writeUTFBytes(settingsXML.toXMLString());
+				localFileStream.close();
+			
+			settingsLoader.load();
+			settingsLoader.addEventListener(settingsFilePath, setupConfig);
+		}
+		
+		private function setupConfig (evt:Event) {
+			
 			config = config.resolvePath("cogulator/config");
 			configFilePath = config.nativePath 
-			var slash:int = configFilePath.indexOf("\\");
+			var slash = configFilePath.indexOf("\\");
 			if (slash < 0) configFilePath += "//config.txt"; //mac or linux
 			else configFilePath += "\\config.txt";
 			cnfg = new TextLoader(configFilePath);
@@ -179,7 +214,6 @@ package classes {
 				lineY += modelButton.modelField.height + 3;
 			}
 			
-
 		}
 		
 		public function reGenerateModelsButtons ():void { //clear out the old before calling the generate function again
@@ -305,8 +339,18 @@ package classes {
 /*			var lineLength:Array = code.txt.split("\r");
 			if (lineLength.length > 250) modelTooLarge();*/
 			
-			//SyntaxColor.solarizeAll();
-			dispatchEvent(new Event("model_loaded"));
+			var automate:Boolean = getAutomateWMsetting();
+			if (automate) dispatchEvent(new Event("model_loaded_automate"));
+			else dispatchEvent(new Event("model_loaded_do_not_automate"));
+		}
+		
+		
+		private function getAutomateWMsetting():Boolean {
+			var autoModelWM:String = settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM;
+			if (autoModelWM == "true") return true;
+			else if (autoModelWM == "false") return false; //tells the main class to recreate the models sidebar;
+			
+			return true; 
 		}
 		
 		private function modelTooLarge():void{
@@ -344,6 +388,33 @@ package classes {
 				localFileStream.writeMultiByte($.codeTxt.text, "utf-8");
 
 				localFileStream.close();
+			
+			saveAutomateWMSetting();
+		}
+		
+		private function saveAutomateWMSetting():void {
+			var autoModelWM:String = settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM;
+			if (autoModelWM == "true" && $.automateButton.currentFrame == 3) {
+				settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM = "false";
+			} else if (autoModelWM == "false" && $.automateButton.currentFrame == 1) {
+				settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM = "true";
+			} else if (autoModelWM == "") {
+				var automate:String = "true";
+				if ($.automateButton.currentFrame == 3) automate = "false";
+				var newModel:XML = <model NAME={_timeReadout.title.text}><autoWM>{automate}</autoWM></model>;
+				settingsLoader.xML.appendChild(newModel);
+			}
+			
+			var localFile = new File(File.documentsDirectory.nativePath); 
+				localFile = localFile.resolvePath(settingsFilePath); 
+			var localFileStream:FileStream = new FileStream();
+				localFileStream.open(localFile, FileMode.WRITE);
+				localFileStream.writeUTFBytes(settingsLoader.xML.toXMLString()); 
+
+				localFileStream.close();
+			
+			
+			//do nothing if none of these conditions are met... the setting is already correct in the file
 		}
 
 		

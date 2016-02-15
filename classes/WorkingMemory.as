@@ -77,8 +77,6 @@ package classes {
 			memory[slot].probabilityOfRecall = Math.pow(e, yValue); 
 			
 			return(memory[slot].probabilityOfRecall);
-			
-
 		}
 
 	}

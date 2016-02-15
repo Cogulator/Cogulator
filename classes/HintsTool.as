@@ -163,13 +163,18 @@ package classes  {
 		
 		
 		private function newHints() {
+			var lookNotTakenByPointOrTouch = false;
+			var pointNotTakenByClick = false;
+			
 			handsLocation = null; 
 			for each (var step:Step in $.gantt.intersteps) {
+				
 				if ( (step.operator == "say" || step.operator == "hear") && step.label == "") {
 					hintsArray.push({txt: "Say/Hear should have a label. It's used to calculate operator duration", lineNo: step.lineNo, type: "static_hint"});
 				} else if (step.operator == "type" && step.label == "") {
 					hintsArray.push({txt: "Type should have a label. It's used to calculate operator duration", lineNo: step.lineNo, type: "static_hint"});
 				}
+				
 				if (step.resource == "hands") {
 					if (handsLocation == null) {
 						if (step.operator == "point" || step.operator == "click") handsLocation = "mouse";
@@ -183,6 +188,17 @@ package classes  {
 					} else if (step.operator == "type" && step.label.substr(step.label.length - 1, 1) == " ") {
 						hintsArray.push({txt: "Heads up: The blank spaces at the end of your label affect task time.", lineNo: step.lineNo, type: "static_hint"});
 					}
+				}
+				
+				if (step.operator == "look" || step.operator == "search") {
+					lookNotTakenByPointOrTouch = true;
+				} else if (step.operator == "point" || step.operator == "touch") {
+					if (lookNotTakenByPointOrTouch) lookNotTakenByPointOrTouch = false;
+					else hintsArray.push({txt: "Add a Look before the " + step.operator +"?", lineNo: step.lineNo, type: "hint"});
+					if (step.operator == "point") pointNotTakenByClick = true;
+				} else if (step.operator == "click") {
+					if (pointNotTakenByClick) pointNotTakenByClick = false;
+					else hintsArray.push({txt: "Add a Point before the click?", lineNo: step.lineNo, type: "hint"});
 				}
 			}
 		}
@@ -284,11 +300,22 @@ package classes  {
 		
 		
 		private function previewFixIt(evt:MouseEvent) {
-			var newHandsLocation:String;
-			if (handsLocation == "mouse") newHandsLocation = "keyboard";
-			else if (handsLocation == "keyboard") newHandsLocation = "mouse";
-			else newHandsLocation = "";
-			_insert.addOperatorPreview(_hintsCHI.hintText, "Hands to " + newHandsLocation);
+			var operatorText:String;
+			var stepLabel:String = "";
+			
+			if (_hintsCHI.hintText.text.indexOf("Add a hands") > -1) {
+				operatorText = "Hands"
+				var newHandsLocation:String;
+				if (handsLocation == "mouse") stepLabel = " to keyboard";
+				else if (handsLocation == "keyboard") stepLabel = " to mouse";
+				else stepLabel = "";
+			} else if (_hintsCHI.hintText.text.indexOf("Add a Point") > -1) {
+				operatorText = "Point";
+			} else if (_hintsCHI.hintText.text.indexOf("Add a Look") > -1) {
+				operatorText = "Look";
+			}
+			
+			_insert.addOperatorPreview(_hintsCHI.hintText, operatorText + stepLabel);
 			highlightLine(hintsArray[currentHint].lineNo + 1, hintsArray[currentHint].type);
 		}
 		

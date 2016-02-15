@@ -65,13 +65,6 @@ package classes {
 			methodAvailability = new Dictionary();
 			
 			//(<resource name>, <time resource comes available>)
-/*			var to:TimeObject = new TimeObject(0,0);
-			resourceAvailability["verbalcoms"] = to;
-			resourceAvailability["see"] = to;
-			resourceAvailability["cognitive"] = to;
-			resourceAvailability["hands"] = to;*/
-			
-			//(<resource name>, <time resource comes available>)
 			var to:TimeObject = new TimeObject(0,0);
 			var verbalcomsArray:Array = new Array(to);
 			var seeArray:Array = new Array(to);
@@ -205,10 +198,6 @@ package classes {
 			
 			if (resource == "speech" || resource == "hear") resource = "verbalcoms";
 			
-			//earliest the resource is available
-/*			resourceTO = resourceAvailability[resource]; //time the resource becomes available
-			resourceTime = resourceTO.et;*/
-			
 			//earliest the thread is available
 			if (threadAvailability[thread] == null) threadAvailability[thread] = zerodTO; //create thread and put in dictionary 
 			threadTO = threadAvailability[thread];
@@ -222,12 +211,6 @@ package classes {
 			methodTO = methodAvailability[method];
 			methodTime = methodTO.et;
 			
-			//take the max of all relevant times to get start time - ignore method time for base thread as base should always be running
-/*			var startTime:Number;
-			if ( thread == "base") startTime = Math.max(resourceTime, threadTime);
-			else startTime = Math.max(resourceTime, threadTime, methodTime);
-			var endTime:Number = startTime + stepTime + cycleTime;*/
-			
 			var startTime:Number = Math.max(threadTime, methodTime);
 			var endTime:Number 	 = startTime + stepTime + cycleTime;
 			
@@ -237,12 +220,6 @@ package classes {
 			//store the results for the next go round
 			threadAvailability[thread] = new TimeObject(startTime, endTime);  
 			methodAvailability[method] = new TimeObject(startTime, endTime);
-			
-			
-			//store the results for the next go round
-/*			resourceAvailability[resource] 	= new TimeObject(startTime, endTime); 
-			threadAvailability[thread] 		= new TimeObject(startTime, endTime);  
-			methodAvailability[method] 		= new TimeObject(startTime, endTime);  */
 			
 			var reslt:Array = new Array();
 				reslt[0] = startTime;

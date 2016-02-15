@@ -88,6 +88,7 @@ package classes {
 		
 
 		public function GanttChart(gW:MovieClip, s:Number, dNT:Boolean, tLLC:Sprite) {
+			
 			// constructor code
 			_ganttWindow = gW;
 			codeText = $.codeTxt.text;
@@ -309,7 +310,7 @@ package classes {
 				if (step.endTime > maxEndTime)  maxEndTime = step.endTime;
 			}
 			
-			addWorkingMemoryToChart(_ganttWindow.chartBckgrnd.height - 45, sclFctr);
+			addWorkingMemoryToChartWithAverage(_ganttWindow.chartBckgrnd.height - 45, sclFctr);
 			
 			//draw gantt chart timeline
 			var lineX1:Number = 0;
@@ -434,8 +435,7 @@ package classes {
 		}
 		
 		
-		private function addWorkingMemoryToChart(baselineY:Number, scl:Number):void {			
-			// this is done once for every new step
+		private function addWorkingMemoryToChartWithAverage(baselineY:Number, scl:Number):void {	
 			var fiftys:int = maxEndTime / 50; //show wm in 50ms cycles
 			var hght:int = 4;
 			var rectangle:Shape = new Shape;
@@ -453,7 +453,9 @@ package classes {
 			var overload:Boolean;
 			var currentTime:Number = 0;
 			
-			for (var stacks:int = 0; stacks < fiftys; stacks++) { //for each 50 ms cycle over the length of the operator time ...
+			var totalChunks = 0;
+			
+			for (var stacks:int = 0; stacks < fiftys; stacks++) { //for each 50 ms cycle over the length of the task time ...
 				//the current time in milliseconds
 				currentTime = stacks * 50;
 				overload = false;
@@ -483,6 +485,7 @@ package classes {
 						if (updatedRecallProbability >= .5) {
 							color = workingMemory.memory[slot].color;
 							rectangle.graphics.beginFill(color, transparency)
+							totalChunks++;
 							
 						} else {
 							rectangle.graphics.beginFill(0xFFFFFF, transparency);
@@ -498,12 +501,13 @@ package classes {
 				if (overload) {
 					var p:Popped = new Popped();
 						p.x = stepX;
-						p.y = baselineY - (hght * 7) - (7 + hght)
+						p.y = baselineY - (hght * 7) - (7 + hght);
 					addChild(p);
 				}
 			}
 			
 			addChild(rectangle);
+			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + (int(totalChunks/fiftys*10)/10);
 		}
 		
 		private function pushChunk(step:Step):Boolean {
@@ -660,7 +664,7 @@ package classes {
 									mthdTime.mouseEnabled = false;
 									mthdTime.defaultTextFormat = grotesqueLrg;
 									mthdTime.autoSize = TextFieldAutoSize.CENTER;
-									mthdTime.text = StringUtils.oneSigDig(step.srtTime);
+									mthdTime.text = " " + StringUtils.oneSigDig(step.srtTime) + " "; //make sure text not cut off
 									mthdTime.x = mthdX - (mthdTime.width/2);
 									mthdTime.y =  lineY + 15;
 								_timeLineLblsContainer.addChild(mthdTime);
