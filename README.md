@@ -9,7 +9,7 @@ More for information about Cogulator can be found at [cogulator.io](http://cogul
 
 #Get Started
 1. [Download](https://get.adobe.com/air/) & Install Adobe AIR 
-2. [Download](https://get.adobe.com/air/) & Install Cogulator
+2. [Download](https://github.com/Cogulator/Cogulator/releases/download/v1.2/cogulator.air) & Install Cogulator
 3. You're ready to roll.  Check out the [primer](http://cogulator.github.io/Cogulator/primer.html) & [screencast](http://cogulator.github.io/Cogulator/screencast.html)
 
 #License
