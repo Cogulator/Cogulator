@@ -47,7 +47,7 @@ package classes {
 		
 		private var codeText:String;
 		private var rawgoms:Array;
-		private var workingMemory:WorkingMemory = new WorkingMemory();
+		private var workingMemory:WorkingMemory;
 				
 		public var scl:Number; // = 5000;
 		
@@ -123,14 +123,14 @@ package classes {
 					cntrlmthds = vars[5];
 				visualize(0);
 			} catch (error:Error) {
-				trace("try/catch fired");
+				trace("try/catch fired", error.message);
 			}
 		}
 		
 		
 		
 		// ---------------------- //
-		// --- VISUALIZIATION --- //
+		// --- VISUALIZATION ---- //
 		// ---------------------- //
 		
 		
@@ -439,97 +439,39 @@ package classes {
 			var fiftys:int = maxEndTime / 50; //show wm in 50ms cycles
 			var hght:int = 4;
 			var rectangle:Shape = new Shape;
-			var stepX:Number;
-			
-			var timeChunkInMemoryInSeconds:Number;
-			var lastRecallProbability:Number;
-			var updatedRecallProbability:Number;
-			
+			var stackX:Number;
 			var color:uint;
 			var transparency:Number;
-					
-			var i:int = 0;
-			var step:Step = intersteps[0];
-			var overload:Boolean;
 			var currentTime:Number = 0;
-			
 			var totalChunks = 0;
 			
-			for (var stacks:int = 0; stacks < fiftys; stacks++) { //for each 50 ms cycle over the length of the task time ...
-				//the current time in milliseconds
-				currentTime = stacks * 50;
-				overload = false;
+			workingMemory = new WorkingMemory(intersteps, maxEndTime, _ganttWindow.automateButton.currentFrame);
+			
+			//loop through each stack (one for each 50 ms cycle)
+			for (var indx:int = 0; indx < workingMemory.memory.length; indx++) {
+				var stack = workingMemory.memory[indx];
+				currentTime = indx * 50;
+				stackX = currentTime * scl;
 				
-				//if there are any steps that are initiated during this 50 ms cycle, add them to working memory
-				//     note - this is imperfect right now - during multitasking if two operators want to add to wm at the same time, the base thread will sometimes get pushed for a few cycles before it's added
-				while (i < intersteps.length && step.endTime <= currentTime) {
-					overload = pushChunk(step); //pushes the chunk to memory and tells you if you overloaded memory as a result
-					i++
-					step = intersteps[i];
-				}
-												
-				//determine the x for this 50 ms cycle
-				stepX = currentTime * scl;
-				
-				//with working memory updated, plot working memory for this 50 ms cycle
-				for (var slot:int = 0; slot < workingMemory.memory.length; slot++) { //... add a rectangle for each chunk
-					//determine how long the chunk has been memory
-					timeChunkInMemoryInSeconds = (currentTime - workingMemory.memory[slot].addedAt) / 1000;
-					lastRecallProbability = workingMemory.memory[slot].probabilityOfRecall;
-					updatedRecallProbability = workingMemory.updateProbabilityOfRecall(slot, timeChunkInMemoryInSeconds);
-													
-					transparency = 1 - ( (1 - updatedRecallProbability) * 2 );
-					
-					//if this memory is still traceable, add a regular rectangle
-					if (lastRecallProbability >= .5) {
-						if (updatedRecallProbability >= .5) {
-							color = workingMemory.memory[slot].color;
-							rectangle.graphics.beginFill(color, transparency)
-							totalChunks++;
-							
-						} else {
-							rectangle.graphics.beginFill(0xFFFFFF, transparency);
-						}
-						rectangle.graphics.drawRect( stepX,
-							 baselineY - (hght * slot) - (slot + hght), 
-							 50 * scl - 1, 
-							 hght - 1 ); 
-						rectangle.graphics.endFill();
-					}
-				}
-				
-				if (overload) {
-					var p:Popped = new Popped();
-						p.x = stepX;
-						p.y = baselineY - (hght * 7) - (7 + hght);
-					addChild(p);
+				//loop through each chunk in the current 50ms stack)
+				for (var chunkIndx:int = 0; chunkIndx < stack.length; chunkIndx++) {
+					var chunk = stack[chunkIndx];
+					transparency = 1 - ( (1 - chunk.probabilityOfRecall) * 2 );
+					color = chunk.color;
+					rectangle.graphics.beginFill(color, transparency)
+					rectangle.graphics.drawRect( 
+						stackX,
+						baselineY - (hght * chunkIndx) - (chunkIndx + hght), 
+						50 * scl - 1, 
+						hght - 1 ); 
+					rectangle.graphics.endFill();
 				}
 			}
 			
 			addChild(rectangle);
-			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + (int(totalChunks/fiftys*10)/10);
+			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + ( int(workingMemory.averageLoad * 10) / 10) ;
 		}
-		
-		private function pushChunk(step:Step):Boolean {
-			var overload:Boolean;
-			if (_ganttWindow.automateButton.currentFrame < 3) {
-				if (step.operator == "store" || step.operator == "recall" ||
-					step.operator == "look" || step.operator == "search" || 
-					step.operator == "perceptual_processor" || step.operator == "hear" ||
-					step.operator == "think") {
-					
-					overload = workingMemory.updateMemory("push", step.label, step.endTime);
-					return overload;
-				}
-			} else {
-				if (step.operator == "store") {
-					overload = workingMemory.updateMemory("push", step.label, step.endTime);
-					return overload;
-				}
-			}
-			return false;
-		}
-		
+			
 		
 		private function findStep(i:int, thrd:String, drctn:int):Step {
 			var itr:int = i;

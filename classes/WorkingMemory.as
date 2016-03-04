@@ -22,61 +22,133 @@
  * limitations under the License.
  ******************************************************************************/
 
+
 package classes {
+	import classes.Step;
+	import classes.Chunk;
 	
 	public class WorkingMemory {
 		public var memory:Array = new Array();
-		public var colorPalette:Array = new Array (0x2AA198, 0x268BD2, 0x6C71C4, 0xD33682, 0xDC322F, 0xCB4B16, 0xCB4B16, 0xB58900);  // Alternate syntax
-
+		public var averageLoad:Number;
+		private var colorPalette:Array = new Array (0x2AA198, 0x268BD2, 0x6C71C4, 0xD33682, 0xDC322F, 0xCB4B16, 0xCB4B16, 0xB58900);  // Alternate syntax
 		private static const e:Number = 2.71828; //Euler's Number
 
-		public function WorkingMemoryLoad() {
-			// constructor code
-		}
-		
-		public function updateMemory(action:String, chunk:String, timeAdded:Number):Boolean {
-			if (action == "push") {
-				if(memory.indexOf(chunk) < 0) { //if this chunk doesn't already exist in wm, add it
-					memory.push({chunkName: chunk, addedAt: timeAdded, probabilityOfRecall: 1, cogLoad: memory.length, color:colorPalette[0]});
-					colorPalette.push(colorPalette[0]); //place the current color at end of list
-					colorPalette.shift(); // remove the current color from begninning of list
+		public function WorkingMemory(intersteps:Array, modelEndTime:int, automateButtonCurrentFrame:int) {
+			
+			var totalCycles:int = (Math.round(modelEndTime / 50) * 50) / 50;
+			memory.length = 0;
+			memory = new Array(totalCycles); //create an array with a length equal to total number of cycles
+			
+			if (memory.length > 0) {
+				 
+				//initialize the stacks within memory (one for each 50ms cycle)
+				for (var i:int = 0; i < memory.length; i++) {
+					memory[i] = [];
 				}
 				
-				if(memory.length > 7) {
-					memory.shift(); // if memory exceeds 7 chunks, delete the first item in wm.  does not account for bowing effect of primacy and recency
-					return(true);
-				} else {
-					return(false);
+				for each (var step:Step in intersteps) {
+					if (automateButtonCurrentFrame < 3) { //if the user has the model set to autome
+						if ((step.resource == "see" || step.resource == "hear" ||
+							 step.operator == "recall" || step.operator == "store" || step.operator == "think") 
+							 && step.operator != "saccade") {
+							pushChunk(step.label, step.endTime);
+						}
+					} else {
+						if (step.operator == "store" || step.operator == "recall") {
+							pushChunk(step.label, step.endTime);
+						}
+					}				
 				}
+				
+				decayMemory();
+				averageLoad = getAverageLoad();
+			}       
+		}
+		
+				
+		private function pushChunk(chunkName:String, atTime:Number) {
+			var roundUpFactor = 0;
+			if (atTime % 50 != 0) roundUpFactor = 50 - (atTime % 50);
+			var roundedUpTime = atTime + roundUpFactor;
+			var stackToAddChunk:int = roundedUpTime / 50;
 			
-			} else { //the action is to pop 
-			
-				for (var i:int = 0; i < memory.length; i++) {
-					if (memory[i].chunkName == chunk) {
-						memory.splice(i, 1);
-						break;
+			var chunk = new Chunk(chunkName, atTime, -1, 1, colorPalette[0]);
+						
+			if (memory.length > stackToAddChunk) {	
+				memory[stackToAddChunk].push(chunk);
+				colorPalette.push(colorPalette[0]); //place the current color at end of list
+				colorPalette.shift(); // remove the current color from begninning of list
+			} 
+		}
+		
+		
+		private function decayMemory() {
+			for (var i:int = 1; i < memory.length; i++) {
+				var stack = memory[i - 1];
+				//carry over the chunk from the previous cycle if recall probability greater than 0.5
+				for each (var chunk in stack) {
+					
+					//set the chunk stack set if not set already
+					if (chunk.stackDepthAtPush == -1) {
+						chunk.stackDepthAtPush = stack.length; //uses the previous cycle stack depth;
+					}
+					
+					var currentCycleTimeInSeconds = (i * 50) / 1000;
+					var timeChunkInMemoryInSeconds = currentCycleTimeInSeconds - (chunk.addedAt / 1000);
+					var recallProbability = getProbabilityOfRecall(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds);
+					if (recallProbability > 1) recallProbability = 0.999; //rounding time sometimes results in recall > 1
+					
+					if (recallProbability > 0.5) {
+						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, recallProbability, chunk.color);
+						memory[i].push(updatedChunk);
 					}
 				}
 				
+				//after carrying over the chunks from the previous cycle, pop those with lowest recall probability if load is greater than 7
+				if (memory[i] != null) {
+					while (memory[i].length > 7) {
+						popMemoryOverload(i);
+					}
+				}
+			}
+		}
+		
+		
+		private function popMemoryOverload(cycleIndex:int) {
+			var indexForLowestRecallProbChunk:int = -1
+			var lowestRecallProb:Number = 1.1;
+			
+			for (var i:int = 0; i < memory[cycleIndex].length; i++) {
+				if (memory[cycleIndex][i].probabilityOfRecall < lowestRecallProb) {
+					lowestRecallProb = memory[cycleIndex][i].probabilityOfRecall;
+					indexForLowestRecallProbChunk = i;
+				}
 			}
 			
-			return(false);
+			memory[cycleIndex].splice(indexForLowestRecallProbChunk, 1);
 		}
+		
 		
 		//based on model human processor estimates. card moran and newell (pg 38) 
 		//may update to reflect current ACT-R thinking, bowing effect in recall, etc
-		public function updateProbabilityOfRecall(slot:int, timeChunkInMemoryInSeconds:Number):Number {
-			if (memory[slot].probabilityOfRecall < .5) {
-				memory.splice(slot, 1);
-				return (.49) //remove the memory if less threshold
-			}
-			
+		private function getProbabilityOfRecall(cogLoad:int, timeChunkInMemoryInSeconds:Number):Number {
 			var yValue:Number;
-			if (memory.cogLoad < 3) yValue = (timeChunkInMemoryInSeconds + 0.00000000000020000000) / -105.31; 
-			else yValue = (timeChunkInMemoryInSeconds + 0.00000000000001000000) / -10.1;
-			memory[slot].probabilityOfRecall = Math.pow(e, yValue); 
-			
-			return(memory[slot].probabilityOfRecall);
+			if (cogLoad < 3) {
+				//yValue = (timeChunkInMemoryInSeconds + 0.00000000000020000000) / -105.31;
+				yValue = (timeChunkInMemoryInSeconds + 0.00000000000020000000) / -50.31;
+			} else {
+				yValue = (timeChunkInMemoryInSeconds + 0.00000000000001000000) / -10.1;
+			}
+			return Math.pow(e, yValue); 
+		}
+		
+		
+		private function getAverageLoad():Number {
+			var totalChunks = 0;
+			for each (var stack in memory) {
+				totalChunks += stack.length;
+			}
+			return totalChunks / memory.length;
 		}
 
 	}

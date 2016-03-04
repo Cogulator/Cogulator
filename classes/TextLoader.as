@@ -33,7 +33,11 @@
 			for each (var item in temp1) {
 				temp2.length = 0;
 				temp2 = item.split(" ");
-				arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3]});
+				if (arry.length < 5) { //prior to version 1.3, did not include labelUse in operators file
+					arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: ""});
+				} else {
+					arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: temp2[4]});
+				}
 			}
 			
 			dispatchEvent( new Event(pth) );

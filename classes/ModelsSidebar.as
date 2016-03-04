@@ -74,6 +74,7 @@ package classes {
 		private var settingsFilePath:String = new String();
 		
 		private var lato = new Lato();
+		private var latoBold = new LatoBold();
 		private var bold:TextFormat = new TextFormat();
 		private var regular:TextFormat = new TextFormat();
 				
@@ -88,7 +89,7 @@ package classes {
 			regular.bold = false;
 			regular.letterSpacing = 0;
 			
-			bold.font = lato.fontName;
+			bold.font = latoBold.fontName;
 			bold.bold = true;
 			bold.letterSpacing = -.1; //prevents unwanted wrapping when bolding model name
 						
