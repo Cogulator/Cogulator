@@ -24,19 +24,23 @@
 		
 
 		private function onLoadFinished(e:Event):void {
-			//txt = e.target.data;
-			//temp1 = e.target.data.split(/\n/);
 			txt = String(filestream.readUTFBytes(filestream.bytesAvailable));
-			temp1 = txt.split(/\n/);
+			
+			//order important
+			temp1 = txt.split(/\r\n/); //remove windows line endings
+			temp1 = txt.split(/\n/); //remove mac line endings
+			
 			filestream.close();
 			
 			for each (var item in temp1) {
 				temp2.length = 0;
 				temp2 = item.split(" ");
-				if (arry.length < 5) { //prior to version 1.3, did not include labelUse in operators file
-					arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: ""});
-				} else {
-					arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: temp2[4]});
+				if (temp2.length > 0 && temp2[0] != "") {
+					if (temp2.length < 5) { //prior to version 1.3, did not include labelUse in operators file
+						arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: ""});
+					} else {
+						arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: temp2[4]});
+					}
 				}
 			}
 			
