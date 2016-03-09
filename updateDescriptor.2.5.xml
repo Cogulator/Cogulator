@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>1.3</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.3/cogulator.air</url>
-       <description>cogulator v1.3. Fixed multitasking working memory bug, added primacy and recency effects to working memory, and new custom operator features (described in the primer at http://cogulator.io/primer.html#OPERATORS</description> 
+       <versionNumber>1.4</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.4/cogulator.air</url>
+       <description>Empty lines in the operator.txt file were causing Cogulator to choke. This release fixes that issue.</description> 
     </update>
