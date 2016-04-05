@@ -310,6 +310,8 @@ package classes {
 			
 			//assuming you were able to match the operator, calculate a time to return
 			var rslt:Number = 1.0;
+			var labelUse:String = operatorObj.labelUse;
+			if (labelUse == null) labelUse = "";
 			
 			//if the custom time exists, use it, otherwise look up the time in the operators arrays
 			if (customTime != "") {
@@ -321,23 +323,13 @@ package classes {
 				} else if (StringUtils.trim(parts[1]) == "syllables") {
 					rslt = Number(parts[0] / 2); //syllable time should be half of whole word time, which is used for op.time
 				}
-			} else if (operatorStr == "say" || operatorStr == "hear" || operatorObj.labelUse == "count_label_words") { //if there's no customTime, use the number of words in the lbl
+			} else if (operatorStr == "say" || operatorStr == "hear" || labelUse.indexOf("count_label_words") > -1) { //if there's no customTime, use the number of words in the lbl
 				rslt = removeConsectiveWhiteSpaces(lbl).split(' ').length;
-			} else if (operatorStr == "type" || operatorObj.labelUse == "count_label_characters") {
+			} else if (operatorStr == "type" || labelUse.indexOf("count_label_characters") > -1) {
 				rslt = lbl.length; //if the operator is "type", figure out how many characters are in the string and save that as result
 			}
 			
-			
 			return Number(operatorObj.time) * rslt;
-			
-			//if the user did not specify a time in ms, then look up the time
-/*			for each (var op in $.operatorArray) {
-				if (operatorStr.toLowerCase() == op.appelation.toLowerCase()) {
-					return Number(op.time) * rslt ;
-				}
-			}*/
-			
-			//return -1; //could not find a match*/
 		}
 		
 		
