@@ -34,6 +34,7 @@ package classes {
 	import flash.events.MouseEvent;
 	import flash.utils.Dictionary;
 	import flash.filters.*;
+	import flash.events.*;
 	import classes.WorkingMemory;
 	import classes.TimeObject;
 	import classes.Step;
@@ -47,7 +48,7 @@ package classes {
 		
 		private var codeText:String;
 		private var rawgoms:Array;
-		private var workingMemory:WorkingMemory;
+		//private var workingMemory:WorkingMemory;
 				
 		public var scl:Number; // = 5000;
 		
@@ -88,7 +89,6 @@ package classes {
 		
 
 		public function GanttChart(gW:MovieClip, s:Number, dNT:Boolean, tLLC:Sprite) {
-			
 			// constructor code
 			_ganttWindow = gW;
 			codeText = $.codeTxt.text;
@@ -122,7 +122,12 @@ package classes {
 					allmthds = vars[4];
 					cntrlmthds = vars[5];
 				visualize(0);
+				
+				//save intersteps for export
+				$.exportIntersteps = intersteps;
+				
 			} catch (error:Error) {
+				$.exportIntersteps = ["No data to export.  Make sure the model is valid before hitting the export button."];
 				trace("try/catch fired", error.message);
 			}
 		}
@@ -157,6 +162,7 @@ package classes {
 				var t:String = thrdOrdr[i];
 				var tF:TextField = new TextField();
 					tF.defaultTextFormat = grotesqueMed;
+					tF.embedFonts = true;
 					tF.text = t;
 					tF.width = 150;
 					tF.x = - 155;
@@ -219,6 +225,7 @@ package classes {
 				//add operator time...
 				var opTime:TextField = new TextField();
 					opTime.defaultTextFormat = grotesqueMed;
+					opTime.embedFonts = true;
 					opTime.autoSize = TextFieldAutoSize.LEFT;
 					opTime.text = " " + int(step.time);
 					opTime.x = stepX1;
@@ -288,6 +295,7 @@ package classes {
 				var opLbl:TextField = new TextField();
 					opLbl.mouseEnabled = false;
 					opLbl.defaultTextFormat = grotesqueMed;
+					opLbl.embedFonts = true;
 					opLbl.autoSize = TextFieldAutoSize.LEFT;
 					opLbl.text = lblTxt;
 				var avlblRtio:Number = (stepX2 - stepX1) / opLbl.width;
@@ -349,6 +357,7 @@ package classes {
 					
 					var axisTime:TextField = new TextField();
 						axisTime.defaultTextFormat = grotesqueSmall;
+						axisTime.embedFonts = true;
 						axisTime.autoSize = TextFieldAutoSize.CENTER;
 						axisTime.text = String(epoch * k);
 						axisTime.x = lineX1 + (epoch * k * sclFctr) - (axisTime.width/2);
@@ -359,6 +368,7 @@ package classes {
 			
 			var zero:TextField = new TextField();
 				zero.defaultTextFormat = grotesqueSmall;
+				zero.embedFonts = true;
 				zero.autoSize = TextFieldAutoSize.CENTER;
 				zero.text = "0";
 				zero.x = lineX1;
@@ -367,6 +377,7 @@ package classes {
 			
 			var maxTime:TextField = new TextField();
 				maxTime.defaultTextFormat = grotesqueSmall;
+				maxTime.embedFonts = true;
 				maxTime.autoSize = TextFieldAutoSize.CENTER;
 				maxTime.text = String(int(maxEndTime));
 				maxTime.x = lineX2 - maxTime.width;
@@ -409,6 +420,7 @@ package classes {
 								var nxtX:Number = lineX1 + (nxtStrtTm * sclFctr);
 								var mthdLbl:TextField = new TextField();
 									mthdLbl.defaultTextFormat = grotesqueSmall;
+									mthdLbl.embedFonts = true;
 									mthdLbl.autoSize = TextFieldAutoSize.CENTER;
 									mthdLbl.text = mthdTxt;
 									mthdLbl.x = mthdX;
@@ -445,11 +457,11 @@ package classes {
 			var currentTime:Number = 0;
 			var totalChunks = 0;
 			
-			workingMemory = new WorkingMemory(intersteps, maxEndTime, _ganttWindow.automateButton.currentFrame);
+			$.workingMemory = new WorkingMemory(intersteps, maxEndTime, _ganttWindow.automateButton.currentFrame);
 			
 			//loop through each stack (one for each 50 ms cycle)
-			for (var indx:int = 0; indx < workingMemory.memory.length; indx++) {
-				var stack = workingMemory.memory[indx];
+			for (var indx:int = 0; indx < $.workingMemory.memory.length; indx++) {
+				var stack = $.workingMemory.memory[indx];
 				currentTime = indx * 50;
 				stackX = currentTime * scl;
 				
@@ -469,7 +481,7 @@ package classes {
 			}
 			
 			addChild(rectangle);
-			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + ( int(workingMemory.averageLoad * 10) / 10) ;
+			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + ( int($.workingMemory.averageLoad * 10) / 10) ;
 		}
 			
 		
@@ -540,6 +552,7 @@ package classes {
 			if (drawNewTimeLine == true) {
 				var zero:TextField = new TextField();
 					zero.defaultTextFormat = grotesqueLrg;
+					zero.embedFonts = true;
 					zero.text = "0";
 					zero.x = _ganttWindow.mainTimeLine.x - 5;
 					zero.y = _ganttWindow.mainTimeLine.y + 5;									
@@ -547,6 +560,7 @@ package classes {
 				
 				var maxTime:TextField = new TextField();
 					maxTime.defaultTextFormat = grotesqueLrg;
+					maxTime.embedFonts = true;
 					maxTime.text = String(Math.round(maxEndTime/100)/10) + " s";
 					maxTime.x = _ganttWindow.mainTimeLine.x + _ganttWindow.mainTimeLine.width - 10;
 					maxTime.y = _ganttWindow.mainTimeLine.y - 25;
@@ -587,6 +601,7 @@ package classes {
 							var mthdLbl:TextField = new TextField();
 								mthdLbl.mouseEnabled = false;
 								mthdLbl.defaultTextFormat = grotesqueLrg;
+								mthdLbl.embedFonts = true;
 								mthdLbl.text = mthdTxt;
 								mthdLbl.autoSize = TextFieldAutoSize.LEFT;
 								mthdLbl.x = mthdX;
@@ -605,6 +620,7 @@ package classes {
 								var mthdTime:TextField = new TextField();
 									mthdTime.mouseEnabled = false;
 									mthdTime.defaultTextFormat = grotesqueLrg;
+									mthdTime.embedFonts = true;
 									mthdTime.autoSize = TextFieldAutoSize.CENTER;
 									mthdTime.text = " " + StringUtils.oneSigDig(step.srtTime) + " "; //make sure text not cut off
 									mthdTime.x = mthdX - (mthdTime.width/2);

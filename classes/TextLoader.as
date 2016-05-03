@@ -18,6 +18,7 @@
 			// constructor code
 			file = File.documentsDirectory.resolvePath(path); 
 			filestream.addEventListener(Event.COMPLETE, onLoadFinished);
+			filestream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 			filestream.openAsync(file, FileMode.READ);
 			pth = path;
 		}
@@ -45,7 +46,13 @@
 			}
 			
 			dispatchEvent( new Event(pth) );
-		} 
+		}
+		
+		
+		private function ioErrorHandler(evt:IOErrorEvent):void {
+            trace("ioErrorHandler: " + evt);
+			//dispatchEvent( new Event("error") );
+		}
 
 	}
 	

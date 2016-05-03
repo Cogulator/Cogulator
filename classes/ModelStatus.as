@@ -32,6 +32,7 @@ package  classes {
 	public class ModelStatus {
 		private var $:Global = Global.getInstance();
 		private var _timeReadout:MovieClip;
+		private var _exportButton:MovieClip
 		public var errorsExist:Boolean;
 
 		public function ModelStatus(tR:MovieClip) {
