@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>1.5</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.5/cogulator.air</url>
-       <description>Squashed bug that prevented "count_label_words" in operator file from having an effect.</description> 
+       <versionNumber>1.6</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v1.6/cogulator.air</url>
+       <description>Adds the ability to export model data.</description> 
     </update>
