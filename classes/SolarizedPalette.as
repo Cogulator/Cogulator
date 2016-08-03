@@ -26,15 +26,16 @@ package classes {
 	
 	public class SolarizedPalette {
 
-		public static const black:uint = 0x000000;
-		public static const grey:uint = 0x999999;
-		public static const darkgrey:uint = 0x363A3B;
-		public static const blue:uint = 0x268BD2;
-		public static const orange:uint = 0xCB4B16;
-		public static const green:uint = 0x859900;
-		public static const red:uint = 0xDC322F;
-		public static const magenta:uint = 0xD33682;
-		public static const errorred:uint = 0xDC312E;
+		public static const black:uint 		= 0x000000;
+		public static const grey:uint 		= 0x999999;
+		public static const darkgrey:uint 	= 0x363A3B;
+		public static const blue:uint 		= 0x268BD2;
+		public static const cyan:uint 		= 0x2BA198;
+		public static const orange:uint 	= 0xCB4B16;
+		public static const green:uint 		= 0x859900;
+		public static const red:uint 		= 0xDC322F;
+		public static const magenta:uint 	= 0xD33682;
+		public static const errorred:uint 	= 0xDC312E;
 		
 		
 		public function SolarizedPalette() {

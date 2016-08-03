@@ -38,10 +38,12 @@ package classes {
 		private static var time:String;
 		private static var threadLabel:String;
 		private static var errorFixed:Boolean;
+		private static var chunkNames:Array = [];
 		
 		private static const black:TextFormat = new TextFormat();
 		private static const grey:TextFormat = new TextFormat();
 		private static const blue:TextFormat = new TextFormat();
+		private static const cyan:TextFormat = new TextFormat();
 		private static const orange:TextFormat = new TextFormat();
 		private static const green:TextFormat = new TextFormat();
 		private static const red:TextFormat = new TextFormat();
@@ -51,17 +53,15 @@ package classes {
 		static var methods:Array = ["Task_Method:", "Goal:", "Also:", "as"];
 		static var errorInLine:Boolean = false;
 		
-		{
-			black.color = SolarizedPalette.black;
-			grey.color = SolarizedPalette.grey;
-			blue.color = SolarizedPalette.blue;
-			orange.color = SolarizedPalette.orange;
-			green.color = SolarizedPalette.green;
-			red.color = SolarizedPalette.red;
-			magenta.color = SolarizedPalette.magenta;
-			errorred.color = SolarizedPalette.errorred;
-		}
-		
+		black.color = SolarizedPalette.black;
+		cyan.color = SolarizedPalette.cyan;
+		grey.color = SolarizedPalette.grey;
+		blue.color = SolarizedPalette.blue;
+		orange.color = SolarizedPalette.orange;
+		green.color = SolarizedPalette.green;
+		red.color = SolarizedPalette.red;
+		magenta.color = SolarizedPalette.magenta;
+		errorred.color = SolarizedPalette.errorred;
 		
 		public static function solarizeAll():void{
 			var codeLines:Array = $.codeTxt.text.split("\r");
@@ -84,9 +84,18 @@ package classes {
 				lineNumber--;
 			var begindex = WrappedLineUtils.getLineIndex($.codeTxt, lineNumber);
 			var endex = WrappedLineUtils.getLineEndIndex($.codeTxt, lineNumber);
-				//endex--;
-						
-			return (solarizeLineNum(lineNumber, begindex, endex)[6]);
+			
+			//chunkErrors are a special case because they can't be identified until after the GomsProcessor initiates WM modeling
+			//chunkErrors are identified in WorkingMemory.as, which calls a custom function here (solarizeChunkAtLineNum) to color the errors
+			var chunkNamedInError:String = "";
+			var errMessage = $.errors[lineNumber];
+			if (errMessage != undefined) if (errMessage.indexOf("memory") > -1) {
+				var leftAngleIndex = errMessage.indexOf("<");
+				var rightAngleIndex = errMessage.indexOf(">");
+				chunkNamedInError = errMessage.substring(leftAngleIndex, rightAngleIndex);	
+			}	
+			
+			return (solarizeLineNum(lineNumber, begindex, endex, chunkNamedInError)[6]);
 		}
 		
 
@@ -98,9 +107,11 @@ package classes {
 		//4: Thread Label
 		//5: Error in line boolean
 		//6: Error fixed in line boolean - the one non-Goms processor calls are looking for
-		//public static function solarizeLineNum(lineNum:int):Array {
-		public static function solarizeLineNum(lineNum:int, beginIndex:int = -1, endIndex:int = -1):Array {
+		//7: Array of chunk names "<>"
+		
+		public static function solarizeLineNum(lineNum:int, beginIndex:int = -1, endIndex:int = -1, chunkNamedInError:String = ""):Array {
 			time = "";
+			chunkNames.length = 0;
 			
 			var lineIsInErrors:Boolean = false;
 			if ($.errors[lineNum] != undefined) lineIsInErrors = true;
@@ -114,8 +125,8 @@ package classes {
 			var index:int;
 			var lineStartIndex:int = beginIndex;
 			
-			var lineTxt:String = $.codeTxt.text.substring(beginIndex, endIndex);	
-			delete $.errors[lineNum];
+			var lineTxt:String = $.codeTxt.text.substring(beginIndex, endIndex);
+			if (chunkNamedInError == "") delete $.errors[lineNum];
 
 			//     -start by setting the whole line to grey
 			if (beginIndex > -1 && endIndex <= $.codeTxt.length) $.codeTxt.setTextFormat(grey, beginIndex, endIndex);
@@ -153,14 +164,50 @@ package classes {
 						}
 					}
 					if (goalLine) solarizeGoalLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex);
-					else solarizeOperatorLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex);
+					else solarizeOperatorLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex, chunkNamedInError);
 				}
-			} else return new Array(0, "goal:", "", "", "", false, false); //returning true here means it won't be included in the interleaving process if it's a comment
+			} else return new Array(0, "goal:", "", "", "", false, false, []); //returning true here means it won't be included in the interleaving process if it's a comment
 					
 			if (errorInLine == false && lineIsInErrors == true) errorFixed = true; //true means an error was fixed
 			else errorFixed = false;
+						
+			return new Array(indents, operator, lineLabel, time, threadLabel, errorInLine, errorFixed, chunkNames);
+		}
+		
+		
+		//If WM detects an error in chunk usage, this line is called to highlight the offending chunk(s)
+		public static function solarizeChunkOnLineNum(lineNum:int, chunkName:String):void {
+			var beginIndex = WrappedLineUtils.getLineIndex($.codeTxt, lineNum);
+			var endIndex = WrappedLineUtils.getLineEndIndex($.codeTxt, lineNum);
+			var lineTxt:String = $.codeTxt.text.substring(beginIndex, endIndex);
 			
-			return new Array(indents, operator, lineLabel, time, threadLabel, errorInLine, errorFixed);
+			chunkName = "<" + chunkName + ">";
+			var chunkStartIndex = lineTxt.indexOf(chunkName);
+			var chunkEndIndex = chunkStartIndex + chunkName.length;
+			
+			$.codeTxt.setTextFormat(errorred, beginIndex + chunkStartIndex + 1, beginIndex + chunkEndIndex - 1);
+			//chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
+			
+			
+			/*var leftAngleBracketIndex:int = 0;
+			var rightAngleBracketIndex:int = 0;
+			var leftAngleBracketIndices:Array = lineTxt.match(/</g);
+			var rightAngleBracketIndices:Array = lineTxt.match(/>/g);
+			if (leftAngleBracketIndices != null && rightAngleBracketIndices != null) {
+				for (var i:int = 0; i < leftAngleBracketIndices.length; i++) {					
+					leftAngleBracketIndex = lineTxt.indexOf(leftAngleBracketIndices[i], leftAngleBracketIndex);
+					rightAngleBracketIndex = leftAngleBracketIndex + 1;
+					rightAngleBracketIndex = lineTxt.indexOf(rightAngleBracketIndices[i], rightAngleBracketIndex);
+					
+					if (rightAngleBracketIndex > leftAngleBracketIndex + 1) {
+						$.codeTxt.setTextFormat(errorred, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
+						chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
+					}
+					
+					leftAngleBracketIndex = rightAngleBracketIndex + 1;
+					rightAngleBracketIndex = leftAngleBracketIndex + 1;
+				}
+			}*/
 		}
 		
 		
@@ -193,7 +240,7 @@ package classes {
 		
 		
 		
-		private static function solarizeOperatorLine(lineTxt:String, index:int, lineNum:int, beginIndex:int, endIndex:int, lineStartIndex:int):void {
+		private static function solarizeOperatorLine(lineTxt:String, index:int, lineNum:int, beginIndex:int, endIndex:int, lineStartIndex:int, chunkNamedInError:String):void {
 			threadLabel = ""; //setting for the return array			
 			
 			//    -evaluate operator
@@ -219,7 +266,31 @@ package classes {
 			lineLabel = lineTxt.substring(index, endIndex);
 			if (lineLabel.length > 0) $.codeTxt.setTextFormat(black, beginIndex + index, beginIndex + endIndex);
 				
-				
+			
+			//    -evaluate WM chunks
+			var leftAngleBracketIndex:int = 0;
+			var rightAngleBracketIndex:int = 0;
+			var leftAngleBracketIndices:Array = lineTxt.match(/</g);
+			var rightAngleBracketIndices:Array = lineTxt.match(/>/g);
+			if (leftAngleBracketIndices != null && rightAngleBracketIndices != null) {
+				for (var i:int = 0; i < leftAngleBracketIndices.length; i++) {					
+					leftAngleBracketIndex = lineTxt.indexOf(leftAngleBracketIndices[i], leftAngleBracketIndex);
+					rightAngleBracketIndex = leftAngleBracketIndex + 1;
+					rightAngleBracketIndex = lineTxt.indexOf(rightAngleBracketIndices[i], rightAngleBracketIndex);
+					var chunkName = lineTxt.substring(leftAngleBracketIndex, rightAngleBracketIndex);	
+										
+					if (rightAngleBracketIndex > leftAngleBracketIndex + 1) {
+						if (chunkNamedInError != chunkName) $.codeTxt.setTextFormat(cyan, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
+						else $.codeTxt.setTextFormat(errorred, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
+						chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
+					}
+					
+					leftAngleBracketIndex = rightAngleBracketIndex + 1;
+					rightAngleBracketIndex = leftAngleBracketIndex + 1;
+				}
+			}
+			
+			
 			//    -evaluate time
 			time = "";
 			var leftParenIndex:int = lineTxt.indexOf("(");
@@ -281,65 +352,6 @@ package classes {
 				}
 
 			}
-			
-			
-			
-			/*index = endIndex + 2; //end index is the character before the break string - move foward to get to the parenthatical and then past it
-			if (lineTxt.indexOf("(") > -1) { //if the "(" marker exists
-				endIndex = findLabelEnd(lineTxt, ")");
-				endIndex++;
-				if (lineTxt.indexOf(")") > -1) { //if the ")" marker exists
-					var pattern:RegExp = /( )\1+/gi;
-					time = lineTxt.substring(index, endIndex);
-					time = time.replace(pattern, '$1'); //removes duplicate white spaces
-					
-					var timeParts:Array = time.split(/\s/);
-					
-					if (timeParts.length == 2) {
-						var codeTxtIndex:int = index + beginIndex;
-						if (   isNaN( Number(timeParts[0]) )   ) {
-							$.errors[lineNum] = "I was expecting a number after the left parenthesis.";
-							if (timeParts[1].length > 0) {
-								$.codeTxt.setTextFormat(errorred, codeTxtIndex, codeTxtIndex + timeParts[0].length);
-								time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
-								errorInLine = true;
-							}
-						} else $.codeTxt.setTextFormat(black, codeTxtIndex - 1, codeTxtIndex + timeParts[0].length);
-					
-					
-						codeTxtIndex = codeTxtIndex + timeParts[0].length + 1;
-						timeParts[2] = trim(timeParts[1]);
-						if (timeParts[2].toLowerCase() != "syllables" && timeParts[2].toLowerCase() != "seconds" 
-						  && timeParts[2].toLowerCase() != "milliseconds" 
-						  && timeParts[2].toLowerCase() != "ms") {
-							$.errors[lineNum] = "The modifier can be 'seconds', 'milliseconds', or 'ms'";
-							if (timeParts[2].length > 0)  {
-								$.codeTxt.setTextFormat(errorred, codeTxtIndex, codeTxtIndex + timeParts[1].length);
-								time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
-								errorInLine = true;
-							}
-						} else {
-							$.codeTxt.setTextFormat(black, codeTxtIndex, codeTxtIndex + timeParts[1].length + 1);
-							$.codeTxt.setTextFormat(green, codeTxtIndex, codeTxtIndex + timeParts[1].length);
-						}
-					} else if (lineTxt.indexOf("(") < lineTxt.indexOf(")"))  { //if there are not two pieces of information between the parens
-						$.errors[lineNum] = "I was expecting a number and 'seconds', 'milliseconds', or 'ms'";
-						time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
-						errorInLine = true;
-						$.codeTxt.setTextFormat(errorred, beginIndex + lineTxt.indexOf("("), beginIndex + lineTxt.indexOf(")"));
-					} else { //if there is a right paren before the left paren
-						$.errors[lineNum] = "I found a right paren before the left paren";
-						time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
-						errorInLine = true;
-						$.codeTxt.setTextFormat(errorred, beginIndex + lineTxt.indexOf(")"), beginIndex + lineTxt.indexOf(")") + 1);
-					}
-				} else { // if there is a left paren with no right paren...
-					$.errors[lineNum] = "I was expecting a right parenthesis.";
-					time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
-					errorInLine = true;
-					$.codeTxt.setTextFormat(errorred, beginIndex + lineTxt.indexOf("("), beginIndex + lineTxt.length);
-				}
-			}*/
 		
 		}
 			
@@ -360,11 +372,7 @@ package classes {
 		
 		
 		private static function findBeginIndex():int {
-			
 			var startPara:int = $.codeTxt.getFirstCharInParagraph($.codeTxt.getFirstCharInParagraph($.codeTxt.caretIndex));
-			//if (startPara == $.codeTxt.caretIndex) startPara = $.codeTxt.getFirstCharInParagraph($.codeTxt.getFirstCharInParagraph($.codeTxt.caretIndex) - 4);
-			
-			
 			return startPara;
 		}
 		

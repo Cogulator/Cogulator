@@ -28,9 +28,10 @@ package  classes {
 		
 		public var time, srtTime, endTime:Number;
 		public var goal, thred, operator, resource, label:String;
-		public var indentCount, lineNo:int;
+		public var indentCount, lineNo:int, prevLineNo:int;
+		public var chunkNames:Array;
 		
-		public function Step(ic:int, gl:String, thrd:String, oprtr:String, tm:Number, rsrce:String, lbl:String, ln:int) {
+		public function Step(ic:int, gl:String, thrd:String, oprtr:String, tm:Number, rsrce:String, lbl:String, ln:int, pln:int, cn:Array) {
 			// constructor code
 			indentCount = ic;
 			goal = gl;
@@ -40,6 +41,12 @@ package  classes {
 			resource = rsrce;
 			label = lbl;
 			lineNo = ln;
+			prevLineNo = pln;
+			chunkNames = [];
+		
+			for each (var chunkName in cn) { //create new array to save value and not reference to array
+				chunkNames.push(chunkName);
+			}
 		}
 
 	}

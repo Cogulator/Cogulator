@@ -43,11 +43,12 @@ package classes {
 		private static var threadTracker:Dictionary; // tracks the active method for each thread
 		private static var resourceAvailability:Dictionary; 
 		private static var threadAvailability:Dictionary;
-		private static var methodAvailability:Dictionary; 
+		
+		private static var newThreadNumber:int = 0; //used as a thread name for "Also" when one is not provided
 				
 		private static var maxEndTime:Number; // = 0;
-		private static var cycleTime:Number;
-		private static var prevStepEndTime:Number;
+		private static var cycleTime:Number;		
+		
 		
 		public static function processGOMS():Array {			
 			maxEndTime = 0;
@@ -62,7 +63,6 @@ package classes {
 			threadTracker = new Dictionary(); //hashmap that tracks that active goal for each thread
 			resourceAvailability = new Dictionary();
 			threadAvailability = new Dictionary();
-			methodAvailability = new Dictionary();
 			
 			//(<resource name>, <time resource comes available>)
 			var to:TimeObject = new TimeObject(0,0);
@@ -74,11 +74,10 @@ package classes {
 			resourceAvailability["see"] = seeArray;
 			resourceAvailability["cognitive"] = cognitiveArray;
 			resourceAvailability["hands"] = handsArray;
-			
-			prevStepEndTime = 0;
-			
+						
 			for (var key:Object in $.errors) delete $.errors[key];  //clear out all $.errors
 			generateStepsArray();
+			
 			if (steps.length > 0) processStepsArray(); //processes and then interleaves steps
 			
 			return(new Array(maxEndTime, thrdOrdr, threadAvailability, intersteps, allmthds, cntrlmthds));
@@ -99,6 +98,7 @@ package classes {
 					var stepOperator:String  = syntaxArray[1]; 
 					var stepLabel:String 	 = trimLabel(syntaxArray[2]); 
 					var stepTime:String 	 = syntaxArray[3];
+					var chunkNames:Array	 = syntaxArray[7];
 				
 					var methodGoal, methodThread:String;
 					if (stepOperator != "goal:" && stepOperator != "also:") {
@@ -107,21 +107,28 @@ package classes {
 						methodThread = goalAndThread[1];
 					} else {
 						methodGoal = stepLabel;
-						methodThread = syntaxArray[4];
-						
+						if (syntaxArray[4] == "!X!X!") {
+							methodThread = String(newThreadNumber);
+							newThreadNumber++;
+						} else {
+							methodThread = syntaxArray[4];
+						}
+	
 						allmthds.push(stepLabel); //for charting in GanttChart
 						if (indentCount == 1) cntrlmthds.push(stepLabel);  //for charting in GanttChart
 					}
 					
 					if (syntaxArray[5] == false && stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
-						var s:Step = new Step (indentCount, methodGoal, methodThread, stepOperator, getOperatorTime(stepOperator, stepTime, stepLabel), getOperatorResource(stepOperator), stepLabel, lineIndex);				
+						var s:Step = new Step (indentCount, methodGoal, methodThread, stepOperator, getOperatorTime(stepOperator, stepTime, stepLabel), getOperatorResource(stepOperator), stepLabel, lineIndex, 0, chunkNames);				
 						steps.push(s); 
 					}
 				}
 				beginIndex = endIndex + 1;
 			}
 			
+
 			removeGoalSteps();
+			setPrevLineNo();
 			
 		}
 			
@@ -130,6 +137,14 @@ package classes {
 		private static function removeGoalSteps() {
 			for (var i:int = steps.length - 1; i > -1; i--) {
 				if (steps[i].operator == "goal:" || steps[i].operator == "also:") steps.splice(i, 1);
+			}
+		}
+		
+		
+		private static function setPrevLineNo() {
+			//steps[0] is set to 0 by default, all others should be updated
+			for (var i:int = 1; i < steps.length; i++) {
+				steps[i].prevLineNo = steps[i-1].lineNo;
 			}
 		}
 		
@@ -161,20 +176,19 @@ package classes {
 		private static function interleaveStep(thread:String, goal:String) {
 			for (var i:int = 0; i < steps.length; i++) {
 				var step:Step = steps[i];
-				
+
 				if (thread == "base") {
 					if (step.thred == "base") {
-						var t:Array = findStartEndTime(step.resource, step.thred, step.goal, step.time, prevStepEndTime);
+						var t:Array = findStartEndTime(step);
 						step.srtTime = t[0];
 						step.endTime = t[1];
-						if (i == 0) prevStepEndTime = t[1]; //only set prevStepEndTime for base and when base is first in the list.  this allows proper sequencing of consecutive also_accomplish goals in the same thread
-							intersteps.push(step);
-							steps.splice(i,1);
-							break;
-						}
-					} else {
+						intersteps.push(step);
+						steps.splice(i,1);
+						break;
+					}
+				} else {
 					if (step.thred == thread && step.goal == goal) {
-						var th:Array = findStartEndTime(step.resource, step.thred, step.goal, step.time, prevStepEndTime);
+						var th:Array = findStartEndTime(step);
 						step.srtTime = th[0];
 						step.endTime = th[1];
 						intersteps.push(step);
@@ -182,12 +196,17 @@ package classes {
 						break;
 					}
 				} 
-			
+
 			}
 		}
 		
 		
-		private static function findStartEndTime(resource:String, thread:String, method:String, stepTime:Number, prevStepEndTime:Number):Array {
+		private static function findStartEndTime(step:Step):Array {
+			var resource:String = step.resource;
+			var thread:String = step.thred;
+			var method:String = step.goal
+			var stepTime:Number = step.time
+			
 			var zerodTO:TimeObject = new TimeObject(0,0);
 			var resourceTO:TimeObject;
 			var threadTO:TimeObject;
@@ -196,22 +215,19 @@ package classes {
 			var threadTime:Number = 0;
 			var methodTime:Number = 0;
 			
-			if (resource == "speech" || resource == "hear") resource = "verbalcoms";
-			
-			//earliest the thread is available
-			if (threadAvailability[thread] == null) threadAvailability[thread] = zerodTO; //create thread and put in dictionary 
+			if (resource == "speech" || step.resource == "hear") resource = "verbalcoms";
+
+			if (threadAvailability[thread] == null) {
+				var prevLineNumberTime = getPreviousLineTime(step.prevLineNo);
+				zerodTO.et = prevLineNumberTime;
+				threadAvailability[thread] = zerodTO;
+			}
 			threadTO = threadAvailability[thread];
 			threadTime = threadTO.et;
 			
-			//earliest the method is available
-			if (methodAvailability[method] == null) {
-				zerodTO.et = prevStepEndTime;
-				methodAvailability[method] = zerodTO; //create thread and put in dictionary
-			}
-			methodTO = methodAvailability[method];
-			methodTime = methodTO.et;
 			
-			var startTime:Number = Math.max(threadTime, methodTime);
+			//var startTime:Number = Math.max(threadTime, methodTime);
+			var startTime:Number = threadTime;
 			var endTime:Number 	 = startTime + stepTime + cycleTime;
 			
 			startTime = getResourceAvailability(resource, startTime, endTime, stepTime);
@@ -219,7 +235,6 @@ package classes {
 			
 			//store the results for the next go round
 			threadAvailability[thread] = new TimeObject(startTime, endTime);  
-			methodAvailability[method] = new TimeObject(startTime, endTime);
 			
 			var reslt:Array = new Array();
 				reslt[0] = startTime;
@@ -228,6 +243,18 @@ package classes {
 			return reslt;
 		}
 		
+		
+		private static function getPreviousLineTime(lineNoToFind:int):Number {
+			//retrieve the start time for the step previous to the current one
+			for each (var step in intersteps) {
+				if (step.lineNo == lineNoToFind) {
+					return step.srtTime;
+				}
+			}
+			
+			//this should never happen...
+			return 0;
+		}
 		
 		private static function getResourceAvailability(resource:String, startTime:Number, endTime:Number, stepTime:Number):Number {
 			//pull the resource array of TimeObjects associated with the resource

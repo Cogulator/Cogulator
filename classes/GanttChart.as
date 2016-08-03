@@ -35,12 +35,14 @@ package classes {
 	import flash.utils.Dictionary;
 	import flash.filters.*;
 	import flash.events.*;
-	import classes.WorkingMemory;
+	import classes.Memory;
 	import classes.TimeObject;
 	import classes.Step;
 	import classes.TextHighlighter;
 	import classes.SyntaxColor;
 	import classes.GomsProcessor;
+	import classes.SubjectiveMentalWorkload;
+	import classes.SolarizedPalette;
 	import com.inruntime.utils.*;
 	
 	public class GanttChart extends MovieClip {
@@ -48,7 +50,6 @@ package classes {
 		
 		private var codeText:String;
 		private var rawgoms:Array;
-		//private var workingMemory:WorkingMemory;
 				
 		public var scl:Number; // = 5000;
 		
@@ -81,7 +82,7 @@ package classes {
 		private var chrtWdth:Number; //pixels
 		
 		//set up color palette from Solorized
-		private var colorPalette:Array = new Array (0x859900, 0xCB4B16, 0xDC322F, 0x6C71C4, 0x2AA198);  // Alternate syntax
+		private var colorPalette:Array = new Array (0xDC322F, 0x2AA198, 0x6C71C4, 0x859900, 0xCB4B16);  // Alternate syntax
 		private var threadColor:Dictionary = new Dictionary();
 		
 		//lookup table for the position of the resource on the y axis of the gantt chart (set in the visualize methd)
@@ -319,6 +320,7 @@ package classes {
 			}
 			
 			addWorkingMemoryToChartWithAverage(_ganttWindow.chartBckgrnd.height - 45, sclFctr);
+			addSubjectiveMentalWorkloadToChart(_ganttWindow.chartBckgrnd.height - 45, sclFctr);
 			
 			//draw gantt chart timeline
 			var lineX1:Number = 0;
@@ -446,7 +448,7 @@ package classes {
 
 		}
 		
-		
+		var popped:Array = new Array();
 		private function addWorkingMemoryToChartWithAverage(baselineY:Number, scl:Number):void {	
 			var fiftys:int = maxEndTime / 50; //show wm in 50ms cycles
 			var hght:int = 4;
@@ -457,18 +459,37 @@ package classes {
 			var currentTime:Number = 0;
 			var totalChunks = 0;
 			
-			$.workingMemory = new WorkingMemory(intersteps, maxEndTime, _ganttWindow.automateButton.currentFrame);
+			//remove all existing overload symbols
+			for each (var popper in popped) removeChild(pop);
+			popped.length = 0;
+			
+			$.memory = new Memory(intersteps, maxEndTime, _ganttWindow.automateButton.currentFrame);
 			
 			//loop through each stack (one for each 50 ms cycle)
-			for (var indx:int = 0; indx < $.workingMemory.memory.length; indx++) {
-				var stack = $.workingMemory.memory[indx];
+			for (var indx:int = 0; indx < $.memory.workingmemory.length; indx++) {
+				var stack = $.memory.workingmemory[indx];
 				currentTime = indx * 50;
 				stackX = currentTime * scl;
+				
+				//check to see if this stack exceeded WM capacity
+				var overloaded = false;
+				for each (var overload in $.memory.overloadedStacks) {
+					if (overload == indx) {
+						overloaded = true;
+						var pop:Popped = new Popped();
+							pop.x = stackX;
+							pop.y = baselineY - (hght * 10);
+						addChild(pop);
+						popped.push(pop);
+						break;
+					}
+				}
 				
 				//loop through each chunk in the current 50ms stack)
 				for (var chunkIndx:int = 0; chunkIndx < stack.length; chunkIndx++) {
 					var chunk = stack[chunkIndx];
 					transparency = 1 - ( (1 - chunk.probabilityOfRecall) * 2 );
+					//transparency = chunk.probabilityOfRecall;
 					color = chunk.color;
 					rectangle.graphics.beginFill(color, transparency)
 					rectangle.graphics.drawRect( 
@@ -481,9 +502,35 @@ package classes {
 			}
 			
 			addChild(rectangle);
-			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + ( int($.workingMemory.averageLoad * 10) / 10) ;
+			_ganttWindow.avgWorkingMemoryTxt.text = "Average WM chunks: " + ( int($.memory.averageLoad * 10) / 10) ;
 		}
+		
+		
+		private function addSubjectiveMentalWorkloadToChart(theWhy:Number, scl:Number):void {
+			var dots:Shape = new Shape();
+			var ex:Number;
+			var time:Number;
+			var why:Number;
+			var workload = SubjectiveMentalWorkload.getMentalWorkload($.memory.rehearsals); //{stack: chunk.stack, load: load}
 			
+			for each (var load in workload) {
+				time = load.stack * 50;
+				why = theWhy - 60;
+				
+				for (var i = 0; i < load.load; i++) {
+					ex = time * scl;
+					if (i % 2 == 1) ex += 4;
+					else why += 4;
+					
+					dots.graphics.beginFill(SolarizedPalette.darkgrey)
+					dots.graphics.drawCircle(ex, why, 1.5);
+					dots.graphics.endFill();
+				}
+			}
+			
+			addChild(dots);
+		}
+		
 		
 		private function findStep(i:int, thrd:String, drctn:int):Step {
 			var itr:int = i;
