@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>1.6</versionNumber> 
+       <versionNumber>2.0</versionNumber> 
        <url>https://github.com/Cogulator/Cogulator/releases/download/v2.0/cogulator.air</url>
        <description>Version 2.0 changes revolve around working memory. You can now name working memory chunks, which allows Cogulator to do two new tricks: advise you when information you’re trying to use has decayed out of working memory and give you an estimate of how a human would rate the workload of the task on a scale of one to ten. Don’t expect perfection from either of these estimates; they should simply give the modeler some clues about where forgetting might be an issue or when the user may perceive the mental load to be high. The new capabilities are documented in the primer at http://cogulator.io and described in The Workload Curve, which was published in 2015 in Human Factors.</description> 
     </update>
