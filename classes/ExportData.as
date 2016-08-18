@@ -26,7 +26,7 @@
 			//Export Working Memory
 			exportTxt = "time" + "\t" + "items_in_memory" + "\r\n";
 			var time = 0;
-			for each (var stack in $.workingMemory.memory) {
+			for each (var stack in $.memory.workingmemory) {
 				exportTxt += time + "\t" + stack.length + "\r\n";
 				time += 50;
 			}

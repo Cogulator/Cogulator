@@ -51,7 +51,7 @@ package classes {
 			
 			var totalCycles:int = (Math.round(modelEndTime / 50) * 50) / 50;
 			workingmemory.length = 0;
-			workingmemory = new Array(totalCycles); //create an array with a length equal to total number of cycles
+			workingmemory = new Array(totalCycles + 1); //create an array with a length equal to total number of cycles.  +1 ensures the last reference to chunk has a wm stack to sustain it
 			
 			if (workingmemory.length > 0) {
 				for (var i:int = 0; i < workingmemory.length; i++) workingmemory[i] = []; //initialize the stacks within memory (one for each 50ms cycle)
@@ -295,9 +295,6 @@ package classes {
 		
 		private function getExistingChunk(chunkName:String, stack:int):Chunk {			
 			//first check to see if the chunk exists in LTM
-			
-
-			
 			for each (var chunk in workingmemory[stack - 1]) {
 				if (chunk.chunkName == chunkName) return chunk;
 			}
@@ -305,8 +302,8 @@ package classes {
 // --- THIS FUNCTION IS INCOMPLETE -----------------------------
 			for each (var ltmChunk in longTermMemory) {
 				if (ltmChunk.chunkName == chunkName) {
-					trace("FOUND A LTM CHUNK MATCH");
-					workingmemory[stack].push(chunk);
+					trace("FOUND A LTM CHUNK MATCH for", chunkName);
+					//workingmemory[stack].push(chunk);
 					//push it back into the working memory stack & return it (with a new rehearsal?)
 				}
 			}

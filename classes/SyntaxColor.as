@@ -186,28 +186,6 @@ package classes {
 			var chunkEndIndex = chunkStartIndex + chunkName.length;
 			
 			$.codeTxt.setTextFormat(errorred, beginIndex + chunkStartIndex + 1, beginIndex + chunkEndIndex - 1);
-			//chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
-			
-			
-			/*var leftAngleBracketIndex:int = 0;
-			var rightAngleBracketIndex:int = 0;
-			var leftAngleBracketIndices:Array = lineTxt.match(/</g);
-			var rightAngleBracketIndices:Array = lineTxt.match(/>/g);
-			if (leftAngleBracketIndices != null && rightAngleBracketIndices != null) {
-				for (var i:int = 0; i < leftAngleBracketIndices.length; i++) {					
-					leftAngleBracketIndex = lineTxt.indexOf(leftAngleBracketIndices[i], leftAngleBracketIndex);
-					rightAngleBracketIndex = leftAngleBracketIndex + 1;
-					rightAngleBracketIndex = lineTxt.indexOf(rightAngleBracketIndices[i], rightAngleBracketIndex);
-					
-					if (rightAngleBracketIndex > leftAngleBracketIndex + 1) {
-						$.codeTxt.setTextFormat(errorred, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
-						chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
-					}
-					
-					leftAngleBracketIndex = rightAngleBracketIndex + 1;
-					rightAngleBracketIndex = leftAngleBracketIndex + 1;
-				}
-			}*/
 		}
 		
 		

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <application xmlns="http://ns.adobe.com/air/application/21.0">
     <id>cogulator</id>
-    <versionNumber>2.0</versionNumber>
+    <versionNumber>2.1</versionNumber>
     <filename>cogulator</filename>
     <description></description>
     <!-- To localize the description, use the following format for the description element.<description><text xml:lang="en">English App description goes here</text><text xml:lang="fr">French App description goes here</text><text xml:lang="ja">Japanese App description goes here</text></description>-->

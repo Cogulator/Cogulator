@@ -353,7 +353,11 @@ package classes {
 			} else if (operatorStr == "say" || operatorStr == "hear" || labelUse.indexOf("count_label_words") > -1) { //if there's no customTime, use the number of words in the lbl
 				rslt = removeConsectiveWhiteSpaces(lbl).split(' ').length;
 			} else if (operatorStr == "type" || labelUse.indexOf("count_label_characters") > -1) {
-				rslt = lbl.length; //if the operator is "type", figure out how many characters are in the string and save that as result
+				var leftAngleBracketIndices:Array = lbl.match(/</g);
+				var rightAngleBracketIndices:Array = lbl.match(/>/g);
+				//because brackets are used for chunk naming, that should be removed from the lable length count if used in something like a Type operator
+				if (leftAngleBracketIndices.length == rightAngleBracketIndices.length) rslt = lbl.length - leftAngleBracketIndices.length - rightAngleBracketIndices.length;
+				else rslt = lbl.length; //if the operator is "type", figure out how many characters are in the string and save that as result
 			}
 			
 			return Number(operatorObj.time) * rslt;
