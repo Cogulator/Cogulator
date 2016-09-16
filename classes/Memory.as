@@ -73,11 +73,14 @@ package classes {
 								popChunkWithName(chunkName, stackToAddChunk); //remove from stack... no questions asked
 							} else { //attempt to push chunk to stack
 								var chunkAction = pushChunk(isWmOperator, step.operator, chunkName, stackToAddChunk, step); //can add multiple chunks simultaneously... not realistic, but maybe passable
-								if (chunkAction == "pushed_rehearsals") {
-									if (!attendToChunkInFuture(chunkName, interleavedSteps.indexOf(step))) {
-										popChunkWithName(chunkName, stackToAddChunk);
-									}
-								}
+								//if (chunkAction == "pushed_rehearsals") {
+								//	if (!attendToChunkInFuture(chunkName, interleavedSteps.indexOf(step))) {
+								//		//The idea is to improve WM estimates by auto removing non-long relevant info from WM
+								//		//But, I think this is too aggresive and ignores problems like interference
+								//		//So, I'm going to comment out this feature for now. Maybe I'll find a better solution in the future
+								//		popChunkWithName(chunkName, stackToAddChunk);
+								//	}
+								//}
 							}
 						}
 					} else if (isWmOperator) {
@@ -177,7 +180,6 @@ package classes {
 				var chunk:Chunk = workingmemory[cycleIndex][i];
 				if (chunk.chunkName == chunkName) {
 					longTermMemory[chunk.chunkName] = chunk;
-					//longTermMemory.push(chunk);
 					workingmemory[cycleIndex].splice(i, 1);
 					break;
 				}
