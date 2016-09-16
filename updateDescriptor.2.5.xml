@@ -2,5 +2,5 @@
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
        <versionNumber>2.1</versionNumber> 
        <url>https://github.com/Cogulator/Cogulator/releases/download/v2.2/cogulator.air</url>
-       <description>Recall now interacts with a long term memory store. In addition, memory items that decay out of working memory are retained in long term memory and can be reactivated with the recall operator.</description> 
+       <description>As part of the new chunk naming feature, Cogulator tried to automatically remove chunks no longer being used in working memory.  In testing, I've found that's too aggressive and tends to result in underestimated working memory load.  So, other than decay, for now the only way to remove an item from working memory is to use the Ignore operator.</description> 
     </update>
