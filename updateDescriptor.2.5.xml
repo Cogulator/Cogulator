@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.4</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.4/cogulator.air</url>
-       <description>- Finally, an interface for adding new operators within Cogulator (operators > "+ new operator")
-- Goal and Also no longer require a colon
-- Scrolling now performs in a more standard way when resizing or expanding/collapsing the Gantt chart
-- Assorted bug fixes</description> 
+       <versionNumber>2.3</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.3/cogulator.air</url>
+       <description></description> 
     </update>
