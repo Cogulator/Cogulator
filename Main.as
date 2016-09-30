@@ -57,10 +57,12 @@ package {
 	import classes.CustomScrollBar;
 	import classes.AppUpdater;
 	import classes.ExportData;
+	import classes.NewOperatorCHI;
 	import com.inruntime.utils.*;
 	import flash.utils.Timer;
 	import flash.utils.Dictionary;
 	import flash.events.TimerEvent;
+	import classes.NewOperatorCHI;
 	
 	public class Main extends MovieClip{
 		
@@ -96,10 +98,12 @@ package {
 		var ganttClosed:Boolean = true;
 
 		var hints:HintsTool;
+		var newOperatorCHI:NewOperatorCHI;
 		
 		//    - generate models sidebar - 
 		var modelsSideBar:ModelsSidebar;
 		var  modelsScrollBar:CustomScrollBar;
+		
 		
 		var defaultTimeLineDraggerX:Number;
 		
@@ -116,7 +120,6 @@ package {
 			$.codeTxt = codeTxt;
 			$.errors = errors;
 			$.automateButton = ganttWindow.automateButton;
-			//operatorsArray is grabbed after array is populated
 			
 			//stage setup - don't zoom
 			stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -173,6 +176,8 @@ package {
 			//  - switch between operators & models in the sidebar
 			sidebarToggle.operators.addEventListener(MouseEvent.CLICK, onSideBarClick);
 			sidebarToggle.models.addEventListener(MouseEvent.CLICK, onSideBarClick);
+			sidebarToggle.newOperatorButton.addEventListener(MouseEvent.CLICK, onNewOperatorClick);
+
 			
 			//  - handle stage resizing
 			stage.addEventListener(Event.RESIZE, onResizeStage);
@@ -207,42 +212,65 @@ package {
 		}
 		
 
-
 		//set up commenting
 		function getRefresh(evt:Event){
 			refreshModel();
 			hintsCHI.hintText.addEventListener
 		}
 		
-
+		
 		function onReady(evt:Event):void {
 			//    - load the operator text file & generate operators sidebar - 
+			ops = new TextLoader("cogulator/operators/operators.txt");
+			ops.addEventListener("cogulator/operators/operators.txt", generateSideBars);
+		}
+		
+		//used by newOperatorCHI to regenerate the sidebar when a new operator is added
+		public function regenerateOperatorsSidebar():void {
 			ops = new TextLoader("cogulator/operators/operators.txt");
 			ops.addEventListener("cogulator/operators/operators.txt", generateOperatorsSidebar);
 		}
 
 		
-		function generateOperatorsSidebar (evt:Event):void {
-			operatorArray = ops.arry; 
-			operatorArray.push({resource: "cognitive", appelation: "Ignore", time: 50, description: "Removes_item_from_working_memory.", labelUse: ""});
-			$.operatorArray = operatorArray;
-				
-			//opsSideBar = new OperatorsSidebar(lineNumbers, undoRedo);
-			opsSideBar = new OperatorsSidebar(undoRedo);
-			opsSideBar.y = 65;
-			opsSideBar.visible = false;
-			addChildAt(opsSideBar, 4);
-			
-			opsScrollBar = new CustomScrollBar(stage, ganttWindow, opsSideBar, sidebarbckgrnd, 35);
-			addChildAt(opsScrollBar, 4);
+		function generateSideBars (evt:Event):void {
+			generateOperatorsSidebar();
 			
 			hints = new HintsTool(hintsButton, hintsCHI, errorLine, highlighter, scrollBar, opsSideBar.insert);
 			//needs to be modified at some point to use refreshModel with reloading the model twice
 			hintsButton.addEventListener(MouseEvent.MOUSE_DOWN, refreshModelSansHints);
 			
+			//now that you have the operatorArray, you can setup the new operator chi
+			newOperatorCHI = new NewOperatorCHI(operatorArray, this);
+			newOperatorCHI.x = 300;
+			newOperatorCHI.y = 60;
+			newOperatorCHI.closeButton.addEventListener(MouseEvent.CLICK, onNewOperatorXClick);
+			
 			generateModelsSidebar();
 		}
-
+		
+		
+		public function generateOperatorsSidebar(evt:Event = null):void {
+			operatorArray = ops.arry; 
+			operatorArray.push({resource: "cognitive", appelation: "Ignore", time: 50, description: "Removes_item_from_working_memory.", labelUse: ""});
+			$.operatorArray = operatorArray;
+			
+			if (opsSideBar != null) {
+				removeChild(opsSideBar);
+				removeChild(opsScrollBar);
+				opsSideBar = null;
+				opsScrollBar = null;
+			}
+			
+			//opsSideBar = new OperatorsSidebar(lineNumbers, undoRedo);
+			opsSideBar = new OperatorsSidebar(undoRedo, this);
+			opsSideBar.y = 60;
+			if (sidebarToggle.currentFrame < 3) opsSideBar.visible = false;
+			addChildAt(opsSideBar, 17);
+			
+			opsScrollBar = new CustomScrollBar(stage, ganttWindow, opsSideBar, sidebarbckgrnd, 60);
+			addChildAt(opsScrollBar, 17);
+		}
+		
 
 		function generateModelsSidebar():void {
 			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout);
@@ -250,10 +278,10 @@ package {
 			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);	
 			modelsSideBar.addEventListener("new_model_added", reloadModels);
 			modelsSideBar.y = 55;
-			addChildAt(modelsSideBar,2);
+			addChildAt(modelsSideBar,17);
 			
 			modelsScrollBar = new CustomScrollBar(stage, ganttWindow, modelsSideBar, sidebarbckgrnd, 55);
-			addChildAt(modelsScrollBar,2);
+			addChildAt(modelsScrollBar,17);
 		}
 
 		
@@ -281,20 +309,17 @@ package {
 		}
 
 		
-		
 		function resetTimeLine(){
 			ganttWindow.timeLineDragger.x = defaultTimeLineDraggerX;
 			moveChart();
 		}
-
-
+	
 
 		function onExportClick(evt:MouseEvent):void {
 			//addEventListener("refresh_complete", handleRefreshComplete);
 			refreshModel();
 			ExportData.export(timeReadout.title.text);
 		}
-
 
 
 		//    - sidebar toggle - 
@@ -304,14 +329,24 @@ package {
 				if (opsScrollBar.prcntShown < 1) opsScrollBar.visible = true;
 				modelsSideBar.visible = false;
 				modelsScrollBar.visible = false;
+				sidebarbckgrnd.gotoAndStop(2);
 			} else if (sidebarToggle.currentFrame == 4) {
 				opsSideBar.visible = false;
 				opsScrollBar.visible = false;
 				modelsSideBar.visible = true;
+				sidebarbckgrnd.gotoAndStop(1);
 				if (modelsScrollBar.prcntShown < 1) modelsScrollBar.visible = true;
 			}
 		}
-
+		
+		function onNewOperatorClick(evt:MouseEvent):void {
+			addChildAt(newOperatorCHI, 20);
+			stage.focus = newOperatorCHI.nameField;
+		}
+		
+		public function onNewOperatorXClick(evt:MouseEvent = null):void {
+			removeChild(newOperatorCHI);
+		}
 
 
 		function onResizeStage(evt:Event):void {
@@ -319,6 +354,7 @@ package {
 			if(hintsCHI.visible) hints.resized();
 		}
 
+		
 		function updateStage():void {
 			
 			//    - resize the line
@@ -425,9 +461,6 @@ package {
 				modelStatus.lineChange();
 			} 
 		}
-		
-				
-
 
 
 		//		- update when automate is turned on/off
@@ -441,11 +474,8 @@ package {
 		}
 		
 
-
-
-
 		//    - refresh the model
-		function refreshModel(event:MouseEvent = null):void {
+		public function refreshModel(event:MouseEvent = null):void {
 			newGantt(true); //has to be second because goal errors are found and colorized from here
 			modelStatus.modelUpdated(); //has to be last - syntaxcolor updates error list
 			updateTaskTimeField(); //field depends on results of the rest
@@ -453,8 +483,6 @@ package {
 			dispatchEvent(new Event("refresh_complete"));	
 		}
 		
-
-
 
 		function refreshModelSansHints(event:MouseEvent = null):void {
 			newGantt(true); //has to be second because goal errors are found and colorized from here
@@ -470,9 +498,6 @@ package {
 		}
 		
 
-
-
-
 		//    autoComplete code Text
 		function autoComplete(evt:KeyboardEvent){
 			if (completeMe.visible && evt.keyCode == Keyboard.ENTER) {
@@ -486,8 +511,6 @@ package {
 			}
 		}
 		
-
-
 
 		//    - monitor changes to text for autocomplete and syntax coloring 
 		function onTextChange(evt:Event):void {
@@ -522,6 +545,7 @@ package {
 			}
 		}
 
+		
 		function clickToComplete(evt:MouseEvent):void{
 			stage.focus = codeTxt;
 			completeMe.visible = false;
@@ -546,10 +570,7 @@ package {
 		}
 
 
-
-
 		//    - stage focus for tab management
-		
 		function focusInHandler(e:FocusEvent):void {
 			if (e.currentTarget.name == "labelField") {
 				newModelCHI.visible = false;
@@ -558,7 +579,6 @@ package {
 				newModelCHI.modelField.tabIndex = 2;
 			}
 		}
-
 
 
 		//		- Gantt Chart Management
@@ -577,6 +597,7 @@ package {
 			ganttWindow.ganttChartMask.width = ganttWindow.chartBckgrnd.width + 1;
 		}
 
+		
 		function updateTaskTimeField():void {
 			if (isNaN(gantt.maxEndTime)) timeReadout.taskTimeField.text = " "; 
 			else if (modelStatus.errorsExist) timeReadout.taskTimeField.text = "   ...";
@@ -600,19 +621,14 @@ package {
 				TweenLite.to(ganttWindow, slideSpeed, {y:stage.stageHeight - ganttWindow.height + ganttFudge, onComplete:onFinishTween});
 				TweenLite.to(codeTxt, slideSpeed, {height:stage.stageHeight - ganttWindow.height + ganttFudge - codeTxt.y});
 				TweenLite.to(scrollBar, slideSpeed, {height:stage.stageHeight - ganttWindow.height + ganttFudge - codeTxt.y + 26});
-				TweenLite.to(modelsSideBar, slideSpeed, {y:sidebarMovement(modelsScrollBar, modelsScrollBar.sideBarDefaultY)});
-				TweenLite.to(modelsScrollBar.dragger, slideSpeed, {y:-sidebarMovement(modelsScrollBar, modelsScrollBar.sideBarDefaultY) + modelsScrollBar.sideBarDefaultY});
 			} else {
 				TweenLite.to(ganttWindow, slideSpeed, {y:stage.stageHeight, onComplete:onFinishTween});
 				TweenLite.to(codeTxt, slideSpeed, {height:stage.stageHeight - codeTxt.y});
 				TweenLite.to(scrollBar, slideSpeed, {height:stage.stageHeight - codeTxt.y + 26});
-				TweenLite.to(modelsSideBar, slideSpeed, {y:sidebarMovement(modelsScrollBar, modelsScrollBar.sideBarDefaultY)});
-				TweenLite.to(modelsScrollBar.dragger, slideSpeed, {y:-sidebarMovement(modelsScrollBar, modelsScrollBar.sideBarDefaultY) + modelsScrollBar.sideBarDefaultY});
-				TweenLite.to(opsSideBar, slideSpeed, {y:sidebarMovement(opsScrollBar, opsScrollBar.sideBarDefaultY)});
-				TweenLite.to(opsScrollBar.dragger, slideSpeed, {y:-sidebarMovement(opsScrollBar, opsScrollBar.sideBarDefaultY) + opsScrollBar.sideBarDefaultY});
 			}
 			
 			ganttClosed = !ganttClosed;
+			addEventListener(Event.ENTER_FRAME, updateSideBarOnFrameEvent);
 			
 			function onFinishTween():void {
 				TweenLite.to(ganttWindow.ganttButton, .3, {rotation:ganttWindow.ganttButton.rotation + 180});
@@ -625,10 +641,21 @@ package {
 				modelsScrollBar.adjustSideBar();
 				if (modelsScrollBar.prcntShown < 1 && sidebarToggle.currentFrame == 4) modelsScrollBar.visible = true;
 				
+				removeEventListener(Event.ENTER_FRAME, updateSideBarOnFrameEvent);
+				
 				scrollBar.update();
 			}
 		}
+		
+		
+		function updateSideBarOnFrameEvent(evt:Event) {
+			opsScrollBar.resizeScrollBarElements();
+			opsScrollBar.adjustSideBar();
+			modelsScrollBar.resizeScrollBarElements();
+			modelsScrollBar.adjustSideBar();
+		}
 
+		
 		function sidebarMovement(sidebar:Object, defaultY:Number):Number {
 			if (sidebar.y < defaultY) {
 				return (defaultY - sidebar.y);
@@ -646,16 +673,17 @@ package {
 			addEventListener(Event.ENTER_FRAME, slideGanttChart);
 		}
 
+		
 		function stopDragging (evt:MouseEvent):void {
 			evt.currentTarget.stopDrag();
 			removeEventListener(Event.ENTER_FRAME, slideGanttChart);
 		}
 
+		
 		function slideGanttChart(evt:Event):void {
 			//move the gantt chart relative to the slider
 			moveChart();
 		}
-
 
 
 		function zoomGanttViaButton(evt:MouseEvent) {

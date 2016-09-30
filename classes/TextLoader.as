@@ -33,10 +33,12 @@
 			
 			filestream.close();
 			
+			arry.length = 0;
+			
 			for each (var item in temp1) {
 				temp2.length = 0;
 				temp2 = item.split(" ");
-				if (temp2.length > 0 && temp2[0] != "") {
+				if (temp2.length > 0 && temp2[0] != "" && temp2[1] != undefined && temp2[2] != undefined && temp2[3] != undefined) {
 					if (temp2.length < 5) { //prior to version 1.3, did not include labelUse in operators file
 						arry.push({resource: temp2[0], appelation: temp2[1], time: temp2[2], description: temp2[3], labelUse: ""});
 					} else {

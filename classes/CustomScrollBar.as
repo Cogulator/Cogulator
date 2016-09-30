@@ -45,20 +45,12 @@ package classes {
 			// constructor code
 			_stage = stg;
 			_stage.addEventListener(Event.RESIZE, onResizeStage);
-			
 			_ganttWindow = gw;
-
 			_sidebar = sb;
 			_sidebarBackground = sbb;
 			
 			dragger.addEventListener(MouseEvent.MOUSE_DOWN, startDragging);
 			_stage.addEventListener(MouseEvent.MOUSE_UP, stopDragging);
-						
-			_sidebar.addEventListener(MouseEvent.ROLL_OVER, manageFrameEventListener);
-			_sidebar.addEventListener(MouseEvent.CLICK, manageFrameEventListener);
-			_sidebarBackground.addEventListener(MouseEvent.ROLL_OVER, manageFrameEventListener);
-			_sidebarBackground.addEventListener(MouseEvent.ROLL_OUT, manageFrameEventListener);
-
 			_sidebar.addEventListener(MouseEvent.MOUSE_WHEEL, moveViaWheel);
 			_sidebarBackground.addEventListener(MouseEvent.MOUSE_WHEEL, moveViaWheel);
 			
@@ -89,19 +81,13 @@ package classes {
 			if (why < 0) why = 0;
 			else if (why > bckgrnd.height - dragger.height) why = bckgrnd.height - dragger.height;
 			dragger.y = why;
+			slideSideBar();
 		}
 		
-		private function manageFrameEventListener(evt:MouseEvent):void {
-			//this seems fairly crappy.  the way this is structure now, the event is tied to the sidebar background & background
-			//so you get lots of on/off firing as you scroll/move mouse over the area.  but, it seems to work none-the-less
-			if (evt.type == "rollOver" || evt.type == "click") addEventListener(Event.ENTER_FRAME, slideSideBar);
-			else if (evt.buttonDown == false) removeEventListener(Event.ENTER_FRAME, slideSideBar);
-		}
 		
-		private function slideSideBar (evt:Event):void {
-			var draggerRelativePosition:Number = (dragger.y + bckgrnd.y) / bckgrnd.height;
-			_sidebar.y = (_sidebar.height * -draggerRelativePosition) + sideBarDefaultY;
-		}
+		private function slideSideBar (evt:Event = null):void {
+			_sidebar.y = -(dragger.y / bckgrnd.height) * _sidebar.height + sideBarDefaultY;
+		} 
 		
 		
 		private function onResizeStage(event = null):void {
@@ -125,20 +111,12 @@ package classes {
 		public function adjustSideBar():void {
 			if (this.visible == false) {
 				_sidebar.y = sideBarDefaultY;
-			/*Resizing causes issues for the scrollbar when the dragger is not at the top position.  Essentially, the dragger
-			  bounding box doesn't get updated during the resize and the position of the dragger and the sidebar start to disagree, so to speak.
-			  This heavy handed code basically identifies where it thinks the sidebar should be position based on the position of the dragger.
-			  The sidebar is then moved to the expected position.  AFterwards, we adjust the dragger position.  Again, to account for the fact that
-			  the dragger bounding box isn't being updated during the stage resize*/
-			} else { 
-				var draggerRelativePos:Number = (dragger.y + bckgrnd.y) / bckgrnd.height; //dragbar position				
-				updateSideBarPixelsVisible(); //determine how many pixels of the sidebar is being shown & change the number of pixels into a percentage of total sidebar pixels
-				var adjustFactor:Number = draggerRelativePos + prcntShown;       //determine the difference between expected an acutal positoin.  If greater than 1, we know there's some space between the bottom of the sidebar and the the bottom of the stage
-				if (adjustFactor <= 1) adjustFactor = 0; //if less than one, there's no space between the bottom of sidebar and bottom of stage so we don't care
-				else adjustFactor = adjustFactor - 1;    //if greater than one, we take the amount over one to use for the adjustment factor
-				_sidebar.y = (_sidebar.height * ( -draggerRelativePos + adjustFactor) ) + sideBarDefaultY;  //move the sidebar
-				//dragger is moved in the opposite direction of the sidebar, by the same number of pixels
-				dragger.y += ( (_sidebar.height * ( -draggerRelativePos) ) + sideBarDefaultY ) - ( (_sidebar.height * ( -draggerRelativePos + adjustFactor) ) + sideBarDefaultY );
+			} else {
+				//ensure that there's never a gap between the bottom of the sidebar and the top of the ganttWindow
+				if (_sidebar.y + _sidebar.height < _ganttWindow.y) _sidebar.y = _ganttWindow.y - _sidebar.height;
+				//move the dragger to the correct position given the resized window
+				var sidebarPercentageScroll = (  Math.abs(_sidebar.y - sideBarDefaultY) / _sidebar.height);
+				dragger.y = bckgrnd.height * sidebarPercentageScroll;
 			}
 		}
 		

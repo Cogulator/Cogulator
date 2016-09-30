@@ -50,7 +50,7 @@ package classes {
 		private static const magenta:TextFormat = new TextFormat();
 		private static const errorred:TextFormat = new TextFormat();
 		
-		static var methods:Array = ["Task_Method:", "Goal:", "Also:", "as"];
+		static var methods:Array = ["goal", "also", "as"];
 		static var errorInLine:Boolean = false;
 		
 		black.color = SolarizedPalette.black;
@@ -136,7 +136,6 @@ package classes {
 			if (index >= 0) {
 				lineTxt = lineTxt.substring(0, index); //remove comments from what you're evaluating
 			}
-								
 			
 			indents = 0;
 			if (trim(lineTxt) != "") {			
@@ -158,7 +157,11 @@ package classes {
 						operator = trim(operator);
 						goalLine = false;
 					for each (var method in methods) {
-						if (operator == method.toLowerCase()) {
+						if ( operator == method  ) {
+							goalLine = true;
+							break;
+						} else if (operator.substring(0,operator.length - 1) == method) { 
+							operator = operator.substring(0,operator.length - 1); // get rid of colon
 							goalLine = true;
 							break;
 						}
@@ -166,7 +169,7 @@ package classes {
 					if (goalLine) solarizeGoalLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex);
 					else solarizeOperatorLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex, chunkNamedInError);
 				}
-			} else return new Array(0, "goal:", "", "", "", false, false, []); //returning true here means it won't be included in the interleaving process if it's a comment
+			} else return new Array(0, "goal", "", "", "", false, false, []); //returning true here means it won't be included in the interleaving process if it's a comment
 					
 			if (errorInLine == false && lineIsInErrors == true) errorFixed = true; //true means an error was fixed
 			else errorFixed = false;
@@ -202,7 +205,7 @@ package classes {
 			
 			index = lineTxt.toLowerCase().indexOf("as ");
 			endIndex = index + 3;
-			if (operator == "also:"){
+			if (operator == "also"){
 				threadLabel = "!X!X!"; 
 				if (index > -1) {// if "as" is used
 					//set "as" magenta
@@ -300,7 +303,6 @@ package classes {
 					//find what's in the units position
 					index = findNextItem(endIndex, lineTxt);
 					endIndex = findLabelEnd(lineTxt,")") + 1;
-					//endIndex = findItemEnd(lineTxt.indexOf(")"), lineTxt) - 1;
 					var timeUnits:String = (lineTxt.substring(index, endIndex)).toLowerCase();
 						timeUnits = trim(timeUnits);
 					if (String(timeValue).length > 0) { //only continue with the evaluation if you have a number in the first position

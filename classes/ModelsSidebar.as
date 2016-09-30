@@ -209,6 +209,7 @@ package classes {
 				
 				if (currentFilePath == modelButton.filePath) {
 					modelButton.select.visible = true;
+					modelButton.hghlight.visible = true;
 					modelButton.modelField.setTextFormat(bold);
 				} else modelButton.select.visible = false;
 				
@@ -288,7 +289,7 @@ package classes {
 		}
 		
 		private function onMouseOut(evt:MouseEvent):void{
-			evt.currentTarget.hghlight.visible = false;
+			if (evt.currentTarget.select.visible == false) evt.currentTarget.hghlight.visible = false;
 			evt.currentTarget.deleteButton.visible = false
 		}
 		
@@ -302,10 +303,11 @@ package classes {
 			}
 			
 			currentFilePath = evt.currentTarget.filePath;
-			evt.currentTarget.hghlight.visible = true; //keep highlighted - let mouse out unhighlight
+			//evt.currentTarget.hghlight.visible = true; //keep highlighted - let mouse out unhighlight
 			//bold here
 			evt.currentTarget.modelField.setTextFormat(bold);
 			evt.currentTarget.select.visible = true;
+			evt.currentTarget.hghlight.visible = true;
 			code = new TextLoader(currentFilePath);
 			code.addEventListener(currentFilePath, onModelLoaded);
 			
@@ -324,6 +326,7 @@ package classes {
 			for each (var mB in modelButtons){
 				if (mB.modelField.text + ".goms" == configFileName) {
 					mB.select.visible = true;
+					mB.hghlight.visible = true;
 					mB.modelField.setTextFormat(bold);
 					_timeReadout.title.text = configFileName.substring(0, configFileName.length - 5);
 				} 
@@ -431,9 +434,7 @@ package classes {
 			_newModelCHI.modelField.addEventListener(KeyboardEvent.KEY_UP, onKeyUP);
 		}
 		
-		private function onKeyUP (evt:KeyboardEvent):void {
-			//evt.currentTarget.text = evt.currentTarget.text.split(" ").join("_"); //no longer require _
-			
+		private function onKeyUP (evt:KeyboardEvent):void {			
 			if (nameAlreadyExists(_newModelCHI.modelField.text) == false) {
 				_newModelCHI.nameExists.visible = false;
 				if (_newModelCHI.modelField.text != "") {

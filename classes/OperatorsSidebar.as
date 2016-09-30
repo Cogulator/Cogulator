@@ -43,15 +43,17 @@ package  classes {
 		public var goalControl:Array = new Array ("Goal", "Also");
 		private var labelX:int = 15;
 		private var operatorX:int = 25;
-		private var lineY:int = 0;
+		private var lineY:int = 10;
 		//private var _lineNumbers:TextField;
 		private var _undoRedo:UndoRedo;
-		public var insert:AddOperatorText;		
+		public var insert:AddOperatorText;	
+		private var _main:Main;
 
 		//public function OperatorsSidebar(ln:TextField, uR:UndoRedo) {
-		public function OperatorsSidebar(uR:UndoRedo) {
+		public function OperatorsSidebar(uR:UndoRedo, main:Main) {
 			//_lineNumbers = ln;
 			_undoRedo = uR
+			_main = main;
 			
 			insert = new AddOperatorText();
 			
@@ -72,7 +74,7 @@ package  classes {
 			
 			//    - add the cognitive operators  - 
 			var cogLabel:HeadingLabel = new HeadingLabel();
-				cogLabel.labeltxt.text = "Thinking";
+				cogLabel.labeltxt.text = "Cognitive";
 				cogLabel.x = labelX;
 				lineY += 20;
 				cogLabel.y = lineY;
@@ -102,7 +104,7 @@ package  classes {
 			
 			//    - add the communication operators  - 
 			var comLabel:HeadingLabel = new HeadingLabel();
-				comLabel.labeltxt.text = "Hear & Say";
+				comLabel.labeltxt.text = "Hear & Speech";
 				comLabel.x = labelX;
 				lineY += 20;
 				comLabel.y = lineY;
@@ -116,7 +118,7 @@ package  classes {
 			
 			//    - add the motor operators  - 
 			var motorLabel:HeadingLabel = new HeadingLabel();
-				motorLabel.labeltxt.text = "Move";
+				motorLabel.labeltxt.text = "Hands";
 				motorLabel.x = labelX;
 				lineY += 20;
 				motorLabel.y = lineY;
@@ -181,7 +183,7 @@ package  classes {
 		private function onOperatorClick(evt:MouseEvent):void {						
 			insert.addOperatorPermament(evt.currentTarget);
 			_undoRedo.listenForNewText(); //add to undo redo stack
-			MovieClip(parent).refreshModel();
+			_main.refreshModel();
 			//LineNumbers.numberTheLines(_lineNumbers, $.codeTxt);
 		}
 		

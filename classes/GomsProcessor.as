@@ -44,7 +44,7 @@ package classes {
 		private static var resourceAvailability:Dictionary; 
 		private static var threadAvailability:Dictionary;
 		
-		private static var newThreadNumber:int = 0; //used as a thread name for "Also" when one is not provided
+		private static var newThreadNumber:int; // = 0; //used as a thread name for "Also" when one is not provided
 				
 		private static var maxEndTime:Number; // = 0;
 		private static var cycleTime:Number;		
@@ -53,6 +53,7 @@ package classes {
 		public static function processGOMS():Array {			
 			maxEndTime = 0;
 			cycleTime = 0; //ms. 50 ms Based on production rule cycle time.  Bovair & Kieras/Card, Moran & Newell
+			newThreadNumber = 0;
 			
 			cntrlmthds = new Array();
 			allmthds = new Array();
@@ -101,7 +102,7 @@ package classes {
 					var chunkNames:Array	 = syntaxArray[7];
 				
 					var methodGoal, methodThread:String;
-					if (stepOperator != "goal:" && stepOperator != "also:") {
+					if (stepOperator != "goal" && stepOperator != "also") {
 						var goalAndThread:Array = findGoalAndThread(indentCount); //determine the operator and thread
 						methodGoal = goalAndThread[0];
 						methodThread = goalAndThread[1];
@@ -117,7 +118,7 @@ package classes {
 						allmthds.push(stepLabel); //for charting in GanttChart
 						if (indentCount == 1) cntrlmthds.push(stepLabel);  //for charting in GanttChart
 					}
-					
+										
 					if (syntaxArray[5] == false && stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
 						var s:Step = new Step (indentCount, methodGoal, methodThread, stepOperator, getOperatorTime(stepOperator, stepTime, stepLabel), getOperatorResource(stepOperator), stepLabel, lineIndex, 0, chunkNames);				
 						steps.push(s); 
@@ -136,7 +137,7 @@ package classes {
 		
 		private static function removeGoalSteps() {
 			for (var i:int = steps.length - 1; i > -1; i--) {
-				if (steps[i].operator == "goal:" || steps[i].operator == "also:") steps.splice(i, 1);
+				if (steps[i].operator == "goal" || steps[i].operator == "also") steps.splice(i, 1);
 			}
 		}
 		
@@ -176,7 +177,7 @@ package classes {
 		private static function interleaveStep(thread:String, goal:String) {
 			for (var i:int = 0; i < steps.length; i++) {
 				var step:Step = steps[i];
-
+				
 				if (thread == "base") {
 					if (step.thred == "base") {
 						var t:Array = findStartEndTime(step);
@@ -285,11 +286,11 @@ package classes {
 			if (steps.length > 0){
 				for (var i:int = steps.length - 1; i >= 0; i--) {
 					if (steps[i].indentCount == indents - 1) { //if this step exists one level above the line being processed in the hiearchy
-						if (steps[i].operator == "goal:") {
+						if (steps[i].operator == "goal") {
 							goalAndThread[0] = steps[i].goal;
 							goalAndThread[1] = "base";
 							return goalAndThread;
-						} else if (steps[i].operator == "also:") {
+						} else if (steps[i].operator == "also") {
 							goalAndThread[0] = steps[i].goal;
 							goalAndThread[1] = steps[i].thred;
 							return goalAndThread;
