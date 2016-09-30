@@ -82,6 +82,7 @@
 
 		private function onKeyUP (evt:KeyboardEvent):void {
 			if (evt.target.name == "nameField") {
+				nameField.text = nameField.text.split(" ").join("_");
 				if ( nameAlreadyExists(nameField.text) ) {
 					nameExists.visible = true;
 				} else {
