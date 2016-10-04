@@ -53,7 +53,7 @@ package {
 	import classes.FirstRun;
 	import classes.IndentComment;
 	import classes.HintsTool;
-	import classes.AppSettings;
+	//import classes.AppSettings;
 	import classes.CustomScrollBar;
 	import classes.AppUpdater;
 	import classes.ExportData;
@@ -63,9 +63,12 @@ package {
 	import flash.utils.Dictionary;
 	import flash.events.TimerEvent;
 	import classes.NewOperatorCHI;
+	import classes.WindowManager;
+	import classes.SettingsFileManager;
 	
-	public class Main extends MovieClip{
-		
+	public class Main extends MovieClip {
+
+		//	  - setup some data holders
 		var errors:Dictionary = new Dictionary();
 		var operatorArray:Array = new Array();
 
@@ -77,7 +80,7 @@ package {
 		
 		//	- start up undo redo -
 		var undoRedo:UndoRedo;
-		var settings:AppSettings;
+		//var settings:AppSettings;
 		
 		// - for commenting
 		var addRemoveCommment:IndentComment;
@@ -110,9 +113,18 @@ package {
 		//    - handle stage resizing - 
 		var ganttGap:Number;
 		var lineGap:Number;
-		
 		var ganttFudge:Number = 80;
 		var slideSpeed:Number = .5;
+		
+		//	  - put in the settings file manager which manages the settings xml file
+		var settingsFileManager:SettingsFileManager;
+		
+		//	  - create the window manager to save the window size for next run
+		var windowManager:WindowManager;
+		
+		//	  - track that all the necessary loading has taken place before building the GUI
+		var settingsLoaded = false;
+		var firstRunComplete = false;
 		
 
 		public function Main() {
@@ -125,6 +137,7 @@ package {
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 				
+			
 			//    - init - 
 			lineNumbers.visible = false;
 			newModelCHI.visible = false;
@@ -134,6 +147,7 @@ package {
 			helpImages.visible = false;
 			completeMe.visible = false;
 			firstRunQuickStart.visible = false;
+			settingsPanel.visible = false;
 			codeTxt.tabEnabled = false;
 			line.width = 710;
 
@@ -143,7 +157,7 @@ package {
 			
 			//  - setup Classes
 			undoRedo = new UndoRedo();
-			settings = new AppSettings(settingsPanel, this, codeTxt);
+			//settings = new AppSettings(settingsPanel, this, codeTxt);
 			addRemoveCommment = new IndentComment(cidToolbar);
 			modelStatus = new ModelStatus(timeReadout);
 			
@@ -157,7 +171,7 @@ package {
 			addRemoveCommment.addEventListener("In Dent We Trust", getRefresh);
 			
 			//  - First Run Stuff
-			run.addEventListener("ready", onReady);
+			run.addEventListener("ready", onFirstRunComplete);
 			run.firstRunTest(firstRunQuickStart);
 			
 			//  - Gantt Chart Setup
@@ -177,10 +191,7 @@ package {
 			sidebarToggle.operators.addEventListener(MouseEvent.CLICK, onSideBarClick);
 			sidebarToggle.models.addEventListener(MouseEvent.CLICK, onSideBarClick);
 			sidebarToggle.newOperatorButton.addEventListener(MouseEvent.CLICK, onNewOperatorClick);
-
 			
-			//  - handle stage resizing
-			stage.addEventListener(Event.RESIZE, onResizeStage);
 			
 			//  - custome keyboard commands
 			stage.addEventListener(KeyboardEvent.KEY_UP, respondToCustomKeyBoardCommands);
@@ -200,11 +211,45 @@ package {
 			ganttWindow.zoomInOutButton.zoomOutButton.addEventListener(MouseEvent.CLICK, zoomGanttViaButton);
 			ganttWindow.addEventListener(MouseEvent.MOUSE_WHEEL, zoomGanttChart);
 			ganttWindow.cameraButton.addEventListener(MouseEvent.CLICK, takePicture);
-			
-			stage.nativeWindow.addEventListener(Event.CLOSING, closeApplication, false, 0, true);  
 
+			//  - listen for the settings file to get loaded
+			settingsFileManager = new SettingsFileManager();
+			settingsFileManager.addEventListener("settings file loaded", onSettingsFileReady);
+			
+			
+			//  - listen for close application to save the last open model
+			stage.nativeWindow.addEventListener(Event.CLOSING, closeApplication, false, 0, true);  
 		}
 		
+		
+		//when the window size data has been loaded
+		function onSettingsFileReady(evt:Event):void{
+			settingsLoaded = true;
+			checkForReady();
+		}
+		
+		function onFirstRunComplete(evt:Event):void {
+			firstRunComplete = true;
+			checkForReady();
+		}
+		
+		function checkForReady():void {
+			if (settingsLoaded && firstRunComplete) {
+				//	  - setup the window manager
+				windowManager = new WindowManager(settingsFileManager, {width:stage.fullScreenWidth, height:stage.fullScreenHeight});
+				stage.nativeWindow.width = windowManager.windowSize.width;
+				stage.nativeWindow.height = windowManager.windowSize.height;
+				stage.nativeWindow.x = windowManager.windowPosition.x;
+				stage.nativeWindow.y = windowManager.windowPosition.y;
+				
+				//    - load the operator text file & generate operators sidebar - 
+				ops = new TextLoader("cogulator/operators/operators.txt");
+				ops.addEventListener("cogulator/operators/operators.txt", generateSideBars);
+				
+				//  - handle stage resizing
+				stage.addEventListener(Event.RESIZE, onResizeStage);
+			}
+		}
 
 		//set help link
 		function openHelp(evt:MouseEvent){
@@ -219,11 +264,7 @@ package {
 		}
 		
 		
-		function onReady(evt:Event):void {
-			//    - load the operator text file & generate operators sidebar - 
-			ops = new TextLoader("cogulator/operators/operators.txt");
-			ops.addEventListener("cogulator/operators/operators.txt", generateSideBars);
-		}
+
 		
 		//used by newOperatorCHI to regenerate the sidebar when a new operator is added
 		public function regenerateOperatorsSidebar():void {
@@ -273,7 +314,7 @@ package {
 		
 
 		function generateModelsSidebar():void {
-			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout);
+			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout, settingsFileManager);
 			modelsSideBar.addEventListener("model_loaded_automate", modelLoaded);
 			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);	
 			modelsSideBar.addEventListener("new_model_added", reloadModels);
@@ -757,7 +798,15 @@ package {
 		//		- save on close			
 		function closeApplication(evt:Event):void {      
 			evt.preventDefault();
+			
+			var currentSize = {width: stage.nativeWindow.width, height: stage.nativeWindow.height}
+			windowManager.windowSize = currentSize;
+			var currentPosition = {x: stage.nativeWindow.x, y: stage.nativeWindow.y};
+			windowManager.windowPosition = currentPosition;
+			windowManager.saveWindowInformation();
+			
 			modelsSideBar.saveModel();
+			settingsFileManager.saveFile();
 			deleteModels();
 			
 			var opened:Array = NativeApplication.nativeApplication.openedWindows;

@@ -40,6 +40,7 @@ package classes {
 	import com.greensock.*;
 	import com.greensock.easing.*;
 	import com.inruntime.utils.*;
+	import classes.SettingsFileManager;
 
 	
 	public class ModelsSidebar extends MovieClip {
@@ -53,7 +54,6 @@ package classes {
 		private var files:Array = new Array();
 		
 		private var config = new File(File.documentsDirectory.nativePath);
-		private var settingsFile = new File(File.documentsDirectory.nativePath);
 		
 		private var lineY:int = 0;
 		private var labelX:int = 15;
@@ -61,29 +61,29 @@ package classes {
 		
 		private var code:TextLoader;
 		public var cnfg:TextLoader;
-		private var settingsLoader:XMLLoader;
 		
 		private var _saveButton:MovieClip;
 		private var _newButton:MovieClip;
 		private var _newModelCHI:MovieClip;
 		private var _timeReadout:MovieClip;
+		private var _settings:SettingsFileManager;
 				
 		public var currentFilePath:String = new String();
 		private var configFilePath:String = new String();
 		private var configFileName:String = new String();
-		private var settingsFilePath:String = new String();
 		
 		private var lato = new Lato();
 		private var latoBold = new LatoBold();
 		private var bold:TextFormat = new TextFormat();
 		private var regular:TextFormat = new TextFormat();
 				
-		public function ModelsSidebar(sB:MovieClip, nB:MovieClip, nMC:MovieClip, tR:MovieClip) {
+		public function ModelsSidebar(sB:MovieClip, nB:MovieClip, nMC:MovieClip, tR:MovieClip, sFM: SettingsFileManager) {
 			// constructor code
 			_saveButton = sB;
 			_newButton = nB;
 			_newModelCHI = nMC;
 			_timeReadout = tR;
+			_settings = sFM;
 			
 			regular.font = lato.fontName;
 			regular.bold = false;
@@ -105,39 +105,11 @@ package classes {
 			}
 			
 			_saveButton.addEventListener(MouseEvent.CLICK, saveModelClick);
-			
-			settingsFile = settingsFile.resolvePath("cogulator/config");
-			settingsFilePath = settingsFile.nativePath;
-			var slash:int = settingsFilePath.indexOf("\\");
-			if (slash < 0) settingsFilePath += "//settings.xml"; //mac or linux
-			else settingsFilePath += "\\settings.xml";
+			setupConfig();
+		}
 
-			settingsLoader = new XMLLoader(settingsFilePath);
-			if (settingsLoader.fileExists) {
-				settingsLoader.load();
-				settingsLoader.addEventListener(settingsFilePath, setupConfig);
-			} else {
-				createSettingsFile();
-			}
-			
-		}
 		
-		private function createSettingsFile () {
-			var settingsXML:XML = <models>GOMS MODELS SETTINGS</models>;
-			
-			var localFile = new File(File.documentsDirectory.nativePath); 
-				localFile = localFile.resolvePath(settingsFilePath); 
-			var localFileStream:FileStream = new FileStream();
-				localFileStream.open(localFile, FileMode.WRITE);
-				localFileStream.writeUTFBytes(settingsXML.toXMLString());
-				localFileStream.close();
-			
-			settingsLoader.load();
-			settingsLoader.addEventListener(settingsFilePath, setupConfig);
-		}
-		
-		private function setupConfig (evt:Event) {
-			
+		private function setupConfig () {
 			config = config.resolvePath("cogulator/config");
 			configFilePath = config.nativePath 
 			var slash = configFilePath.indexOf("\\");
@@ -350,7 +322,7 @@ package classes {
 		
 		
 		private function getAutomateWMsetting():Boolean {
-			var autoModelWM:String = settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM;
+			var autoModelWM:String = _settings.xml.model.(@NAME==_timeReadout.title.text).autoWM;
 			if (autoModelWM == "true") return true;
 			else if (autoModelWM == "false") return false; //tells the main class to recreate the models sidebar;
 			
@@ -397,28 +369,17 @@ package classes {
 		}
 		
 		private function saveAutomateWMSetting():void {
-			var autoModelWM:String = settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM;
+			var autoModelWM:String = _settings.xml.model.(@NAME==_timeReadout.title.text).autoWM;
 			if (autoModelWM == "true" && $.automateButton.currentFrame == 3) {
-				settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM = "false";
+				_settings.xml.model.(@NAME==_timeReadout.title.text).autoWM = "false";
 			} else if (autoModelWM == "false" && $.automateButton.currentFrame == 1) {
-				settingsLoader.xML.model.(@NAME==_timeReadout.title.text).autoWM = "true";
+				_settings.xml.model.(@NAME==_timeReadout.title.text).autoWM = "true";
 			} else if (autoModelWM == "") {
 				var automate:String = "true";
 				if ($.automateButton.currentFrame == 3) automate = "false";
 				var newModel:XML = <model NAME={_timeReadout.title.text}><autoWM>{automate}</autoWM></model>;
-				settingsLoader.xML.appendChild(newModel);
+				_settings.xml.appendChild(newModel);
 			}
-			
-			var localFile = new File(File.documentsDirectory.nativePath); 
-				localFile = localFile.resolvePath(settingsFilePath); 
-			var localFileStream:FileStream = new FileStream();
-				localFileStream.open(localFile, FileMode.WRITE);
-				localFileStream.writeUTFBytes(settingsLoader.xML.toXMLString()); 
-
-				localFileStream.close();
-			
-			
-			//do nothing if none of these conditions are met... the setting is already correct in the file
 		}
 
 		
