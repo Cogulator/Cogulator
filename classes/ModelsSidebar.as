@@ -47,6 +47,7 @@ package classes {
 		private var $:Global = Global.getInstance();
 
 		public var modelButtons:Array = new Array();
+		private var highlightFrame:int = 1;
 		private var models = new File(File.documentsDirectory.nativePath);
 		private var modelDirectoryContents:Array;
 		private var directories:Array = new Array();
@@ -67,6 +68,7 @@ package classes {
 		private var _newModelCHI:MovieClip;
 		private var _timeReadout:MovieClip;
 		private var _settings:SettingsFileManager;
+		private var _sideBarBackground:MovieClip
 				
 		public var currentFilePath:String = new String();
 		private var configFilePath:String = new String();
@@ -76,14 +78,15 @@ package classes {
 		private var latoBold = new LatoBold();
 		private var bold:TextFormat = new TextFormat();
 		private var regular:TextFormat = new TextFormat();
-				
-		public function ModelsSidebar(sB:MovieClip, nB:MovieClip, nMC:MovieClip, tR:MovieClip, sFM: SettingsFileManager) {
+								
+		public function ModelsSidebar(sB:MovieClip, nB:MovieClip, nMC:MovieClip, tR:MovieClip, sFM: SettingsFileManager, sBB:MovieClip) {
 			// constructor code
 			_saveButton = sB;
 			_newButton = nB;
 			_newModelCHI = nMC;
 			_timeReadout = tR;
 			_settings = sFM;
+			_sideBarBackground = sBB;
 			
 			regular.font = lato.fontName;
 			regular.bold = false;
@@ -91,7 +94,7 @@ package classes {
 			
 			bold.font = latoBold.fontName;
 			bold.bold = true;
-			bold.letterSpacing = -.1; //prevents unwanted wrapping when bolding model name
+			bold.letterSpacing = -.2; //prevents unwanted wrapping when bolding model name
 						
 			models = models.resolvePath("cogulator/models");
 			modelDirectoryContents = models.getDirectoryListing();
@@ -146,6 +149,19 @@ package classes {
 		private function generateModelsButtons():void {
 			var currentDirectory = "models";
 			_newButton.addEventListener(MouseEvent.CLICK, newModel);
+						
+			var blank:ModelButton = new ModelButton();
+				blank.modelField.text = "";
+				blank.removeChild(blank.hghlight);
+				blank.removeChild(blank.deleteButton);
+				blank.removeChild(blank.strikeThrough);
+				blank.removeChild(blank.select);
+				blank.x = modelX;
+				blank.y = lineY;
+			addChild(blank);
+			modelButtons.push(blank);
+			lineY += blank.modelField.height / 2;
+			
 			
 			for each (var model in files) {
 				if (model.dir != currentDirectory) { //if this is a new directory, create a directory label
@@ -172,10 +188,13 @@ package classes {
 					modelButton.deleteButton.addEventListener(MouseEvent.CLICK, onDeleteClick);
 					modelButton.deleteButton.addEventListener(MouseEvent.ROLL_OVER, onOverDelete);
 					modelButton.deleteButton.addEventListener(MouseEvent.ROLL_OUT, onOutDelete);
+					modelButton.hghlight.gotoAndStop(highlightFrame);
+					modelButton.select.highlight.gotoAndStop(highlightFrame);
 					modelButton.hghlight.visible = false;
 					modelButton.hghlight.height = modelButton.modelField.height - 2;
 					modelButton.deleteButton.visible = false;
 					modelButton.strikeThrough.visible = false;
+					modelButton.modelField.setTextFormat(regular);
 				addChild(modelButton);
 				modelButtons.push(modelButton);
 				
@@ -190,7 +209,7 @@ package classes {
 			
 		}
 		
-		public function reGenerateModelsButtons ():void { //clear out the old before calling the generate function again
+		public function reGenerateModelsButtons(useCogulatorCollection:Boolean):void { //clear out the old before calling the generate function again
 			for each (var old in modelButtons) {
 				old.removeEventListener(MouseEvent.CLICK, onModelClick);
 				old.removeEventListener(MouseEvent.ROLL_OVER, onMouseOver);
@@ -212,9 +231,23 @@ package classes {
 			directoryLabels.length = 0;
 			files.length = 0;
 			modelDirectoryContents.length = 0;
+			
 			models = null;
 			models = new File(File.documentsDirectory.nativePath);
-			models = models.resolvePath("cogulator/models");
+			if (useCogulatorCollection) {
+				models = models.resolvePath("cogulator/cogulatorcollection");
+				bold.color = 0xCCCCCC;
+				regular.color = 0xCCCCCC;
+				_sideBarBackground.gotoAndStop(2);
+				highlightFrame = 2;
+			} else {
+				models = models.resolvePath("cogulator/models");
+				bold.color = 0x000000;
+				regular.color = 0x000000;
+				_sideBarBackground.gotoAndStop(1);
+				highlightFrame = 1;
+			}
+			
 			modelDirectoryContents = models.getDirectoryListing();
 			
 			populateFilesArrays("models");
@@ -252,7 +285,6 @@ package classes {
 			else evt.currentTarget.parent.strikeThrough.visible = false;
 		}
 		
-
 		
 		
 		private function onMouseOver(evt:MouseEvent):void {
@@ -268,7 +300,7 @@ package classes {
 		private function onModelClick(evt:MouseEvent) {
 			saveModel(); //save the currently open model before opening the new model
 			
-			for each (var modelButton in modelButtons){
+			for each (var modelButton in modelButtons) {
 				modelButton.select.visible = false;
 				modelButton.hghlight.visible = false;
 				modelButton.modelField.setTextFormat(regular);
@@ -303,7 +335,7 @@ package classes {
 					_timeReadout.title.text = configFileName.substring(0, configFileName.length - 5);
 				} 
 			}
-
+			
 			code = new TextLoader(currentFilePath);
 			code.addEventListener(currentFilePath, onModelLoaded);			
 		}
@@ -382,8 +414,6 @@ package classes {
 			}
 		}
 
-		
-		
 		private function newModel(evt:MouseEvent):void {
 			_newModelCHI.collectionField.text = "";
 			_newModelCHI.modelField.text = "";
@@ -462,12 +492,15 @@ package classes {
 		}
 		
 		public function lastOpenFile():void {
-			var localFile = new File(File.applicationDirectory.nativePath);
-				localFile = localFile.resolvePath(configFilePath); 
-			var localFileStream:FileStream = new FileStream();
-				localFileStream.open(localFile, FileMode.WRITE);
-				localFileStream.writeMultiByte(currentFilePath, "utf-8");
-				localFileStream.close();
+			//only update the config file if the current file is not in cogulatorcollection - don't want to startup Cogulator pointing to remote directory
+			if (currentFilePath.indexOf("cogulatorcollection") < 0) {
+				var localFile = new File(File.applicationDirectory.nativePath);
+					localFile = localFile.resolvePath(configFilePath); 
+				var localFileStream:FileStream = new FileStream();
+					localFileStream.open(localFile, FileMode.WRITE);
+					localFileStream.writeMultiByte(currentFilePath, "utf-8");
+					localFileStream.close();
+			}
 		}
 		
 		private function replaceDoubleBackslash(str:String):String {

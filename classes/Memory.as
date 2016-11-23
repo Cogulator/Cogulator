@@ -292,9 +292,10 @@ package classes {
 			
 			//if not in WM, check to see if LTM
 			if (longTermMemory[chunkName] != undefined) {
-				workingmemory[stack].push(longTermMemory[chunkName]);
+				var stck = stack
+				if (stck >= workingmemory.length) stck = workingmemory.length - 1;
+				workingmemory[stck].push(longTermMemory[chunkName]);
 				return(longTermMemory[chunkName]);
-				trace("FOUND A LTM CHUNK MATCH for", chunkName);
 			}
 			
 			return null;

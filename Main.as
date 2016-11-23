@@ -188,9 +188,9 @@ package {
 		
 		
 			//  - switch between operators & models in the sidebar
-			sidebarToggle.operators.addEventListener(MouseEvent.CLICK, onSideBarClick);
-			sidebarToggle.models.addEventListener(MouseEvent.CLICK, onSideBarClick);
+			sidebarToggle.addEventListener("sidebar toggle", onSideBarToggle);
 			sidebarToggle.newOperatorButton.addEventListener(MouseEvent.CLICK, onNewOperatorClick);
+			sidebarToggle.addEventListener("stashe groom", onSideBarStacheClick);
 			
 			
 			//  - custome keyboard commands
@@ -314,14 +314,14 @@ package {
 		
 
 		function generateModelsSidebar():void {
-			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout, settingsFileManager);
+			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout, settingsFileManager, sidebarbckgrnd);
 			modelsSideBar.addEventListener("model_loaded_automate", modelLoaded);
 			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);	
 			modelsSideBar.addEventListener("new_model_added", reloadModels);
-			modelsSideBar.y = 55;
+			modelsSideBar.y = 60;
 			addChildAt(modelsSideBar,17);
 			
-			modelsScrollBar = new CustomScrollBar(stage, ganttWindow, modelsSideBar, sidebarbckgrnd, 55);
+			modelsScrollBar = new CustomScrollBar(stage, ganttWindow, modelsSideBar, sidebarbckgrnd, 60);
 			addChildAt(modelsScrollBar,17);
 		}
 
@@ -340,14 +340,20 @@ package {
 
 		
 		//when a new model is added, regenerate the models sidebar
-		function reloadModels(evt:Event){
-			modelsSideBar.reGenerateModelsButtons();
+		function reloadModels(evt:Event = null){
+			modelsSideBar.reGenerateModelsButtons(sidebarToggle.showCogulatorCollectionsNow);
 			lineNumbers.text = "";
 			refreshModel();
 			modelsScrollBar.resizeScrollBarElements();
 			modelsScrollBar.adjustSideBar();
 			stage.focus = codeTxt;
 		}
+		
+		
+		////on startup, the lastopen file is loaded.  if that file comes from cogulatorcollection, the chi is updated here
+		//function cogulatorCollectionCHI(evt:Event) {
+		//	trace("FROM COGULATORCOLLECTION");
+		//}
 
 		
 		function resetTimeLine(){
@@ -357,25 +363,26 @@ package {
 	
 
 		function onExportClick(evt:MouseEvent):void {
-			//addEventListener("refresh_complete", handleRefreshComplete);
 			refreshModel();
 			ExportData.export(timeReadout.title.text);
 		}
 
 
 		//    - sidebar toggle - 
-		function onSideBarClick (evt:MouseEvent):void {
-			if (sidebarToggle.currentFrame == 2) {
+		function onSideBarToggle (evt:Event):void {			
+			trace(sidebarToggle.currentFrame);
+			if (sidebarToggle.currentFrame == 3) {
 				opsSideBar.visible = true;
 				if (opsScrollBar.prcntShown < 1) opsScrollBar.visible = true;
 				modelsSideBar.visible = false;
 				modelsScrollBar.visible = false;
-				sidebarbckgrnd.gotoAndStop(2);
-			} else if (sidebarToggle.currentFrame == 4) {
+				sidebarbckgrnd.gotoAndStop(1);
+			} else if (sidebarToggle.currentFrame == 1) {
 				opsSideBar.visible = false;
 				opsScrollBar.visible = false;
 				modelsSideBar.visible = true;
-				sidebarbckgrnd.gotoAndStop(1);
+				if (sidebarToggle.showCogulatorCollectionsNow) sidebarbckgrnd.gotoAndStop(2);
+				else sidebarbckgrnd.gotoAndStop(1);
 				if (modelsScrollBar.prcntShown < 1) modelsScrollBar.visible = true;
 			}
 		}
@@ -388,8 +395,11 @@ package {
 		public function onNewOperatorXClick(evt:MouseEvent = null):void {
 			removeChild(newOperatorCHI);
 		}
-
-
+		
+		public function onSideBarStacheClick(evt:Event):void {
+			reloadModels();
+		}
+		
 		function onResizeStage(evt:Event):void {
 			updateStage();
 			if(hintsCHI.visible) hints.resized();
@@ -415,7 +425,7 @@ package {
 			else cidToolbar.x = timeReadout.x + timeReadout.width + 50;
 				
 			//    - resize the sidebar -
-			sidebarbckgrnd.height = stage.stageHeight;
+			sidebarbckgrnd.height = stage.stageHeight + 5;
 			
 			//    - resize the gantt chart -
 			ganttWindow.chartBckgrnd.width = stage.stageWidth - ganttWindow.chartBckgrnd.x - ganttGap;
