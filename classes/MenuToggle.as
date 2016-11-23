@@ -23,18 +23,18 @@
 			
 			newOperatorButton.visible = false;
 			
+			stacheToggle.visible = false;
 			useCogulatorCollections();
 		}
 		
+		
 		function useCogulatorCollections() {
 			//determine whether to use the cogulatorcolletions button
-			var cogulatorcollections = new File(File.documentsDirectory.nativePath);
-				cogulatorcollections.resolvePath("cogulator/cogulatorcollection");
+			var cogulatorcollections = File.documentsDirectory.resolvePath("cogulator/cogulatorcollection");
 			if (cogulatorcollections.isDirectory) {
 				cogulatorcollectionsEnabled = true;
 				if (this.currentFrame < 3) stacheToggle.visible = true;
 			}
-				
 		}
 	
 
