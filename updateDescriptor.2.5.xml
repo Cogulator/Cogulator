@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.5</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5/cogulator.air</url>
-       <description>. Fixed bug in working memory
-. Cogulator will now retain window size/position between sessions
-. Added cogulatorcollection feature to allow for integration with
-remote repository</description> 
+       <versionNumber>2.5.1</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.1/cogulator.air</url>
+       <description>Bug fix for new remote repository feature</description> 
     </update>
