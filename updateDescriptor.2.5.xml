@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.5.1</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.1/cogulator.air</url>
-       <description>Bug fix for new remote repository feature</description> 
+       <versionNumber>2.5.2</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.2/cogulator.air</url>
+       <description>Interface for adding new operators offered two options for speech, and none for vision.  Poetic, but wrong.  Bug fixed.</description> 
     </update>
