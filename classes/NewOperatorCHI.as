@@ -27,7 +27,7 @@
 			_operatorArray = operatorArray;
 			_main = main;
 			
-			resourceCombo = new CustomComboBox(new Array("cognitive","speech","hear","say","hands"));
+			resourceCombo = new CustomComboBox(new Array("cognitive","speech","hear","see","hands"));
 			resourceCombo.x = 180;
 			resourceCombo.y = 120;
 			addChild(resourceCombo);
