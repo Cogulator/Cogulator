@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.5.2</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.2/cogulator.air</url>
-       <description>Interface for adding new operators offered two options for speech, and none for vision.  Poetic, but wrong.  Bug fixed.</description> 
+       <versionNumber>2.5.3</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.3/cogulator.air</url>
+       <description>If you closed Cogulator while a model marked for deletion was selected, it’d crash. Fixed.</description> 
     </update>
