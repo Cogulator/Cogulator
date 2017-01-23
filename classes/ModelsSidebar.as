@@ -493,7 +493,7 @@ package classes {
 		
 		public function lastOpenFile():void {
 			//only update the config file if the current file is not in cogulatorcollection - don't want to startup Cogulator pointing to remote directory
-			if (currentFilePath.indexOf("cogulatorcollection") < 0) {
+			if (currentFilePath.indexOf("cogulatorcollection") < 0 && currentFilePath != null) {
 				var localFile = new File(File.applicationDirectory.nativePath);
 					localFile = localFile.resolvePath(configFilePath); 
 				var localFileStream:FileStream = new FileStream();

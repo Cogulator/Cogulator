@@ -841,7 +841,7 @@ package {
 		function updateConfigFile(){
 			//make sure that the config file path saved in the models side bar stuff points to a model that isn't being deleted
 			for each (var model in modelsSideBar.modelButtons) {
-				if (model.deleteModel == false) {
+				if (model.deleteModel == false && model.filePath != undefined) {
 					modelsSideBar.currentFilePath = model.filePath;
 					modelsSideBar.lastOpenFile();
 					break;
