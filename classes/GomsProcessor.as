@@ -226,8 +226,6 @@ package classes {
 			threadTO = threadAvailability[thread];
 			threadTime = threadTO.et;
 			
-			
-			//var startTime:Number = Math.max(threadTime, methodTime);
 			var startTime:Number = threadTime;
 			var endTime:Number 	 = startTime + stepTime + cycleTime;
 			
@@ -240,7 +238,6 @@ package classes {
 			var reslt:Array = new Array();
 				reslt[0] = startTime;
 				reslt[1] = endTime;
-			
 			return reslt;
 		}
 		
@@ -257,6 +254,7 @@ package classes {
 			return 0;
 		}
 		
+		
 		private static function getResourceAvailability(resource:String, startTime:Number, endTime:Number, stepTime:Number):Number {
 			//pull the resource array of TimeObjects associated with the resource
 			var resourceArray:Array = resourceAvailability[resource]; //time the resource becomes available
@@ -264,18 +262,22 @@ package classes {
 				if (resourceArray[i].et < resourceArray[i + 1].st) { //this means there's a gap - it's worth digging further
 					if (startTime >= resourceArray[i].et) { //if the resource availability occurs after the earliest possible start time, it's worth digging further
 						if (endTime <= resourceArray[i + 1].st) { //... check to see if there's a gap large enough to insert the operator
-							var gapTO:TimeObject = new TimeObject( Math.max(startTime, resourceArray[i].et), Math.max(endTime, resourceArray[i].et + stepTime + cycleTime) ); 
-							resourceArray.splice(i, 0, gapTO); 
-							return (Math.max(gapTO.st, startTime));
+							var startAt = Math.max(startTime, resourceArray[i].et)
+							var endAt = startAt + stepTime + cycleTime
+							var gapTO:TimeObject = new TimeObject(startAt, endAt);
+							resourceArray.push(gapTO);
+							resourceArray.sortOn("st", Array.NUMERIC); //splice occasionally caused misordered arrays
+							return (startAt);
 						}
 					}
 				}
 			}
 			
-			
-			var to:TimeObject = new TimeObject( Math.max(startTime, resourceArray[resourceArray.length - 1].et), Math.max(endTime, resourceArray[resourceArray.length - 1].et + stepTime + cycleTime) ); 
-			resourceArray.push(to); 
-			return (Math.max(to.st, startTime));
+			var startMax = Math.max(startTime, resourceArray[resourceArray.length - 1].et)
+			var endMax = startMax + stepTime + cycleTime
+			var to:TimeObject = new TimeObject(startMax, endMax); 
+			resourceArray.push(to);
+			return (startMax);
 		}
 		
 		
