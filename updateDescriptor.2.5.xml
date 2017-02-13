@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.5.4</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.4/cogulator.air</url>
-       <description>With nested multitasking, bug allowed for simultaneous execution of operators with the same resource (i.e., it let you do the same thing at the same time… e.g., snap and clap). Fixed.</description> 
+       <versionNumber>2.5.5</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v2.5.5/cogulator.air</url>
+       <description>Enhanced working memory export now includes chunk names and probability of recall.</description> 
     </update>
