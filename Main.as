@@ -105,7 +105,7 @@ package {
 		
 		//    - generate models sidebar - 
 		var modelsSideBar:ModelsSidebar;
-		var  modelsScrollBar:CustomScrollBar;
+		var modelsScrollBar:CustomScrollBar;
 		
 		
 		var defaultTimeLineDraggerX:Number;
@@ -133,6 +133,7 @@ package {
 			$.errors = errors;
 			$.automateButton = ganttWindow.automateButton;
 			
+			
 			//stage setup - don't zoom
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
@@ -144,6 +145,8 @@ package {
 			hintsCHI.visible = false;
 			lineLimit.visible = false;
 			lineLimitAlert.visible = false;
+			fileOpenError.visible = false;
+			fileSaveError.visible = false;
 			helpImages.visible = false;
 			completeMe.visible = false;
 			firstRunQuickStart.visible = false;
@@ -316,8 +319,10 @@ package {
 		function generateModelsSidebar():void {
 			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout, settingsFileManager, sidebarbckgrnd);
 			modelsSideBar.addEventListener("model_loaded_automate", modelLoaded);
-			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);	
+			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);
+			modelsSideBar.addEventListener("model_did_not_load", modelLoaded);
 			modelsSideBar.addEventListener("new_model_added", reloadModels);
+			modelsSideBar.addEventListener("¡save error!", handleSaveError);
 			modelsSideBar.y = 60;
 			addChildAt(modelsSideBar,17);
 			
@@ -327,16 +332,25 @@ package {
 
 		
 		function modelLoaded(evt:Event):void { //once the model is loaded
-			if (evt.type == "model_loaded_automate") ganttWindow.automateButton.gotoAndStop(1);
-			else ganttWindow.automateButton.gotoAndStop(3);
-			hints.hideHintsCHI();
-			undoRedo.init(); //initialize the undo redo functionality
-			refreshModel();
-			resetTimeLine();
-			updateStage();
-			
-			modelsScrollBar.resizeScrollBarElements();	//ensure the scrollbar is showing
+			if (evt.type == "model_did_not_load") {
+				fileOpenError.visible = true;
+			} else {
+				if (evt.type == "model_loaded_automate") ganttWindow.automateButton.gotoAndStop(1);
+				else ganttWindow.automateButton.gotoAndStop(3);
+				hints.hideHintsCHI();
+				undoRedo.init(); //initialize the undo redo functionality
+				refreshModel();
+				resetTimeLine();
+				updateStage();
+				
+				modelsScrollBar.resizeScrollBarElements();	//ensure the scrollbar is showing
+			}
 		}
+		
+		function handleSaveError(evt:Event):void {
+			fileSaveError.visible = true;
+		}
+
 
 		
 		//when a new model is added, regenerate the models sidebar
@@ -435,7 +449,7 @@ package {
 			ganttWindow.moreArrow.x  = stage.stageWidth - ganttGap;
 			ganttWindow.avgWorkingMemoryTxt.x  = ganttWindow.chartBckgrnd.width - 50;
 			ganttWindow.zoomInOutButton.x  = stage.stageWidth - ganttGap + 10;
-			newGantt(true);
+			//newGantt(true);
 			
 			//    - move the gantt chart -
 			if (ganttClosed == true) ganttWindow.y = stage.stageHeight;

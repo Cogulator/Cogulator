@@ -47,10 +47,7 @@ package classes {
 	
 	public class GanttChart extends MovieClip {
 		private var $:Global = Global.getInstance();
-		
-		private var codeText:String;
-		private var rawgoms:Array;
-				
+						
 		public var scl:Number; // = 5000;
 		
 		private var cycleTime:Number;
@@ -92,7 +89,6 @@ package classes {
 		public function GanttChart(gW:MovieClip, s:Number, dNT:Boolean, tLLC:Sprite) {
 			// constructor code
 			_ganttWindow = gW;
-			codeText = $.codeTxt.text;
 			scl = s;
 			drawNewTimeLine = dNT;
 			_timeLineLblsContainer = tLLC;

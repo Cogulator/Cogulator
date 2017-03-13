@@ -33,7 +33,7 @@ package classes {
 	
 	public class GomsProcessor {
 		private static var $:Global = Global.getInstance();
-			
+		
 		private static var cntrlmthds:Array; //list of methods in the control loop for overview timeline
 		private static var allmthds:Array;
 		private static var steps:Array;

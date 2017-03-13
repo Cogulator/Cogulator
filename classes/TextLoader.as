@@ -52,8 +52,8 @@
 		
 		
 		private function ioErrorHandler(evt:IOErrorEvent):void {
-            trace("ioErrorHandler: " + evt);
-			//dispatchEvent( new Event("error") );
+            trace("ioErrorHandler fired: " + evt);
+			dispatchEvent( new Event("¡error!") );
 		}
 
 	}

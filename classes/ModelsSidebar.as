@@ -136,13 +136,7 @@ package classes {
 		
 		private function loadConfig(evt:Event):void {
 			currentFilePath = cnfg.txt;
-			
-			var pathArray:Array;
-			var slash:int = currentFilePath.indexOf("\\");
-			if (slash < 0) pathArray = currentFilePath.split("/"); //mac or linux
-			else pathArray = currentFilePath.split("\\");
-			
-			configFileName = pathArray[pathArray.length -1];
+			configFileName = getFileNameFromPath(currentFilePath);
 			onFirstOpen();
 		}
 		
@@ -312,8 +306,10 @@ package classes {
 			evt.currentTarget.modelField.setTextFormat(bold);
 			evt.currentTarget.select.visible = true;
 			evt.currentTarget.hghlight.visible = true;
+			
 			code = new TextLoader(currentFilePath);
 			code.addEventListener(currentFilePath, onModelLoaded);
+			code.addEventListener("¡error!", onModelLoadError);
 			
 			lastOpenFile(); //save the path to the currently open model
 			
@@ -327,17 +323,29 @@ package classes {
 				modelButton.select.visible = false;
 			}
 			
-			for each (var mB in modelButtons){
-				if (mB.modelField.text + ".goms" == configFileName) {
-					mB.select.visible = true;
-					mB.hghlight.visible = true;
-					mB.modelField.setTextFormat(bold);
+			
+			var match = false
+			for (var i:int = 0; i < modelButtons.length; i++) {
+				if (modelButtons[i].modelField.text + ".goms" == configFileName || (!match && i == modelButtons.length - 1)) {
+					match = true;
+					
+					//if unable to find the configFileName, just use the last file you iterate through and open it
+					if (!match && i == modelButtons.length - 1) {
+						currentFilePath = modelButton.filePath;
+						configFileName = getFileNameFromPath(currentFilePath);
+						lastOpenFile(); //save this file to the config file as the last open one
+					}
+					
+					modelButtons[i].select.visible = true;
+					modelButtons[i].hghlight.visible = true;
+					modelButtons[i].modelField.setTextFormat(bold);
 					_timeReadout.title.text = configFileName.substring(0, configFileName.length - 5);
-				} 
+				}
 			}
 			
 			code = new TextLoader(currentFilePath);
-			code.addEventListener(currentFilePath, onModelLoaded);			
+			code.addEventListener(currentFilePath, onModelLoaded);
+			code.addEventListener("¡error!", onModelLoadError);
 		}
 		
 		private function onModelLoaded(evt:Event):void {
@@ -350,6 +358,11 @@ package classes {
 			var automate:Boolean = getAutomateWMsetting();
 			if (automate) dispatchEvent(new Event("model_loaded_automate"));
 			else dispatchEvent(new Event("model_loaded_do_not_automate"));
+		}
+		
+		private function onModelLoadError(evt:Event):void {
+			trace("I hear the model didn't load");
+			dispatchEvent(new Event("model_did_not_load"));
 		}
 		
 		
@@ -392,13 +405,19 @@ package classes {
 			var localFile = new File(File.documentsDirectory.nativePath); 
 				localFile = localFile.resolvePath(currentFilePath); 
 			var localFileStream:FileStream = new FileStream();
+				
+			try {
 				localFileStream.open(localFile, FileMode.WRITE);
 				localFileStream.writeMultiByte($.codeTxt.text, "utf-8");
+				saveAutomateWMSetting();
+			} catch (error:Error) {
+				trace("try/catch fired", error.message);
+				dispatchEvent( new Event("¡save error!") ); //Main.as listens for this and displays error if needed
+			}
 
-				localFileStream.close();
-			
-			saveAutomateWMSetting();
+			localFileStream.close();
 		}
+		
 		
 		private function saveAutomateWMSetting():void {
 			var autoModelWM:String = _settings.xml.model.(@NAME==_timeReadout.title.text).autoWM;
@@ -506,6 +525,17 @@ package classes {
 		private function replaceDoubleBackslash(str:String):String {
 			var myPattern:RegExp = /\\/g;
 			return(str.replace(myPattern, "\\")); 
+		}
+		
+		
+		private function getFileNameFromPath(path:String):String {
+			var pathArray:Array;
+			var slash:int = currentFilePath.indexOf("\\");
+			if (slash < 0) pathArray = currentFilePath.split("/"); //mac or linux
+			else pathArray = currentFilePath.split("\\");
+			
+			var path = pathArray[pathArray.length -1];
+			return path;
 		}
 		
 
