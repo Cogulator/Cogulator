@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>2.5.5</versionNumber> 
+       <versionNumber>2.6</versionNumber> 
        <url>https://github.com/Cogulator/Cogulator/releases/download/v2.6/cogulator.air</url>
        <description>First crack at useful error messages when a file can't be opened or saved.</description> 
     </update>
