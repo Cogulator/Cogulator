@@ -21,7 +21,6 @@ This is beta software: don’t use Cogulator for critical work. Make sure your m
 #Alternatives
 If Cogulator doesn't work for your purposes (say, you wanted to plug into a sim or want to build models graphically), consider some of these alternatives
 * [GLEAN](http://web.eecs.umich.edu/~kieras/goms.html): One of the primary inspirations for Cogulator
-* [CogTool](http://cogtool.hcii.cs.cmu.edu/): GUI based model building
+* [CogTool](https://github.com/cogtool/): GUI based model building
 * [Apex](http://www.ai.sri.com/project/APEX): Open source architecture
-* [SAN-CM](http://cogworks.cogsci.rpi.edu/node/366): GUI-templates for building CPM-GOMS models
 * [ACT-R](http://act-r.psy.cmu.edu/): Hybrid production system architecture for detailed modeling and testing of cognitive theory
