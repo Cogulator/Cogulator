@@ -50,7 +50,7 @@ package classes {
 		private static const magenta:TextFormat = new TextFormat();
 		private static const errorred:TextFormat = new TextFormat();
 		
-		static var methods:Array = ["goal", "also", "as"];
+		static var methods:Array = ["goal", "also", "as", "if", "endif", "goto", "createstate", "setstate"];
 		static var errorInLine:Boolean = false;
 		
 		black.color = SolarizedPalette.black;
@@ -63,6 +63,8 @@ package classes {
 		magenta.color = SolarizedPalette.magenta;
 		errorred.color = SolarizedPalette.errorred;
 		
+		
+		//Called from GOMSProcessor to colorize and error check lines that are not evaluated in Cog+ functionality
 		public static function solarizeAll():void{
 			var codeLines:Array = $.codeTxt.text.split("\r");
 			var beginIndex:int = 0;
@@ -98,7 +100,38 @@ package classes {
 			return (solarizeLineNum(lineNumber, begindex, endex, chunkNamedInError)[6]);
 		}
 		
+		//Purpose:  Color the line specified.  Created for Cog+ functionality
+		//Input: line number to be colorized.
+		//Output: none.
+		//SideEffect: The line should be colored and errors will be checked.  Other side effects are TBD.
+		public static function solarizeLine(lineNumber:int) {
+			//get line number based on caret position
+			var begindex = WrappedLineUtils.getLineIndex($.codeTxt, lineNumber);
+			var endex = WrappedLineUtils.getLineEndIndex($.codeTxt, lineNumber);
+			
+			//chunkErrors are a special case because they can't be identified until after the GomsProcessor initiates WM modeling
+			//chunkErrors are identified in WorkingMemory.as, which calls a custom function here (solarizeChunkAtLineNum) to color the errors
+			var chunkNamedInError:String = "";
+			var errMessage = $.errors[lineNumber];
+			if (errMessage != undefined) if (errMessage.indexOf("memory") > -1) {
+				var leftAngleIndex = errMessage.indexOf("<");
+				var rightAngleIndex = errMessage.indexOf(">");
+				chunkNamedInError = errMessage.substring(leftAngleIndex, rightAngleIndex);	
+			}	
+			
+			solarizeLineNum(lineNumber, begindex, endex, chunkNamedInError)[6];
+		}
 
+
+		public static function ErrorColorLine(lineNumber:int){
+			
+			//get line number based on caret position
+			var beginIndex = WrappedLineUtils.getLineIndex($.codeTxt, lineNumber);
+			var endIndex = WrappedLineUtils.getLineEndIndex($.codeTxt, lineNumber);
+			
+			$.codeTxt.setTextFormat(errorred, beginIndex, endIndex);
+			}
+		
 			
 		//0: Number of Indents
 		//1: Operator
@@ -176,7 +209,6 @@ package classes {
 						
 			return new Array(indents, operator, lineLabel, time, threadLabel, errorInLine, errorFixed, chunkNames);
 		}
-		
 		
 		//If WM detects an error in chunk usage, this line is called to highlight the offending chunk(s)
 		public static function solarizeChunkOnLineNum(lineNum:int, chunkName:String):void {
