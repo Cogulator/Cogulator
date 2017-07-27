@@ -35,6 +35,8 @@ package classes {
 		private var ngomslTxt:String;
 		private var klmTxt:String;
 		private var sundryTxt:String;
+		private var selectionRules:String;
+		private var chunkTxt:String;
 		private var mentalMathTxt:String;
 		private var cpmTxt:String;
 		private var operatorsTxt:String;
@@ -295,6 +297,54 @@ package classes {
 							+ "\n" + ". Cognitive_processor *determine if the target is a match"
 							+ "\n" + ". Cognitive_processor *if there is a match, initiate the motor processor"
 							+ "\n" + ". Motor_processor  *initiation of the motor processor to press the 'match' button";
+							
+			selectionRules = "*Demonstration of selection rules in Cogulator. If you don't have the basics down yet, come back to this later. You don't need selection rules to build useful models."
+							+ "\n" 
+							+ "\n" + "CreateState Room isDark"
+							+ "\n" 
+							+ "\n" + "If Room isDark"
+							+ "\n" + ". Hands to light switch"
+							+ "\n" + ". Turn light switch on"
+							+ "\n" + ". SetState Room isLight"
+							+ "\n" + "EndIf";
+			
+			chunkTxt = 		"* In the Mental-Math example, we demonstrate automated working memory modeling. This model is very similar, but we use the more powerful Chunk Naming tool. Chunk Naming is simply the process of putting memory items inside angled brackets. For an example, a number that is familiar to you would be a single chunk like so: <123-4567>.An unfamiliar number would be consider seven chunks: <1><2><3> - <4><5><6><7>. Chunk naming allows for a couple of cool things, including forgetting. In this example, the model shows the user forgetting one of the numbers they are asked to add in their head.  The forgotten chunk is marked in red. Check out the primer at cogulator.io for more information."
+							+ "\n" 
+							+ "\n" + "* Important: In the Gantt chart (up arrow at bottom of interface) set working memory to Do not automate WM"
+							+ "\n" 
+							+ "\n" + "Goal: Listen To Problem"
+							+ "\n" + "*What is 354 plus 412?"
+							+ "\n" + ". Hear What is <3[354]> *retain the number 3 in 354"
+							+ "\n" + ". Hear <5[354]> *fifty"
+							+ "\n" + ". Hear <4[354]> * four"
+							+ "\n" + ". Hear plus"
+							+ "\n" + ". Hear <4[412]>"
+							+ "\n" + ". Hear and <1[412]>"
+							+ "\n" + ". Hear and <2[412]>"
+							+ "\n" 
+							+ "\n" + "Goal: Calculate Answer"
+							+ "\n" + ". Goal: Add 4 plus 2"
+							+ "\n" + "*Internal thought"
+							+ "\n" + ". . Say Well, <4[354]> plus <2[412]> is 6"
+							+ "\n" + ". . Recall <1st6_of766>  (150 ms)"
+							+ "\n" + ". Goal: Add_5_plus_1"
+							+ "\n" + ". . Say <5[354]> plus <1[412]> is 6"
+							+ "\n" + ". . Recall <2nd6_of766>  (150 ms)"
+							+ "\n" + ". Goal: Add_3_plus_4"
+							+ "\n" 
+							+ "\n" + "*. . Goal: Ask for Forgetten Number"
+							+ "\n" + "*. . . Say What was that first number again?"
+							+ "\n" + "*. . . Hear <3[354]> <5[354]> <4[354]>"
+							+ "\n" 
+							+ "\n" + ". . Say <3[354]> plus <4[412]> is 7 *3[354] is red because the it's been forgotten. Resolve by removing the *'s before the Ask for Forgetten Number method above."
+							+ "\n" + ". . Recall <7_of766> (150 ms)"
+							+ "\n" 
+							+ "\n" + "Goal: Encode Answer"
+							+ "\n" + ".Store <766>"
+							+ "\n" 
+							+ "\n" + "Goal: Speak Answer"
+							+ "\n" + ". Verify answer (5 seconds)"
+							+ "\n" + ". Say <7_of766> <2nd6_of766>  <1st6_of766> 766"
 			
 			initialSettings = "font-size:16";
 			
@@ -372,6 +422,28 @@ package classes {
 				//this should write the location of the launch file
 				stream6.writeUTFBytes(sundryTxt); 
 				stream6.close();
+				
+			//create selection rules file
+			var sR:File;
+				sR = File.documentsDirectory; 
+				sR = sR.resolvePath("cogulator/models/Examples/Selection_Rules.goms"); 
+			//write models file
+			var stream8:FileStream = new FileStream(); 
+				stream8.open(sR, FileMode.WRITE); 
+				//this should write the location of the launch file
+				stream8.writeUTFBytes(selectionRules); 
+				stream8.close();
+				
+			//create chunk naming file
+			var chunk:File;
+				chunk = File.documentsDirectory; 
+				chunk = chunk.resolvePath("cogulator/models/Examples/Forgetting.goms"); 
+			//write models file
+			var stream9:FileStream = new FileStream(); 
+				stream9.open(chunk, FileMode.WRITE); 
+				//this should write the location of the launch file
+				stream9.writeUTFBytes(chunkTxt); 
+				stream9.close();
 				
 			//create config file
 			var stream1:FileStream = new FileStream(); 
