@@ -44,6 +44,7 @@ package {
 	import classes.TextLoader;
 	import classes.OperatorsSidebar;
 	import classes.ModelsSidebar;
+	import classes.MethodsSidebar;
 	import classes.ModelStatus;
 	import classes.GanttChart;
 	import classes.SyntaxColor;
@@ -58,11 +59,11 @@ package {
 	import classes.AppUpdater;
 	import classes.ExportData;
 	import classes.NewOperatorCHI;
+	import classes.NewMethodCHI;
 	import com.inruntime.utils.*;
 	import flash.utils.Timer;
 	import flash.utils.Dictionary;
 	import flash.events.TimerEvent;
-	import classes.NewOperatorCHI;
 	import classes.WindowManager;
 	import classes.SettingsFileManager;
 	
@@ -106,6 +107,12 @@ package {
 		//    - generate models sidebar - 
 		var modelsSideBar:ModelsSidebar;
 		var modelsScrollBar:CustomScrollBar;
+		
+		
+		//    - generate the methods sidebar -
+		var methodsSideBar:MethodsSidebar;
+		var methodsScrollBar:CustomScrollBar;
+		var newMethodCHI:NewMethodCHI;
 		
 		
 		var defaultTimeLineDraggerX:Number;
@@ -193,6 +200,7 @@ package {
 			//  - switch between operators & models in the sidebar
 			sidebarToggle.addEventListener("sidebar toggle", onSideBarToggle);
 			sidebarToggle.newOperatorButton.addEventListener(MouseEvent.CLICK, onNewOperatorClick);
+			sidebarToggle.newMethodButton.addEventListener(MouseEvent.CLICK, onNewMethodClick);
 			sidebarToggle.addEventListener("stashe groom", onSideBarStacheClick);
 			
 			
@@ -266,9 +274,7 @@ package {
 			hintsCHI.hintText.addEventListener
 		}
 		
-		
-
-		
+				
 		//used by newOperatorCHI to regenerate the sidebar when a new operator is added
 		public function regenerateOperatorsSidebar():void {
 			ops = new TextLoader("cogulator/operators/operators.txt");
@@ -289,6 +295,7 @@ package {
 			newOperatorCHI.y = 60;
 			newOperatorCHI.closeButton.addEventListener(MouseEvent.CLICK, onNewOperatorXClick);
 			
+			generateMethodsSidebar();
 			generateModelsSidebar();
 		}
 		
@@ -305,18 +312,44 @@ package {
 				opsScrollBar = null;
 			}
 			
-			//opsSideBar = new OperatorsSidebar(lineNumbers, undoRedo);
 			opsSideBar = new OperatorsSidebar(undoRedo, this);
 			opsSideBar.y = 60;
-			if (sidebarToggle.currentFrame < 3) opsSideBar.visible = false;
+			if (sidebarToggle.operators.currentFrame != 1) opsSideBar.visible = false;
 			addChildAt(opsSideBar, 17);
 			
 			opsScrollBar = new CustomScrollBar(stage, ganttWindow, opsSideBar, sidebarbckgrnd, 60);
 			addChildAt(opsScrollBar, 17);
 		}
 		
+		
+		//used by newMethodCHI to regenerate the sidebar when a new operator is added
+		public function generateMethodsSidebar(evt:Event = null):void {
+			if (methodsSideBar != null) {
+				removeChild(methodsSideBar);
+				methodsSideBar = null;
+				
+				removeChild(methodsScrollBar);
+				methodsScrollBar = null;
+			}
+			
+			methodsSideBar = new MethodsSidebar(undoRedo, this);
+			methodsSideBar.y = 60;
+			methodsScrollBar = new CustomScrollBar(stage, ganttWindow, methodsSideBar, sidebarbckgrnd, 60);
+			addChildAt(methodsSideBar, 17);
+			addChildAt(methodsScrollBar,17);
+			
+			if (sidebarToggle.methods.currentFrame != 1) methodsSideBar.visible = false;
+			
+			if (newMethodCHI == null) {
+				newMethodCHI = new NewMethodCHI(this, methodsSideBar);
+				newMethodCHI.x = 300;
+				newMethodCHI.y = 60;
+				newMethodCHI.closeButton.addEventListener(MouseEvent.CLICK, onNewMethodXClick);
+			}
+		}
+		
 
-		function generateModelsSidebar():void {
+		public function generateModelsSidebar():void {
 			modelsSideBar = new ModelsSidebar(saveButton, newButton, newModelCHI, timeReadout, settingsFileManager, sidebarbckgrnd);
 			modelsSideBar.addEventListener("model_loaded_automate", modelLoaded);
 			modelsSideBar.addEventListener("model_loaded_do_not_automate", modelLoaded);
@@ -362,12 +395,6 @@ package {
 			modelsScrollBar.adjustSideBar();
 			stage.focus = codeTxt;
 		}
-		
-		
-		////on startup, the lastopen file is loaded.  if that file comes from cogulatorcollection, the chi is updated here
-		//function cogulatorCollectionCHI(evt:Event) {
-		//	trace("FROM COGULATORCOLLECTION");
-		//}
 
 		
 		function resetTimeLine(){
@@ -384,20 +411,30 @@ package {
 
 		//    - sidebar toggle - 
 		function onSideBarToggle (evt:Event):void {			
-			trace(sidebarToggle.currentFrame);
-			if (sidebarToggle.currentFrame == 3) {
+			if (sidebarToggle.operators.currentFrame == 1) {
 				opsSideBar.visible = true;
 				if (opsScrollBar.prcntShown < 1) opsScrollBar.visible = true;
 				modelsSideBar.visible = false;
 				modelsScrollBar.visible = false;
+				methodsSideBar.visible = false;
+				methodsScrollBar.visible = false;
 				sidebarbckgrnd.gotoAndStop(1);
-			} else if (sidebarToggle.currentFrame == 1) {
+			} else if (sidebarToggle.models.currentFrame == 1) {
 				opsSideBar.visible = false;
 				opsScrollBar.visible = false;
 				modelsSideBar.visible = true;
+				methodsSideBar.visible = false;
+				methodsScrollBar.visible = false;
 				if (sidebarToggle.showCogulatorCollectionsNow) sidebarbckgrnd.gotoAndStop(2);
 				else sidebarbckgrnd.gotoAndStop(1);
 				if (modelsScrollBar.prcntShown < 1) modelsScrollBar.visible = true;
+			} else if (sidebarToggle.methods.currentFrame == 1) {
+				opsSideBar.visible = false;
+				opsScrollBar.visible = false;
+				modelsSideBar.visible = false;
+				modelsScrollBar.visible = false;
+				methodsSideBar.visible = true;
+				if (methodsScrollBar.prcntShown < 1) methodsScrollBar.visible = true;
 			}
 		}
 		
@@ -408,6 +445,18 @@ package {
 		
 		public function onNewOperatorXClick(evt:MouseEvent = null):void {
 			removeChild(newOperatorCHI);
+		}
+		
+				
+		function onNewMethodClick(evt:MouseEvent):void {
+			newMethodCHI.stepsField.text = $.codeTxt.selectedText;
+			addChildAt(newMethodCHI, 20);
+			stage.focus = newMethodCHI.nameField;
+		}
+		
+		public function onNewMethodXClick(evt:MouseEvent = null):void {
+			newMethodCHI.initializer();
+			if (newMethodCHI) removeChild(newMethodCHI);
 		}
 		
 		public function onSideBarStacheClick(evt:Event):void {

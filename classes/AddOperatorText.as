@@ -93,7 +93,6 @@ package classes {
 			$.codeTxt.setSelection(indexOfInsertPoint + insertText.length - 1, indexOfInsertPoint + insertText.length - 1);
 			$.stage.focus = $.codeTxt;
 			operatorButton.removeEventListener(MouseEvent.MOUSE_OUT, removeOperatorPreview);
-			//SyntaxColor.solarizeAll(); //don't thin this is needed as model refreshes on new operator add
 		}
 		
 		private function indent(f:TextField, firstCharInParagraph:int, lastCharInParagraph:int, isGoal:Boolean):String {
