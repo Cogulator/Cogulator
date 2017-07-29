@@ -37,9 +37,11 @@ package {
 	import flash.ui.Keyboard;
 	import flash.text.TextFieldAutoSize;
 	import flash.desktop.NativeApplication;
+	import flash.utils.Timer;
+	import flash.utils.Dictionary;
+	import flash.events.TimerEvent;
 	import com.greensock.*;
 	import com.greensock.easing.*;
-	//import classes.LineNumbers;
 	import classes.AutoComplete;
 	import classes.TextLoader;
 	import classes.OperatorsSidebar;
@@ -54,18 +56,15 @@ package {
 	import classes.FirstRun;
 	import classes.IndentComment;
 	import classes.HintsTool;
-	//import classes.AppSettings;
 	import classes.CustomScrollBar;
 	import classes.AppUpdater;
 	import classes.ExportData;
 	import classes.NewOperatorCHI;
 	import classes.NewMethodCHI;
-	import com.inruntime.utils.*;
-	import flash.utils.Timer;
-	import flash.utils.Dictionary;
-	import flash.events.TimerEvent;
+	import classes.actiontoGOMS.MagicModels;
 	import classes.WindowManager;
 	import classes.SettingsFileManager;
+	import com.inruntime.utils.*;
 	
 	public class Main extends MovieClip {
 
@@ -108,20 +107,21 @@ package {
 		var modelsSideBar:ModelsSidebar;
 		var modelsScrollBar:CustomScrollBar;
 		
-		
 		//    - generate the methods sidebar -
 		var methodsSideBar:MethodsSidebar;
 		var methodsScrollBar:CustomScrollBar;
 		var newMethodCHI:NewMethodCHI;
 		
-		
-		var defaultTimeLineDraggerX:Number;
-		
+		//	  - MagicModels
+		var magicModel:MagicModels;
+
 		//    - handle stage resizing - 
 		var ganttGap:Number;
 		var lineGap:Number;
 		var ganttFudge:Number = 80;
 		var slideSpeed:Number = .5;
+		
+		var defaultTimeLineDraggerX:Number;
 		
 		//	  - put in the settings file manager which manages the settings xml file
 		var settingsFileManager:SettingsFileManager;
@@ -144,10 +144,10 @@ package {
 			//stage setup - don't zoom
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
+			stage.stageFocusRect = false;
 				
 			
 			//    - init - 
-			lineNumbers.visible = false;
 			newModelCHI.visible = false;
 			hintsCHI.visible = false;
 			lineLimit.visible = false;
@@ -227,6 +227,9 @@ package {
 			settingsFileManager = new SettingsFileManager();
 			settingsFileManager.addEventListener("settings file loaded", onSettingsFileReady);
 			
+			// - listen for magic models
+			magicWandButton.addEventListener(MouseEvent.CLICK, onMagicModelsClick);
+
 			
 			//  - listen for close application to save the last open model
 			stage.nativeWindow.addEventListener(Event.CLOSING, closeApplication, false, 0, true);  
@@ -303,6 +306,7 @@ package {
 		public function generateOperatorsSidebar(evt:Event = null):void {
 			operatorArray = ops.arry; 
 			operatorArray.push({resource: "cognitive", appelation: "Ignore", time: 50, description: "Removes_item_from_working_memory.", labelUse: ""});
+			operatorArray.push({resource: "system", appelation: "Wait", time: 1000, description: "User_waiting_for_system._Modify_time_by_adding_'(x_seconds)'_at_end_of_line.", labelUse: ""});
 			$.operatorArray = operatorArray;
 			
 			if (opsSideBar != null) {
@@ -389,7 +393,6 @@ package {
 		//when a new model is added, regenerate the models sidebar
 		function reloadModels(evt:Event = null){
 			modelsSideBar.reGenerateModelsButtons(sidebarToggle.showCogulatorCollectionsNow);
-			lineNumbers.text = "";
 			refreshModel();
 			modelsScrollBar.resizeScrollBarElements();
 			modelsScrollBar.adjustSideBar();
@@ -463,6 +466,38 @@ package {
 			reloadModels();
 		}
 		
+		function onMagicModelsClick(evt:MouseEvent):void {
+			magicModel = new MagicModels();
+			magicModel.x = 0;
+			magicModel.y = 0;
+			magicModel.container.closeButton.addEventListener(MouseEvent.CLICK, onMagicModelsClose);
+			magicModel.container.typeSelector.addEventListener(MouseEvent.CLICK, onMagicModelDeviceChange);
+			magicModel.checkButton.addEventListener(MouseEvent.CLICK, onMagicModelsAdd);
+			addChild(magicModel);
+			
+			stage.focus = magicModel.selectedDevice.logWindow;
+		}
+		
+		function onMagicModelsClose(evt:MouseEvent = null):void {
+			removeChild(magicModel);
+			magicModel = null;
+			refreshModel();
+			stage.focus = $.codeTxt;
+		}
+		
+		function onMagicModelDeviceChange(evt:MouseEvent):void {
+			magicModel.checkButton.addEventListener(MouseEvent.CLICK, onMagicModelsAdd);
+		}
+		
+		function onMagicModelsAdd(evt:MouseEvent):void {
+			$.codeTxt.text += "\n" + "* -- Magic Model Start --";
+			var lines:Array = magicModel.modelTF.text.split("\n"); 
+			for each (var line in lines) $.codeTxt.text += line + "\n";
+			$.codeTxt.text += "* -- Magic Model End --" + "\n";
+			
+			onMagicModelsClose();
+		}
+		
 		function onResizeStage(evt:Event):void {
 			updateStage();
 			if(hintsCHI.visible) hints.resized();
@@ -498,7 +533,6 @@ package {
 			ganttWindow.moreArrow.x  = stage.stageWidth - ganttGap;
 			ganttWindow.avgWorkingMemoryTxt.x  = ganttWindow.chartBckgrnd.width - 50;
 			ganttWindow.zoomInOutButton.x  = stage.stageWidth - ganttGap + 10;
-			//newGantt(true);
 			
 			//    - move the gantt chart -
 			if (ganttClosed == true) ganttWindow.y = stage.stageHeight;
@@ -508,10 +542,6 @@ package {
 			codeTxt.height = ganttWindow.y - codeTxt.y;
 			codeTxt.width = stage.stageWidth - 250;
 			
-			//    - size the line number textfield to code text;
-			//lineNumbers.height = codeTxt.height;
-			//timer.stop(); 
-			//timer.start();
 				
 			//    - resize the scroll bar for the code text box -
 			scrollBar.height = codeTxt.height + 26;
@@ -523,26 +553,21 @@ package {
 			helpImages.background.width = stage.stageWidth;
 			helpImages.imageContainer.x = stage.stageWidth / 2 - helpImages.imageContainer.width / 2;
 			helpImages.imageContainer.y = stage.stageHeight / 2 - helpImages.imageContainer.height / 2;
+			
+			//    - resize the magicModel
+			if (magicModel) {
+				magicModel.background.width = stage.stageWidth;
+				magicModel.background.height = stage.stageHeight;
+				magicModel.container.x = stage.stageWidth / 2 - magicModel.container.width / 2;
+				magicModel.container.y = stage.stageHeight / 2 - magicModel.container.height / 2;
+				
+				magicModel.mac.x = stage.stageWidth / 2 - 393;
+				magicModel.mac.y = stage.stageHeight / 2 - 215;
+				
+				magicModel.phone.x = stage.stageWidth / 2 - 80;
+				magicModel.phone.y = stage.stageHeight / 2 - 140;
+			}
 		}
-
-
-
-
-		// on maxize minize it seems the line numbering happens prior to the word wrapping in the field finalizing
-		// this delay ensures the line numbers happen after word wrapping completeg
-		/*var timer:Timer = new Timer(10, 1);
-		function lineNumberTimerEvent(evt:TimerEvent) {
-			LineNumbers.numberTheLines(lineNumbers, codeTxt);
-		}
-		timer.addEventListener(TimerEvent.TIMER_COMPLETE, lineNumberTimerEvent);
-
-
-
-		//connect code text scroll action to linenumbers
-		function scrollLineNumbers (evt:Event) {
-			lineNumbers.scrollV = codeTxt.scrollV;
-		}
-		codeTxt.addEventListener(ScrollEvent.SCROLL, scrollLineNumbers);*/
 
 
 		//		- special keyboard commands including cntrl events
@@ -628,9 +653,6 @@ package {
 
 		//    - monitor changes to text for autocomplete and syntax coloring 
 		function onTextChange(evt:Event):void {
-			//lineLimiter();
-			//LineNumbers.numberTheLines(lineNumbers, codeTxt);
-			
 			var errorFixed:Boolean = SyntaxColor.solarizeSelectedLine();
 			if (errorFixed) refreshModel(); //if an existing error is elimated in the course of typing, refresh the model
 			else modelStatus.lineChange();

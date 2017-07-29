@@ -106,7 +106,7 @@ package classes {
 			stateTable = new Dictionary();
 			var jumps:int = 0;
 			//Color all lines since GoTo skips some lines, but we don't want them to be gray. 
-			SyntaxColor.solarizeAll();
+			SyntaxColor.solarizeAll($.codeTxt);
 			
 			for (var lineIndex: int = 0; lineIndex < codeLines.length; lineIndex++) {
 				var line = codeLines[lineIndex];
@@ -164,7 +164,7 @@ package classes {
 							}
 							break;
 						default:
-							var syntaxArray: Array = SyntaxColor.solarizeLineNum(lineIndex, beginIndex, endIndex);
+							var syntaxArray: Array = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
 							processBaseCogulatorLine(syntaxArray, lineIndex);
 					}
 				}
@@ -437,13 +437,13 @@ package classes {
 			threadTO = threadAvailability[thread];
 			threadTime = threadTO.et;
 
-
-			//var startTime:Number = Math.max(threadTime, methodTime);
 			var startTime: Number = threadTime;
 			var endTime: Number = startTime + stepTime + cycleTime;
 
-			startTime = getResourceAvailability(resource, startTime, endTime, stepTime);
-			endTime = startTime + stepTime + cycleTime;
+			if (resource != "system") {
+				startTime = getResourceAvailability(resource, startTime, endTime, stepTime);
+				endTime = startTime + stepTime + cycleTime;
+			}
 
 			//store the results for the next go round
 			threadAvailability[thread] = new TimeObject(startTime, endTime);
@@ -564,14 +564,15 @@ package classes {
 				}
 			} else if (operatorStr == "say" || operatorStr == "hear" || labelUse.indexOf("count_label_words") > -1) { //if there's no customTime, use the number of words in the lbl
 				rslt = removeConsectiveWhiteSpaces(lbl).split(' ').length;
-			} else if (operatorStr == "type" || labelUse.indexOf("count_label_characters") > -1) {
+			} else if (operatorStr == "type" || operatorStr == "tap" || labelUse.indexOf("count_label_characters") > -1) {
 				var leftAngleBracketIndices: Array = lbl.match(/</g);
 				var rightAngleBracketIndices: Array = lbl.match(/>/g);
 				//because brackets are used for chunk naming, that should be removed from the lable length count if used in something like a Type operator
 				if (leftAngleBracketIndices.length == rightAngleBracketIndices.length) rslt = lbl.length - leftAngleBracketIndices.length - rightAngleBracketIndices.length;
 				else rslt = lbl.length; //if the operator is "type", figure out how many characters are in the string and save that as result
 			}
-
+			
+			
 			return Number(operatorObj.time) * rslt;
 		}
 

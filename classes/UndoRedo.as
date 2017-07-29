@@ -57,11 +57,11 @@ package classes {
 				switch ( evt.keyCode ) {
 					case Keyboard.Z : //if control+z for undo 
 						if (undoStack.length > 1) undo();
-						SyntaxColor.solarizeAll();
+						SyntaxColor.solarizeAll($.codeTxt);
 						break;
 					case Keyboard.Y : //if control+y for redo
 						if (redoStack.length > 0)redo();
-						SyntaxColor.solarizeAll();
+						SyntaxColor.solarizeAll($.codeTxt);
 						break;
 				}
 			}

@@ -129,6 +129,22 @@ package  classes {
 				if ($.operatorArray[i].resource == "hands") generateOperatorButton($.operatorArray[i].appelation, $.operatorArray[i].time, $.operatorArray[i].description);
 			}
 			
+			lineY += 10;
+			
+			//    - add the wait operator  - 
+			var systemLabel:HeadingLabel = new HeadingLabel();
+				systemLabel.labeltxt.text = "System";
+				systemLabel.x = labelX;
+				lineY += 20;
+				systemLabel.y = lineY;
+				addChild(systemLabel);
+
+			
+			for (i = 0; i < $.operatorArray.length; i++) {
+				//trace("SYSTEM", $.operatorArray[i].appelation, $.operatorArray[i].resource);
+				if ($.operatorArray[i].resource == "system") generateOperatorButton($.operatorArray[i].appelation, $.operatorArray[i].time, $.operatorArray[i].description);
+			}
+			
 		}
 		
 		private function generateOperatorButton (appelation:String, time:Number, description:String):void {
