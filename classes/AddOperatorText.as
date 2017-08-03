@@ -73,14 +73,14 @@ package classes {
 			$.codeTxt.setSelection(indexOfInsertPoint, indexOfInsertPoint + insertText.length);
 			
 			operatorButton.addEventListener(MouseEvent.MOUSE_OUT, removeOperatorPreview);
-			SyntaxColor.solarizeAll();
+			SyntaxColor.solarizeAll($.codeTxt);
 		}
 		
 		private function removeOperatorPreview (evt:MouseEvent):void {
 			$.codeTxt.setSelection(indexOfSavedCaretPosition, indexOfSavedCaretPosition);
 			$.codeTxt.text = savedText;
 			$.stage.focus = $.codeTxt;
-			SyntaxColor.solarizeAll();
+			SyntaxColor.solarizeAll($.codeTxt);
 		}
 		
 		public function removeOperatorListeners(operatorButton:Object):void {

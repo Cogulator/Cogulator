@@ -33,6 +33,7 @@ package  classes {
 	import flash.text.TextField;
     import flash.text.TextFormat;
 	import classes.AddOperatorText
+	import classes.OperaterUpdater;
 	import classes.UndoRedo;
 	import com.inruntime.utils.*;
 	
@@ -44,17 +45,16 @@ package  classes {
 		private var labelX:int = 15;
 		private var operatorX:int = 25;
 		private var lineY:int = 10;
-		//private var _lineNumbers:TextField;
 		private var _undoRedo:UndoRedo;
 		public var insert:AddOperatorText;	
 		private var _main:Main;
 
 		//public function OperatorsSidebar(ln:TextField, uR:UndoRedo) {
 		public function OperatorsSidebar(uR:UndoRedo, main:Main) {
-			//_lineNumbers = ln;
 			_undoRedo = uR
 			_main = main;
 			
+			var update = new OperaterUpdater(); //checks to see if there new or modified operators. If so, updates the operator.txt file and backs up the old one
 			insert = new AddOperatorText();
 			
 			var i:int = 0;
@@ -67,7 +67,8 @@ package  classes {
 				addChild(goalsLabel);
 			
 			for (i = 0; i < goalControl.length; i++) {
-				generateOperatorButton(goalControl[i], 0, "");
+				//For now, only adding Goal & Also. Operator Sidebar is really for novices, so keeping the more advanced features out of it for now
+				if (goalControl[i] == "Goal" || goalControl[i] == "Also") generateOperatorButton(goalControl[i], 0, "");
 			}
 			
 			lineY += 10;
@@ -127,6 +128,21 @@ package  classes {
 			
 			for (i = 0; i < $.operatorArray.length; i++) {
 				if ($.operatorArray[i].resource == "hands") generateOperatorButton($.operatorArray[i].appelation, $.operatorArray[i].time, $.operatorArray[i].description);
+			}
+			
+			lineY += 10;
+			
+			//    - add the wait operator  - 
+			var systemLabel:HeadingLabel = new HeadingLabel();
+				systemLabel.labeltxt.text = "System";
+				systemLabel.x = labelX;
+				lineY += 20;
+				systemLabel.y = lineY;
+				addChild(systemLabel);
+
+			
+			for (i = 0; i < $.operatorArray.length; i++) {
+				if ($.operatorArray[i].resource == "system") generateOperatorButton($.operatorArray[i].appelation, $.operatorArray[i].time, $.operatorArray[i].description);
 			}
 			
 		}
@@ -194,7 +210,6 @@ package  classes {
 			insert.addOperatorPermament(evt.currentTarget);
 			_undoRedo.listenForNewText(); //add to undo redo stack
 			_main.refreshModel();
-			//LineNumbers.numberTheLines(_lineNumbers, $.codeTxt);
 		}
 		
 

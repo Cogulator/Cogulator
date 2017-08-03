@@ -213,106 +213,110 @@ package classes {
 			for (var i:int = 0; i <intersteps.length; i++) {
 				var step:Step = intersteps[i];
 				
-				stepX1 = step.srtTime * sclFctr;
-				stepX2 = step.endTime * sclFctr;
-				stepY = resourceY[step.resource];
-				
-				var colour:uint = threadColor[step.thred];
-				
-				//add operator time...
-				var opTime:TextField = new TextField();
-					opTime.defaultTextFormat = grotesqueMed;
-					opTime.embedFonts = true;
-					opTime.autoSize = TextFieldAutoSize.LEFT;
-					opTime.text = " " + int(step.time);
-					opTime.x = stepX1;
-					opTime.y = stepY + oprtrDeltaY; 
-				if (opTime.width < stepX2 - stepX1) addChild(opTime);
-				
-				//draw operator line...
-				//...first need to determine if the next step is above or below current step for line connecitng
-				//get previous step in same thrd...
-				var prvstepY:Number;
-				var nxtstepY:Number;
-				
-				var prvstep:Step = findStep(i, step.thred, -1);
-				if (prvstep == null) prvstepY = stepY;
-				else prvstepY = resourceY[prvstep.resource];
-				
-				//..and the next step in same thrd...
-				var nxtstep:Step = findStep(i, step.thred, 1);
-				if (nxtstep == null) nxtstepY = stepY;
-				else nxtstepY = resourceY[nxtstep.resource];
-				
-				var uplft:int, dwnlft:int, uprght:int, dwnrght:int;
-				if (stepY == prvstepY) {
-					uplft = 5;
-					dwnlft = 5;
-				} else if (stepY < prvstepY) {
-					uplft = 5;
-					dwnlft = 35;
-				} else {
-					uplft = 35;
-					dwnlft = 5;
-				}
-				
-				if (stepY == nxtstepY) {
-					uprght = 5;
-					dwnrght = 5;
-				} else if (stepY < nxtstepY) {
-					uprght = 5;
-					dwnrght = int(nxtstepY - stepY);
-				} else {
-					uprght = int(stepY - nxtstepY);
-					dwnrght = 5;
-				}
-				
-				var line:Shape = new Shape();
-					line.graphics.lineStyle(1, colour, 1, false, "normal", "none", "null", 3);
-					connector
-				
-				line.graphics.moveTo(stepX1, stepY + lineDeltaY); 
-				line.graphics.lineTo(stepX2, stepY + lineDeltaY);
-				
-				var connector:Shape = new Shape();
-					connector.graphics.lineStyle(1, colour);
-				
-				connector.graphics.moveTo(stepX1, stepY + lineDeltaY - uplft); //left cap
-				connector.graphics.lineTo(stepX1, stepY + lineDeltaY + dwnlft);
-				
-				connector.graphics.moveTo(stepX2, stepY + lineDeltaY - uprght); 
-				connector.graphics.lineTo(stepX2, stepY + lineDeltaY + dwnrght); //right cap
-				
-				addChild(line);
-				addChild(connector);
+				if (step.resource != "system") {
+					stepX1 = step.srtTime * sclFctr;
+					stepX2 = step.endTime * sclFctr;
+					stepY = resourceY[step.resource];
+					
+					var colour:uint = threadColor[step.thred];
+					
+					//add operator time...
+					var opTime:TextField = new TextField();
+						opTime.defaultTextFormat = grotesqueMed;
+						opTime.embedFonts = true;
+						opTime.autoSize = TextFieldAutoSize.LEFT;
+						opTime.text = " " + int(step.time);
+						opTime.x = stepX1;
+						opTime.y = stepY + oprtrDeltaY; 
+					if (opTime.width < stepX2 - stepX1) addChild(opTime);
+					
+					//draw operator line...
+					//...first need to determine if the next step is above or below current step for line connecitng
+					//get previous step in same thrd...
+					var prvstepY:Number;
+					var nxtstepY:Number;
+					
+					var prvstep:Step = findStep(i, step.thred, -1);
+					if (prvstep == null) prvstepY = stepY;
+					else if (prvstep.resource == "system") prvstepY = stepY;
+					else prvstepY = resourceY[prvstep.resource];
+					
+					//..and the next step in same thrd...
+					var nxtstep:Step = findStep(i, step.thred, 1);
+					if (nxtstep == null) nxtstepY = stepY;
+					else nxtstepY = resourceY[nxtstep.resource];
+					
+					var uplft:int, dwnlft:int, uprght:int, dwnrght:int;
+					if (stepY == prvstepY) {
+						uplft = 5;
+						dwnlft = 5;
+					} else if (stepY < prvstepY) {
+						uplft = 5;
+						dwnlft = 35;
+					} else {
+						uplft = 35;
+						dwnlft = 5;
+					}
+					
+					if (stepY == nxtstepY) {
+						uprght = 5;
+						dwnrght = 5;
+					} else if (stepY < nxtstepY) {
+						uprght = 5;
+						dwnrght = int(nxtstepY - stepY);
+					} else {
+						uprght = int(stepY - nxtstepY);
+						dwnrght = 5;
+					}
+					
+					var line:Shape = new Shape();
+						line.graphics.lineStyle(1, colour, 1, false, "normal", "none", "null", 3);
+						connector
+					
+					line.graphics.moveTo(stepX1, stepY + lineDeltaY); 
+					line.graphics.lineTo(stepX2, stepY + lineDeltaY);
+					
+					var connector:Shape = new Shape();
+						connector.graphics.lineStyle(1, colour);
+					
+					connector.graphics.moveTo(stepX1, stepY + lineDeltaY - uplft); //left cap
+					connector.graphics.lineTo(stepX1, stepY + lineDeltaY + dwnlft);
+					
+					connector.graphics.moveTo(stepX2, stepY + lineDeltaY - uprght); 
+					connector.graphics.lineTo(stepX2, stepY + lineDeltaY + dwnrght); //right cap
+					
+					addChild(line);
+					addChild(connector);
 				
 				
 				//add operator and label
-				var lblTxt:String =  " " + StringUtils.capitaliseFirstLetter(step.operator) + " " + StringUtils.capitaliseFirstLetter(step.label);
-				var opLbl:TextField = new TextField();
-					opLbl.mouseEnabled = false;
-					opLbl.defaultTextFormat = grotesqueMed;
-					opLbl.embedFonts = true;
-					opLbl.autoSize = TextFieldAutoSize.LEFT;
+					var lblTxt:String =  " " + StringUtils.capitaliseFirstLetter(step.operator) + " " + StringUtils.capitaliseFirstLetter(step.label);
+					var opLbl:TextField = new TextField();
+						opLbl.mouseEnabled = false;
+						opLbl.defaultTextFormat = grotesqueMed;
+						opLbl.embedFonts = true;
+						opLbl.autoSize = TextFieldAutoSize.LEFT;
+						opLbl.text = lblTxt;
+					var avlblRtio:Number = (stepX2 - stepX1) / opLbl.width;
+					opLbl.text = "....."
+					if (lblTxt.length < 4 || opLbl.width > stepX2 - stepX1) lblTxt = "";
+					else if (avlblRtio < 1) lblTxt = lblTxt.substring(0, int(  ( lblTxt.length - 3 ) * avlblRtio )  ) + "..."; 
 					opLbl.text = lblTxt;
-				var avlblRtio:Number = (stepX2 - stepX1) / opLbl.width;
-				opLbl.text = "....."
-				if (lblTxt.length < 4 || opLbl.width > stepX2 - stepX1) lblTxt = "";
-				else if (avlblRtio < 1) lblTxt = lblTxt.substring(0, int(  ( lblTxt.length - 3 ) * avlblRtio )  ) + "..."; 
-				opLbl.text = lblTxt;
-				
-				//text field is placed in container so that you can get hand cursor when hovering over field
-				var opLblContainer:Sprite = new Sprite();
-					opLblContainer.buttonMode = true;
-					opLblContainer.x = stepX1;
-					opLblContainer.y = stepY + labelDeltaY;
-					opLblContainer.name = String(step.lineNo); //for textHighlighter
-					opLblContainer.addEventListener(MouseEvent.CLICK, textHighlighter);
-					opLblContainer.addChild(opLbl);
-					addChild(opLblContainer);
+					
+					//text field is placed in container so that you can get hand cursor when hovering over field
+					var opLblContainer:Sprite = new Sprite();
+						opLblContainer.buttonMode = true;
+						opLblContainer.x = stepX1;
+						opLblContainer.y = stepY + labelDeltaY;
+						opLblContainer.name = String(step.lineNo); //for textHighlighter
+						opLblContainer.addEventListener(MouseEvent.CLICK, textHighlighter);
+						opLblContainer.addChild(opLbl);
+						addChild(opLblContainer);
+				}
 				
 				//save max end time
 				if (step.endTime > maxEndTime)  maxEndTime = step.endTime;
+				
 			}
 			
 			addWorkingMemoryToChartWithAverage(_ganttWindow.chartBckgrnd.height - 45, sclFctr);

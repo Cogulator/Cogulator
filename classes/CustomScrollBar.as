@@ -77,11 +77,13 @@ package classes {
 		}
 		
 		private function moveViaWheel(evt:MouseEvent):void {
-			var why:Number = dragger.y + -evt.delta * 5;
-			if (why < 0) why = 0;
-			else if (why > bckgrnd.height - dragger.height) why = bckgrnd.height - dragger.height;
-			dragger.y = why;
-			slideSideBar();
+			if (this.visible) { //only scroll if there's a sidebar
+				var why:Number = dragger.y + -evt.delta * 5;
+				if (why < 0) why = 0;
+				else if (why > bckgrnd.height - dragger.height) why = bckgrnd.height - dragger.height;
+				dragger.y = why;
+				slideSideBar();
+			}
 		}
 		
 		
@@ -102,9 +104,11 @@ package classes {
 			updateSideBarPixelsVisible();
 			dragger.height = bckgrnd.height * prcntShown;
 			
-			if (_sidebar.visible == false) this.visible = false;
-			else if (prcntShown > 1) this.visible = false;
+			if (_sidebar.visible == false || prcntShown > 1 ) this.visible = false;
 			else this.visible = true;
+
+			//else if (prcntShown > 1) this.visible = false;
+			//else this.visible = true;
 		}
 		
 		

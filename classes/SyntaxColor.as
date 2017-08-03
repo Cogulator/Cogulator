@@ -27,6 +27,7 @@ package classes {
 	import classes.WrappedLineUtils;
 	import classes.SolarizedPalette;
 	import com.inruntime.utils.*;
+	import flash.text.TextField;
 
 	
 	public class SyntaxColor {
@@ -65,16 +66,19 @@ package classes {
 		
 		
 		//Called from GOMSProcessor to colorize and error check lines that are not evaluated in Cog+ functionality
-		public static function solarizeAll():void{
-			var codeLines:Array = $.codeTxt.text.split("\r");
+		public static function solarizeAll(txtField:TextField, evaluateModel:Boolean = true):void{
+			var codeLines:Array = txtField.text.split("\r");
 			var beginIndex:int = 0;
 			var endIndex:int = codeLines[0].length;
-			for (var key:Object in $.errors) delete $.errors[key];  //clear out all $.errors
+			
+			if (evaluateModel) {
+				for (var key:Object in $.errors) delete $.errors[key];  //clear out all $.errors
+			}
 
 			for (var lineIndex:int = 0; lineIndex < codeLines.length; lineIndex++ ) {	
 				var line = codeLines[lineIndex];
 				endIndex = beginIndex + line.length;
-				if (trim(line) != "") solarizeLineNum(lineIndex, beginIndex, endIndex);
+				if (trim(line) != "") solarizeLineNum(txtField, lineIndex, beginIndex, endIndex, "", evaluateModel);
 				beginIndex = endIndex + 1;
 			}
 		}
@@ -97,8 +101,9 @@ package classes {
 				chunkNamedInError = errMessage.substring(leftAngleIndex, rightAngleIndex);	
 			}	
 			
-			return (solarizeLineNum(lineNumber, begindex, endex, chunkNamedInError)[6]);
+			return (solarizeLineNum($.codeTxt, lineNumber, begindex, endex, chunkNamedInError)[6]);
 		}
+		
 		
 		//Purpose:  Color the line specified.  Created for Cog+ functionality
 		//Input: line number to be colorized.
@@ -119,18 +124,17 @@ package classes {
 				chunkNamedInError = errMessage.substring(leftAngleIndex, rightAngleIndex);	
 			}	
 			
-			solarizeLineNum(lineNumber, begindex, endex, chunkNamedInError)[6];
+			solarizeLineNum($.codeTxt, lineNumber, begindex, endex, chunkNamedInError)[6];
 		}
 
 
 		public static function ErrorColorLine(lineNumber:int){
-			
 			//get line number based on caret position
 			var beginIndex = WrappedLineUtils.getLineIndex($.codeTxt, lineNumber);
 			var endIndex = WrappedLineUtils.getLineEndIndex($.codeTxt, lineNumber);
 			
 			$.codeTxt.setTextFormat(errorred, beginIndex, endIndex);
-			}
+		}
 		
 			
 		//0: Number of Indents
@@ -142,27 +146,31 @@ package classes {
 		//6: Error fixed in line boolean - the one non-Goms processor calls are looking for
 		//7: Array of chunk names "<>"
 		
-		public static function solarizeLineNum(lineNum:int, beginIndex:int = -1, endIndex:int = -1, chunkNamedInError:String = ""):Array {
-			time = "";
-			chunkNames.length = 0;
+		public static function solarizeLineNum(txtFld:TextField, lineNum:int, beginIndex:int = -1, endIndex:int = -1, chunkNamedInError:String = "", evaluateModel:Boolean = true):Array {
+			if (evaluateModel) {
+				time = "";
+				chunkNames.length = 0;
+			}
 			
 			var lineIsInErrors:Boolean = false;
-			if ($.errors[lineNum] != undefined) lineIsInErrors = true;
-			errorInLine = false;
+			if (evaluateModel) {
+				if ($.errors[lineNum] != undefined) lineIsInErrors = true;
+				errorInLine = false;
+			}
 			
 			if(beginIndex == -1) {
-				beginIndex = findBeginIndex();
-				endIndex = findEndIndex(beginIndex);
+				beginIndex = findBeginIndex(txtFld);
+				endIndex = findEndIndex(txtFld, beginIndex);
 			}
 			
 			var index:int;
 			var lineStartIndex:int = beginIndex;
 			
-			var lineTxt:String = $.codeTxt.text.substring(beginIndex, endIndex);
-			if (chunkNamedInError == "") delete $.errors[lineNum];
+			var lineTxt:String = txtFld.text.substring(beginIndex, endIndex);
+			if (evaluateModel && chunkNamedInError == "") delete $.errors[lineNum];
 
 			//     -start by setting the whole line to grey
-			if (beginIndex > -1 && endIndex <= $.codeTxt.length) $.codeTxt.setTextFormat(grey, beginIndex, endIndex);
+			if (beginIndex > -1 && endIndex <= txtFld.length) txtFld.setTextFormat(grey, beginIndex, endIndex);
 			
 			//    -evaluate comments
 			index = lineTxt.indexOf("*");
@@ -172,15 +180,13 @@ package classes {
 			
 			indents = 0;
 			if (trim(lineTxt) != "") {			
-				//    -evaluate indents
-				
+				//    -evaluate indents	
 				for (var d:int = 1; d < lineTxt.length; d++) {
 					if (lineTxt.charAt(d) != "." && lineTxt.charAt(d) != " ") break;
 				}
 				
 				indents = lineTxt.substring(0, d).split(".").length;
-				$.codeTxt.setTextFormat(black, beginIndex + 0, beginIndex + d);
-				
+				txtFld.setTextFormat(black, beginIndex + 0, beginIndex + d);				
 				
 				//    -evaluate whether operator line or method control line
 				index = findIndentEnd(lineTxt);
@@ -199,12 +205,13 @@ package classes {
 							break;
 						}
 					}
-					if (goalLine) solarizeGoalLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex);
-					else solarizeOperatorLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex, chunkNamedInError);
-				}
-			} else return new Array(0, "goal", "", "", "", false, false, []); //returning true here means it won't be included in the interleaving process if it's a comment
 					
-			if (errorInLine == false && lineIsInErrors == true) errorFixed = true; //true means an error was fixed
+					if (goalLine) solarizeGoalLine(lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex);
+					else solarizeOperatorLine(txtFld, lineTxt, index, lineNum, beginIndex, endIndex, lineStartIndex, chunkNamedInError, evaluateModel);
+				}
+			} else return new Array(0, "goal", "", "", "", false, false, []); //returning true here means it won't be included in the interleaving process if it's a comment					
+
+			if (evaluateModel && errorInLine == false && lineIsInErrors == true) errorFixed = true; //true means an error was fixed
 			else errorFixed = false;
 						
 			return new Array(indents, operator, lineLabel, time, threadLabel, errorInLine, errorFixed, chunkNames);
@@ -251,9 +258,8 @@ package classes {
 			}
 		}
 		
-		
-		
-		private static function solarizeOperatorLine(lineTxt:String, index:int, lineNum:int, beginIndex:int, endIndex:int, lineStartIndex:int, chunkNamedInError:String):void {
+			
+		private static function solarizeOperatorLine(txtFld:TextField, lineTxt:String, index:int, lineNum:int, beginIndex:int, endIndex:int, lineStartIndex:int, chunkNamedInError:String, evaluateModel:Boolean):void {
 			threadLabel = ""; //setting for the return array			
 			
 			//    -evaluate operator
@@ -265,21 +271,22 @@ package classes {
 				}
 			}
 			if (operator.length > 0) {
-				if (!match) {
+				if (!match && evaluateModel) {
 					$.errors[lineNum] = "Couldn't find an operator.";
-					$.codeTxt.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
+
+					txtFld.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
 					errorInLine = true;
-				} else $.codeTxt.setTextFormat(blue, beginIndex + index, beginIndex + endIndex);
+
+				} else txtFld.setTextFormat(blue, beginIndex + index, beginIndex + endIndex);
 			}
-				
 				
 			//    -evaluate label
 			index = findNextItem(endIndex, lineTxt);
 			endIndex = findLabelEnd(lineTxt, "(");
 			lineLabel = lineTxt.substring(index, endIndex);
-			if (lineLabel.length > 0) $.codeTxt.setTextFormat(black, beginIndex + index, beginIndex + endIndex);
-				
-			
+
+			if (lineLabel.length > 0) txtFld.setTextFormat(black, beginIndex + index, beginIndex + endIndex);
+							
 			//    -evaluate WM chunks
 			var leftAngleBracketIndex:int = 0;
 			var rightAngleBracketIndex:int = 0;
@@ -293,43 +300,51 @@ package classes {
 					var chunkName = lineTxt.substring(leftAngleBracketIndex, rightAngleBracketIndex);	
 										
 					if (rightAngleBracketIndex > leftAngleBracketIndex + 1) {
-						if (chunkNamedInError != chunkName) $.codeTxt.setTextFormat(cyan, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
-						else $.codeTxt.setTextFormat(errorred, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
-						chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
+
+						if (chunkNamedInError != chunkName) txtFld.setTextFormat(cyan, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
+
+						else txtFld.setTextFormat(errorred, beginIndex + leftAngleBracketIndex + 1, beginIndex + rightAngleBracketIndex);
+
+						if (evaluateModel) chunkNames.push(lineTxt.substring(leftAngleBracketIndex + 1, rightAngleBracketIndex));
 					}
 					
 					leftAngleBracketIndex = rightAngleBracketIndex + 1;
 					rightAngleBracketIndex = leftAngleBracketIndex + 1;
 				}
 			}
-			
-			
+						
 			//    -evaluate time
-			time = "";
+			if (evaluateModel) time = "";
 			var leftParenIndex:int = lineTxt.indexOf("(");
 			var rightParenIndex:int = lineTxt.indexOf(")");
 			if (leftParenIndex > -1) {
-				$.codeTxt.setTextFormat(black, beginIndex + leftParenIndex, beginIndex + leftParenIndex + 1); //set right paren to black
+
+				txtFld.setTextFormat(black, beginIndex + leftParenIndex, beginIndex + leftParenIndex + 1); //set right paren to black
 				
 				//if the "(" marker exists
 				if (rightParenIndex > -1 && rightParenIndex > leftParenIndex) {  //if the ")" marker exists and occurs after the left marker					
-					$.codeTxt.setTextFormat(black, beginIndex + rightParenIndex, beginIndex + rightParenIndex + 1); //set right paren to black
+
+					txtFld.setTextFormat(black, beginIndex + rightParenIndex, beginIndex + rightParenIndex + 1); //set right paren to black
 					
 					//find what's in the number position
 					index = findNextItem(leftParenIndex + 1, lineTxt);
 					endIndex = findItemEnd(index, lineTxt);
 					var timeValue:String = lineTxt.substring(index, endIndex);
 						timeValue = trim(timeValue);
-					if ( isNaN(Number(timeValue) )  ) {
+
+					if ( evaluateModel && isNaN(Number(timeValue) )  ) {
 						$.errors[lineNum] = "I was expecting a number after the left parenthesis.";
 						if (String(timeValue).length > 0) {
-							$.codeTxt.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
+
+							txtFld.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
 							time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
 							errorInLine = true;
 						} 
 					} else {
-						time = String(timeValue);
-						$.codeTxt.setTextFormat(black, beginIndex + index, beginIndex + endIndex);
+
+						if (evaluateModel) time = String(timeValue);
+
+						txtFld.setTextFormat(black, beginIndex + index, beginIndex + endIndex);
 					}
 
 					//find what's in the units position
@@ -341,33 +356,39 @@ package classes {
 						if (timeUnits != "syllables" && timeUnits != "seconds" && timeUnits != "milliseconds" && timeUnits != "ms") {
 							$.errors[lineNum] = "The modifier can be 'seconds', 'milliseconds', or 'ms'";
 							if (timeUnits.length > 0) { 
-								$.codeTxt.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
+
+								txtFld.setTextFormat(errorred, beginIndex + index, beginIndex + endIndex);
 								time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
 								errorInLine = true;
 							} 
 						} else  {
-							time = time + " " + timeUnits;
-							$.codeTxt.setTextFormat(green, beginIndex + index, beginIndex + endIndex); //set units to green
+
+							if (evaluateModel) time = time + " " + timeUnits;
+
+							txtFld.setTextFormat(green, beginIndex + index, beginIndex + endIndex); //set units to green
 						}
 					}
 					
-				} else if (rightParenIndex < leftParenIndex && rightParenIndex > - 1) { //if there is a right paren before the left paren
+
+				} else if (evaluateModel && rightParenIndex < leftParenIndex && rightParenIndex > - 1) { //if there is a right paren before the left paren
 						$.errors[lineNum] = "I found a right paren before the left paren";
 						time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
 						errorInLine = true;
-						$.codeTxt.setTextFormat(errorred, beginIndex + rightParenIndex, beginIndex + rightParenIndex + 1);
-				} else { // if there is a left paren with no right paren...
+
+						txtFld.setTextFormat(errorred, beginIndex + rightParenIndex, beginIndex + rightParenIndex + 1);
+
+				} else if (evaluateModel) { // if there is a left paren with no right paren...
 					$.errors[lineNum] = "I was expecting a right parenthesis.";
 					time = ""; //if there is an error, blank out time so you don't try to evaluate it GomsProcessor
 					errorInLine = true;
-					$.codeTxt.setTextFormat(errorred, beginIndex + leftParenIndex, beginIndex + lineTxt.length);
+
+					txtFld.setTextFormat(errorred, beginIndex + leftParenIndex, beginIndex + lineTxt.length);
 				}
 
 			}
-		
 		}
-			
-			
+		
+		
 		private static function trim(s:String):String {
 			return s.replace(/^[\s|\t|\n]+|[\s|\t|\n]+$/gs, '');
 		}
@@ -382,16 +403,14 @@ package classes {
 			return indx++;
 		}
 		
-		
-		private static function findBeginIndex():int {
-			var startPara:int = $.codeTxt.getFirstCharInParagraph($.codeTxt.getFirstCharInParagraph($.codeTxt.caretIndex));
+		private static function findBeginIndex(txtFld:TextField):int {
+			var startPara:int = txtFld.getFirstCharInParagraph(txtFld.getFirstCharInParagraph(txtFld.caretIndex));
 			return startPara;
 		}
 		
-		private static function findEndIndex(beginIndex:int):int {
-			return ( beginIndex + $.codeTxt.getParagraphLength(beginIndex) );
+		private static function findEndIndex(txtFld:TextField, beginIndex:int):int {
+			return ( beginIndex + txtFld.getParagraphLength(beginIndex) );
 		}
-		
 		
 		private static function findLabelEnd(lineTxt:String, brkString:String):int {
 			var endIndex:int = lineTxt.indexOf(brkString);
