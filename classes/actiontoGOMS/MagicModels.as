@@ -1,6 +1,7 @@
 ﻿package classes.actiontoGOMS {
 	
 	import flash.display.MovieClip;
+	import flash.display.SimpleButton;
 	import flash.events.*;
 	import flash.ui.Keyboard;
 	import flash.utils.Timer;
@@ -16,6 +17,7 @@
 	import flash.geom.Point;
 	import flash.display.Shape;
 	import flash.text.TextField;
+	import com.greensock.TweenMax;
 	
 
 	
@@ -30,10 +32,12 @@
 		private var fitts = new FittsLaw();
 		private var displayMarkings:Array = new Array();
 		private var actionCount:int = 0;
+		private var speechRecMode = "none";
+		private var speechRecTween:TweenMax;
 		
 		public var mac:InteractiveDesktop = new InteractiveDesktop();
 		public var phone:InteractiveIphone = new InteractiveIphone();
-		public var checkButton:MovieClip;
+		public var checkButton:SimpleButton;
 		public var modelTF:TextField;
 		public var selectedDevice:Object;
 	
@@ -59,7 +63,7 @@
 			if (phone.stage) removeChild(phone);
 			reset();
 			
-			mac.x = $.stage.stageWidth / 3 - 190;
+			mac.x = $.stage.stageWidth / 2 - 393;
 			mac.y = $.stage.stageHeight / 2 - 215;
 			
 			mac.checkButton.visible = false;
@@ -75,13 +79,16 @@
 			if (mac.stage) removeChild(mac);
 			reset();
 			
-			phone.x = $.stage.stageWidth / 3 - 80;
+			phone.x = $.stage.stageWidth / 2 - 292;
 			phone.y = $.stage.stageHeight / 2 - 140;
 			
 			phone.checkButton.visible = false;
 			phone.undoButton.visible = false;
+			phone.speechRecGuide.visible = false;
 			addChild(phone);
 			
+			phone.homeButton.addEventListener(MouseEvent.MOUSE_DOWN, onHomeDown);
+			phone.speechRecGuide.field.text = "";
 			checkButton = phone.checkButton;
 			modelTF = phone.logWindow.logTxt;
 			selectedDevice = phone;
@@ -119,7 +126,7 @@
 			mac.x = stage.stageWidth / 2 - 393;
 			mac.y = stage.stageHeight / 2 - 215;
 			
-			phone.x = stage.stageWidth / 2 - 80;
+			phone.x = stage.stageWidth / 2 - 292;
 			phone.y = stage.stageHeight / 2 - 140;
 		}
 		
@@ -150,45 +157,50 @@
 			var travelTime = 0.0;
 			if (action == Interactions.POINT) {
 				if (mac.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
 				travelTime = fitts.pointAndClick(resolvedDistance(startPoint, endPoint, Device.DESKTOP));
-				logActions += "\nPoint to " + actionCount.toString() + " (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
-				logActions += "\nVerify cursor over target";
+				logActions += "\nPoint to <" + actionCount.toString() + "> (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
+				logActions += "\nCognitive_processor verify cursor over <" + actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markDesktopAction(action, startPoint, endPoint, mac.logWindow.logTxt.text);
 			} else if (action == Interactions.CLICK) {
 				if (mac.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nVerify cursor over target";
-				logActions += "\nClick on " + actionCount.toString();
+				logActions += "\nCognitive_processor verify cursor over <" + actionCount.toString() + ">";
+				logActions += "\nClick on <" + actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markDesktopAction(action, startPoint, endPoint, mac.logWindow.logTxt.text);
 			} else if (action == Interactions.POINTANDCLICK) {
 				if (mac.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
 				travelTime = fitts.pointAndClick(resolvedDistance(startPoint, endPoint, Device.DESKTOP));
-				logActions += "\nPoint to " + actionCount.toString() + " (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
-				logActions += "\nVerify cursor over target.";				
-				logActions += "\nClick on " + actionCount.toString();
+				logActions += "\nPoint to <" + actionCount.toString() + "> (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
+				logActions += "\nCognitive_processor verify cursor over <" + actionCount.toString() + ">";				
+				logActions += "\nClick on <" +  actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markDesktopAction(action, startPoint, endPoint, mac.logWindow.logTxt.text);
 			} else if (action == Interactions.DRAGFROM) {
 				if (mac.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
 				travelTime = fitts.pointAndClick(resolvedDistance(startPoint, endPoint, Device.DESKTOP));
-				logActions += "\nPoint to " + actionCount.toString() + " (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
-				logActions += "\nVerify cursor over target.";
-				logActions += "\nClick on " + actionCount.toString();
+				logActions += "\nPoint to <" + actionCount.toString() + "> (" + travelTime.toString() + " milliseconds) *Fitts Law Point Estimate";
+				logActions += "\nCognitive_processor verify cursor over <" + actionCount.toString() + ">";
+				logActions += "\nClick on <" + actionCount.toString()  + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markDesktopAction(action, startPoint, endPoint, mac.logWindow.logTxt.text, drawPoint);
 			} else if (action == Interactions.DRAGTO) {
 				if (mac.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
 				travelTime = fitts.dragAndDrop(resolvedDistance(startPoint, endPoint, Device.DESKTOP));
-				logActions += "\nPoint to " + actionCount.toString() + " (" + travelTime.toString() + " milliseconds) *Fitts Law Drag Estimate";
-				logActions += "\nVerify cursor over target.";				
-				logActions += "\nClick on " + actionCount.toString();
+				logActions += "\nPoint to <" + actionCount.toString() + "> (" + travelTime.toString() + " milliseconds) *Fitts Law Drag Estimate";
+				logActions += "\nCognitive_processor verify cursor over <" + actionCount.toString() + ">";;				
+				logActions += "\nClick on <" + actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markDesktopAction(action, startPoint, endPoint, mac.logWindow.logTxt.text, drawPoint);
 			} else if (action == Interactions.TYPE) {
 				if (lastAction != Interactions.TYPE) logActions += "\n " + "\nType ";
 				logActions += data;
 			} else if (action == Interactions.KEYSTROKE) {
-				logActions += "\nVerify correct";
+				logActions += "\nCognitive_processor verify correct";
 				logActions += "\nKeystroke ";
 				logActions += data;
 			} else if (action == Interactions.HOVER) {
@@ -301,7 +313,6 @@
 		}
 		
 		private function hoverHandler(evt:TimerEvent):void {
-			//desktopActionToCode(Interactions.HOVER, "");			
 			mouseTimer.removeEventListener(TimerEvent.TIMER, hoverHandler);
 			mouseMoving = false;
 		}
@@ -325,8 +336,20 @@
 					desktopActionToCode(Interactions.TYPE, character);
 				}
 			} else {
-				var char:String = String.fromCharCode(evt.charCode);
-				iphoneActionToCode(Interactions.TAP, char);
+				if (speechRecMode != "none") {
+					if (evt.keyCode == Keyboard.ESCAPE) {
+						cycleSpeechRecMode(true); //turn off speech rec mode
+					} else if (evt.keyCode == Keyboard.ENTER) {
+						cycleSpeechRecMode();
+					} else {
+						var chrtr:String = String.fromCharCode(evt.charCode);
+						if (speechRecMode == "say") iphoneActionToCode(Interactions.SPEECHRECSAY, chrtr);
+						else if (speechRecMode == "hear") iphoneActionToCode(Interactions.SPEECHRECHEAR, chrtr);
+					}
+				} else {
+					var char:String = String.fromCharCode(evt.charCode);
+					iphoneActionToCode(Interactions.TAP, char);
+				}
 			}
 		}
 		
@@ -380,7 +403,7 @@
 		}
 		
 		
-// - INTEPRET IPHONE ACTIONS
+// --------------------- INTEPRET IPHONE ACTIONS ---------------------------
 		var gridStartPoint:Point;
 		var gridEndPoint:Point;
 		private function touchDownHandler(evt:MouseEvent):void {
@@ -401,12 +424,57 @@
 		
 		private function touchMoveHandler(evt:MouseEvent):void {
 			phone.grid.x = 0; 
+			if (phone.grid.y <= -phone.grid.height + 225) phone.grid.y = -phone.grid.height + 225;
+			else if (phone.grid.y >= 0) phone.grid.y = 0;
 		}
 		
 		private function wasSwipe():Boolean {
 			var d = distance(gridStartPoint, gridEndPoint);
 			if (d > 10) return true;
 			return false;
+		}
+		
+		var homeTimer:Timer = new Timer(1000);
+		private function onHomeDown(evt:MouseEvent):void {
+			homeTimer.reset();
+			homeTimer.addEventListener(TimerEvent.TIMER, homeTimerHandler);
+			homeTimer.start();
+			phone.homeButton.addEventListener(MouseEvent.MOUSE_UP, onHomeUp);
+		}
+		
+		private function onHomeUp(evt:MouseEvent):void {
+			homeTimer.reset();
+			phone.homeButton.removeEventListener(MouseEvent.MOUSE_UP, onHomeUp);
+			iphoneActionToCode(Interactions.HOME, "", null, null);
+		}
+		
+		private function homeTimerHandler(evt:TimerEvent):void {
+			phone.homeButton.removeEventListener(MouseEvent.MOUSE_UP, onHomeUp);
+			homeTimer.removeEventListener(TimerEvent.TIMER, homeTimerHandler);
+			homeTimer.reset();
+			cycleSpeechRecMode();
+		}
+		
+		private function cycleSpeechRecMode(end:Boolean = false):void {
+			if (end || phone.speechRecGuide.field.text == "Type system aural response, if any. Press ENTER when done. ESC to exit.") {
+				if (speechRecTween != null) speechRecTween.kill();
+				speechRecMode = "none";
+				phone.speechRecGuide.field.text = "";
+				phone.speechRecGuide.visible = false;
+				lastAction = "";
+			} else if (phone.speechRecGuide.field.text == "") {
+				speechRecMode = "say";
+				phone.speechRecGuide.field.text = "Type speech rec command. Press ENTER when done. ESC to exit."
+				if (speechRecTween != null) speechRecTween.kill();
+				speechRecTween = new TweenMax(phone.speechRecGuide.field, 1, {alpha:0.5, repeat:1, yoyo:true});
+				phone.speechRecGuide.visible = true;
+			} else if (phone.speechRecGuide.field.text == "Type speech rec command. Press ENTER when done. ESC to exit.") {
+				speechRecMode = "hear";
+				phone.speechRecGuide.field.text = "Type system aural response, if any. Press ENTER when done. ESC to exit."
+				if (speechRecTween != null) speechRecTween.kill();
+				speechRecTween = new TweenMax(phone.speechRecGuide.field, 1, {alpha:0.5, repeat:1, yoyo:true})
+				phone.speechRecGuide.visible = true;
+			} 
 		}
 		
 		private function iphoneActionToCode(action:String, data:String, startPoint:Point = null, endPoint:Point = null, drawPoint:Point = null):void {
@@ -418,22 +486,51 @@
 			var travelTime = 0.0;
 			if (action == Interactions.TOUCH) {
 				if (phone.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
-				logActions += "\nCognitive_processor verify target.";				
-				logActions += "\nTouch " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
+				logActions += "\nCognitive_processor verify <" + actionCount.toString() + ">";				
+				logActions += "\nTouch <" + actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markPhoneAction(action, startPoint, endPoint, phone.logWindow.logTxt.text, drawPoint);
 			} else if (action == Interactions.SWIPE) {
 				if (phone.logWindow.logTxt.length > 0) logActions += "\n ";
-				logActions += "\nLook at " + actionCount.toString();
-				logActions += "\nCognitive_processor verify target.";	
-				logActions += "\nTouch " + actionCount.toString();
-				logActions += "\nSwipe on " + actionCount.toString();
+				logActions += "\nLook at <" + actionCount.toString() + ">";
+				logActions += "\nCognitive_processor <" + actionCount.toString() + ">";	
+				logActions += "\nTouch <" + actionCount.toString() + ">";
+				logActions += "\nSwipe on <" + actionCount.toString() + ">";
+				logActions += "\nIgnore <" + actionCount.toString() + ">";
 				markPhoneAction(action, startPoint, endPoint, phone.logWindow.logTxt.text, drawPoint);
 			} else if (action == Interactions.TAP) {
 				if (lastAction != Interactions.TAP) logActions += "\n " + "\nTap ";
 				logActions += data;
-			} else if (action == Interactions.SPEECHREC) {
-				
+			} else if (action == Interactions.HOME) {
+				if (phone.logWindow.logTxt.length > 0) logActions += "\n ";
+				logActions += "\nLook at <Home " + actionCount.toString() + ">";
+				logActions += "\nCognitive_processor <Home " + actionCount.toString() + ">";	
+				logActions += "\nTouch <Home " + actionCount.toString() + ">";
+				logActions += "\nClick <Home " + actionCount.toString() + ">";
+				logActions += "\nIgnore <Home " + actionCount.toString() + ">";
+				markPhoneAction(action, startPoint, endPoint, phone.logWindow.logTxt.text, drawPoint);
+			} else if (action == Interactions.SPEECHRECSAY) {
+				if (lastAction != Interactions.SPEECHRECSAY) {
+					if (phone.logWindow.logTxt.length > 0) logActions += "\n ";
+					logActions += "\nLook at <Home " + actionCount.toString() + ">";
+					logActions += "\nCognitive_processor verify <Home " + actionCount.toString() + ">";	
+					logActions += "\nTouch <Home " + actionCount.toString() + ">";
+					logActions += "\nClick and hold <Home " + actionCount.toString() + ">";
+					logActions += "\nIgnore <Home " + actionCount.toString() + ">";
+					logActions += "\nWait for speech rec to start (1 seconds)";
+					logActions += "\nHear <start sound> (2 syllables)";
+					logActions += "\nIgnore <start sound>";
+					logActions += "\nSay ";
+					markPhoneAction(action, startPoint, endPoint, phone.logWindow.logTxt.text, drawPoint);
+				}
+				logActions += data;
+			} else if (action == Interactions.SPEECHRECHEAR) {
+				if (lastAction != Interactions.SPEECHRECHEAR) {
+					logActions += "\nWait for system response (250 ms)";
+					logActions += "\nHear ";
+				}
+				logActions += data;
 			} 
 						
 			phone.logWindow.logTxt.appendText(logActions);
@@ -450,6 +547,7 @@
 			var line:Shape;
 			var click:ClickMark;
 			var swipe:SwipeMark;
+			var home:HomeMark;
 			
 			if (action == Interactions.TOUCH) {
 				click = new ClickMark();
@@ -474,7 +572,19 @@
 				
 				shapes = new Array(swipe);
 				displayMarkings.push({"shapes": shapes, "txt": logTxt});
-			}  
+				
+			}  else if (action == Interactions.HOME || action == Interactions.SPEECHRECSAY) {
+				home = new HomeMark();
+				home.mouseEnabled = false;
+				home.label.mouseEnabled = false;
+				home.x = phone.homeButton.x;
+				home.y = phone.homeButton.y;
+				home.label.text = actionCount.toString();
+				phone.addChild(home);
+				
+				shapes = new Array(home);
+				displayMarkings.push({"shapes": shapes, "txt": logTxt});
+			}
 			
 			actionCount++;
 		}
@@ -490,7 +600,10 @@
 				var shapes:Array = markingsAndText.shapes;
 				var text:String = markingsAndText.txt;
 				
-				for each (var item in shapes) selectedDevice.grid.removeChild(item);
+				for each (var item in shapes) {
+					if (item is HomeMark) phone.removeChild(item);	
+					else selectedDevice.grid.removeChild(item);		
+				}				
 				selectedDevice.logWindow.logTxt.text = text;
 				SyntaxColor.solarizeAll(selectedDevice.logWindow.logTxt);
 			} 
@@ -499,6 +612,8 @@
 				selectedDevice.undoButton.visible = false;
 				selectedDevice.checkButton.visible = false;
 			}
+			
+			cycleSpeechRecMode(true);
 		}
 		
 		private function handleRedo(evt:MouseEvent):void {

@@ -12,6 +12,8 @@
 		public static const TOUCH:String = "touch";
 		public static const TAP:String = "tap"; 
 		public static const SWIPE:String = "swipe"; 
-		public static const SPEECHREC:String = "speechrec"; 
+		public static const HOME:String = "home";
+		public static const SPEECHRECSAY:String = "speechrecsay"; 
+		public static const SPEECHRECHEAR:String = "speechrechear"; 
 	}
 }

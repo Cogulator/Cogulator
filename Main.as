@@ -289,7 +289,6 @@ package {
 			generateOperatorsSidebar();
 			
 			hints = new HintsTool(hintsButton, hintsCHI, errorLine, highlighter, scrollBar, opsSideBar.insert);
-			//needs to be modified at some point to use refreshModel with reloading the model twice
 			hintsButton.addEventListener(MouseEvent.MOUSE_DOWN, refreshModelSansHints);
 			
 			//now that you have the operatorArray, you can setup the new operator chi
@@ -305,8 +304,6 @@ package {
 		
 		public function generateOperatorsSidebar(evt:Event = null):void {
 			operatorArray = ops.arry; 
-			operatorArray.push({resource: "cognitive", appelation: "Ignore", time: 50, description: "Removes_item_from_working_memory.", labelUse: ""});
-			operatorArray.push({resource: "system", appelation: "Wait", time: 1000, description: "User_waiting_for_system._Modify_time_by_adding_'(x_seconds)'_at_end_of_line.", labelUse: ""});
 			$.operatorArray = operatorArray;
 			
 			if (opsSideBar != null) {
@@ -511,7 +508,7 @@ package {
 			
 			//    - move the task time readout
 			var timeReadoutX:Number = line.x + (line.width / 2 - (timeReadout.width + hintsButton.width) / 2);
-			if (timeReadoutX < exportButton.x + 50) timeReadout.x = exportButton.x + 50;
+			if (timeReadoutX < magicWandButton.x + 50) timeReadout.x = magicWandButton.x + 50;
 			else timeReadout.x = timeReadoutX;
 			
 			//    - update the hints button position
@@ -521,6 +518,7 @@ package {
 			//    - move the cidToobar
 			if (line.x + line.width - cidToolbar.width > timeReadout.x + timeReadout.width + 50) cidToolbar.x = line.x + line.width - cidToolbar.width;
 			else cidToolbar.x = timeReadout.x + timeReadout.width + 50;
+			
 				
 			//    - resize the sidebar -
 			sidebarbckgrnd.height = stage.stageHeight + 5;
@@ -564,7 +562,7 @@ package {
 				magicModel.mac.x = stage.stageWidth / 2 - 393;
 				magicModel.mac.y = stage.stageHeight / 2 - 215;
 				
-				magicModel.phone.x = stage.stageWidth / 2 - 80;
+				magicModel.phone.x = stage.stageWidth / 2 - 292;
 				magicModel.phone.y = stage.stageHeight / 2 - 140;
 			}
 		}
