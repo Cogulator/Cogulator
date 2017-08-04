@@ -265,13 +265,17 @@ package classes {
 			return item != "";
 		}
 
-
-		// Purpose: removes unnecessary characters (see trim), indents, and colons
+		// Purpose: removes comments, unnecessary characters (see trim), indents, and colons
 		// Input: String: raw line 
-		//	 	  Example: "...CreateState goal_name value"
+		//	 	  Example: "...CreateState goal_name value *this is a comment"
 		// Output: String: trimmed line 
 		// Example: "CreateState goal_name value"
 		public static function clean(s: String): String {
+			//Remove comment
+			var commentStart:int = s.indexOf("*");
+			if (commentStart >= 0) {
+				s = s.substring(0, commentStart); //remove comments from what you're evaluating
+			}
 			return trimColon(trimIndents(trim(s)));
 		}
 		
