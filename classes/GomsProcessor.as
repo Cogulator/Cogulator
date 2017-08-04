@@ -117,55 +117,57 @@ package classes {
 					var frontTrimmedLine: String = clean(codeLines[lineIndex]);
 					var tokens: Array = frontTrimmedLine.split(' ');
 					tokens = tokens.filter(noEmpty);
-					switch (tokens[0].toLowerCase()) {
-						case "createstate":
-							if (hasError(tokens, lineIndex)) {
-								SyntaxColor.ErrorColorLine(lineIndex);
-							} else {
-								createState(tokens[1], tokens[2]);
-							}
-							break;
-						case "setstate":
-							if (hasError(tokens, lineIndex)) {
-								SyntaxColor.ErrorColorLine(lineIndex);
-							} else {
-								setState(tokens);
-							}
-							break;
-						case "if":
-							if (hasError(tokens, lineIndex)) {
-								SyntaxColor.ErrorColorLine(lineIndex);
-							} else {
-								//should return int of next line to be processed based on the resolution
-								//of the if statement.
-								lineIndex = nextIfLine(codeLines, lineIndex);
-							}
-							break;
-						case "endif":
-							if (hasError(tokens, lineIndex)) {
-								SyntaxColor.ErrorColorLine(lineIndex);
-							}
-							//ignore EndIfs, but are useful in processing original statement.
-							break;
-						case "goto":
-							//Checks for infinite loops and syntax errors
-							//Jumps are limited to 25, after which all jumps will be considered errors and not processed.
-							if (hasError(tokens, lineIndex, jumps)) {
-								SyntaxColor.ErrorColorLine(lineIndex);
-							} else {
-								//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
-								var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
-								if(goalTable[goalLabel] !== undefined){
-									lineIndex = goalTable[goalLabel] - 1;
-									jumps++;
+					if(tokens.length > 0){
+						switch (tokens[0].toLowerCase()) {
+							case "createstate":
+								if (hasError(tokens, lineIndex)) {
+									SyntaxColor.ErrorColorLine(lineIndex);
 								} else {
+									createState(tokens[1], tokens[2]);
+								}
+								break;
+							case "setstate":
+								if (hasError(tokens, lineIndex)) {
+									SyntaxColor.ErrorColorLine(lineIndex);
+								} else {
+									setState(tokens);
+								}
+								break;
+							case "if":
+								if (hasError(tokens, lineIndex)) {
+									SyntaxColor.ErrorColorLine(lineIndex);
+								} else {
+									//should return int of next line to be processed based on the resolution
+									//of the if statement.
+									lineIndex = nextIfLine(codeLines, lineIndex);
+								}
+								break;
+							case "endif":
+								if (hasError(tokens, lineIndex)) {
 									SyntaxColor.ErrorColorLine(lineIndex);
 								}
-							}
-							break;
-						default:
-							var syntaxArray: Array = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
-							processBaseCogulatorLine(syntaxArray, lineIndex);
+								//ignore EndIfs, but are useful in processing original statement.
+								break;
+							case "goto":
+								//Checks for infinite loops and syntax errors
+								//Jumps are limited to 25, after which all jumps will be considered errors and not processed.
+								if (hasError(tokens, lineIndex, jumps)) {
+									SyntaxColor.ErrorColorLine(lineIndex);
+								} else {
+									//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
+									var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
+									if(goalTable[goalLabel] !== undefined){
+										lineIndex = goalTable[goalLabel] - 1;
+										jumps++;
+									} else {
+										SyntaxColor.ErrorColorLine(lineIndex);
+									}
+								}
+								break;
+							default:
+								var syntaxArray: Array = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
+								processBaseCogulatorLine(syntaxArray, lineIndex);
+						}
 					}
 				}
 			}
