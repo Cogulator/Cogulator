@@ -125,7 +125,7 @@ package classes {
 				
 			} catch (error:Error) {
 				$.exportIntersteps = ["No data to export.  Make sure the model is valid before hitting the export button."];
-				trace("try/catch fired", error.message);
+				trace("try/catch fired in GanttChart", error.message);
 			}
 		}
 		

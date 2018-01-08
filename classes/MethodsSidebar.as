@@ -129,10 +129,12 @@ package classes {
 				methodButton.label.autoSize = TextFieldAutoSize.LEFT;
 				methodButton.info.method.text = methodButton.label.text;
 				methodButton.info.description.text = steps.txt;
+				methodButton.filePath = method.file.nativePath;
 				methodButton.x = methodX;
 				methodButton.y = lineY;
-				methodButton.addEventListener(MouseEvent.CLICK, onMethodClick);
-				methodButton.addEventListener(MouseEvent.MOUSE_OVER, onMethodHover);
+				methodButton.strikeThrough.visible = false;
+				methodButton.hotspot.addEventListener(MouseEvent.CLICK, onMethodClick);
+				methodButton.hotspot.addEventListener(MouseEvent.MOUSE_OVER, onMethodHover);
 			addChild(methodButton);
 			methodButtons.push(methodButton);
 			
@@ -183,7 +185,8 @@ package classes {
 		}
 		
 		private function onMethodHover(evt:MouseEvent) {
-			insert.addOperatorPreview(evt.currentTarget, formatMethod(evt.currentTarget.info.description.text));
+			var methodButton = evt.currentTarget.parent;
+			insert.addOperatorPreview(methodButton, formatMethod(methodButton.info.description.text));
 		}
 		
 		private function onMethodLoadError(evt:Event):void {
@@ -218,7 +221,7 @@ package classes {
 					localFileStream.open(localFile, FileMode.WRITE);
 					localFileStream.writeMultiByte(steps, "utf-8");
 				} catch (error:Error) {
-					trace("try/catch fired", error.message);
+					trace("try/catch fired in MethodsSidebar", error.message);
 					dispatchEvent( new Event("¡save error!") ); //Main.as listens for this and displays error if needed
 				}
 
@@ -261,7 +264,7 @@ package classes {
 			var myPattern:RegExp = /\\/g;
 			return(str.replace(myPattern, "\\")); 
 		}
-		
+	
 
 	}
 	

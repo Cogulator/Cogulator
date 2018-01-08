@@ -901,6 +901,7 @@ package {
 			modelsSideBar.saveModel();
 			settingsFileManager.saveFile();
 			deleteModels();
+			deleteMethods();
 			
 			var opened:Array = NativeApplication.nativeApplication.openedWindows;
 			for (var i:int = 0; i < opened.length; i++) {
@@ -916,6 +917,18 @@ package {
 					if (model.filePath == modelsSideBar.currentFilePath) updateConfigFile();
 					file = File.documentsDirectory; 
 					file = file.resolvePath(model.filePath);
+					file.moveToTrash();
+				}
+			}
+		}
+		
+		function deleteMethods():void {
+			var file:File;
+			for each (var method in methodsSideBar.methodButtons) {
+				if (method.deleteMethod) {
+					file = File.documentsDirectory; 
+					file = file.resolvePath(method.filePath);
+					trace(method.filePath);
 					file.moveToTrash();
 				}
 			}

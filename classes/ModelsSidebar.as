@@ -411,7 +411,7 @@ package classes {
 				localFileStream.writeMultiByte($.codeTxt.text, "utf-8");
 				saveAutomateWMSetting();
 			} catch (error:Error) {
-				trace("try/catch fired", error.message);
+				trace("try/catch fired in ModelsSidebar", error.message);
 				dispatchEvent( new Event("¡save error!") ); //Main.as listens for this and displays error if needed
 			}
 
