@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>3.0</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.0/cogulator.air</url>
-       <description>A bunch of new features, including: Magic Models, Selection Rules, a Methods sidebar, new touchscreen operators, and more.  Be advised, on first run of the new release, Cogulator will update your operators.txt file.  Just to be safe, it will create a backup (saved at Documents/cogulator/operators) of your current operators.txt file. Check out http://cogulator.io for more info.</description> 
+       <versionNumber>3.1</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.1/cogulator.air</url>
+       <description>Added ability to delete methods within Cogulator.</description> 
     </update>
