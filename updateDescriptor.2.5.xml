@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>3.1</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.1/cogulator.air</url>
-       <description>Added ability to delete methods within Cogulator.</description> 
+       <versionNumber>3.15</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.15/cogulator.air</url>
+       <description>Temporary fix for signing issue.</description> 
     </update>
