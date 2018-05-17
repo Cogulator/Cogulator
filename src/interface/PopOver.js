@@ -6,12 +6,13 @@ class PopOver {
 	}
 	
 
-	show(message, offset) {
+	show(message, offset, backgroundColor) {
 		let top = offset.top + 22;
 		let left = offset.left + 35;
 		
 		$(this.divID).text(message);
 		$(this.divID).offset({top: top, left: left});
+		$(this.divID).css({"background": backgroundColor});
 		$(this.divID).css({"visibility": "visible"});
 		
 	}

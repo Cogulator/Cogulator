@@ -1,4 +1,4 @@
-class Autocomplete {
+class AutocompleteManager {
 	
 	constructor() {
 		this.isVisible = false;
@@ -127,4 +127,4 @@ class Autocomplete {
 	
 }
 
-G.autocomplete = new Autocomplete();
+G.autocomplete = new AutocompleteManager();

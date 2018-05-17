@@ -1,4 +1,4 @@
-class Solarize {
+class SolarizeManager {
 	
 	constructor() {
 		this.selected = "";
@@ -115,9 +115,9 @@ class Solarize {
 		var cursorIndex = G.quill.getSelection().index - 1; 
 		if (cursorIndex < 0) cursorIndex = 0;
 		
-		var lineStart = G.quillHelper.getLineStart(cursorIndex);
-		let lineEnd = G.quillHelper.getLineEnd(cursorIndex);
-		if (lineEnd < lineStart) lineStart = G.quillHelper.getLineStart(lineEnd - 1);
+		var lineStart = G.quillManager.getLineStart(cursorIndex);
+		let lineEnd = G.quillManager.getLineEnd(cursorIndex);
+		if (lineEnd < lineStart) lineStart = G.quillManager.getLineStart(lineEnd - 1);
 		
 		let lineLngth = lineEnd - lineStart;
 		if (lineLngth <= 0) return;
@@ -157,4 +157,4 @@ class Solarize {
 	
 }
 
-G.solarize = new Solarize();
+G.solarize = new SolarizeManager();

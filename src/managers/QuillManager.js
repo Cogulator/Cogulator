@@ -1,10 +1,10 @@
-class QuillHelper {
+class QuillManager {
 	constructor() {
 		this.lastSelection;
 		
 		G.quill.on('selection-change', function(range, oldRange, source) {
-			if (range && oldRange) G.quillHelper.lastSelection = range;
-			if (range == undefined && oldRange) G.quillHelper.lastSelection = oldRange;
+			if (range && oldRange) G.quillManager.lastSelection = range;
+			if (range == undefined && oldRange) G.quillManager.lastSelection = oldRange;
 		});
 	}
 	
@@ -88,4 +88,4 @@ class QuillHelper {
 	
 }
 
-G.quillHelper = new QuillHelper();
+G.quillManager = new QuillManager();

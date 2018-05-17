@@ -134,23 +134,31 @@
 	overflow: hidden;
 } 
 
-.error_marker_container {
+.error_and_tip_marker_container {
 	width: 22px;
 	height: 22px;
 	vertical-align: middle;
 }
 
-.error_marker {
+.error_and_tip_marker {
 	display: block;
 	width: 16px;
 	height: 16px;
 	border-radius: 16px;
-	background-color:red;
 	color:var(--main-bg-color);
 	text-align: center;
 	font-size: 10px;
 	cursor: default;
 }
+
+.red_background {
+	background-color:red;
+}
+
+.orange_background {
+	background-color:orange;
+}
+
 
 #error_message_popover {
 	position: absolute;

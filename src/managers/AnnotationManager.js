@@ -21,8 +21,8 @@ class AnnotationManager {
 	annotate(annotation, type) {
 		var annotatedText = "";
 		
-		let index = G.quillHelper.lastSelection;
-		let selectedText = G.quillHelper.getLine(index);
+		let index = G.quillManager.lastSelection;
+		let selectedText = G.quillManager.getLine(index);
 		
 		let lines = selectedText.split("\n");
 		for (var i = 0; i < lines.length; i++) {

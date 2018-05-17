@@ -68,6 +68,7 @@ var ganttSketch = function(s) {
 	var cpmLabel;
 	
 	//scale & time
+	var scaleTarget = 5000 //ms
 	var scale = 5000; //ms
 	let cycleTime = 50; //ms
 	var totalTaskTime = 0; //ms
@@ -150,6 +151,8 @@ var ganttSketch = function(s) {
 	s.draw = function() {
 		//the p5 renderer is evidently not quite ready on initial load. Try catch prevents 
 		try {
+			s.setScale();			
+
     		s.drawBackground();
 			totalTaskTime = G.gomsProcessor.totalTaskTime;
 			if (totalTaskTime != null && totalTaskTime != undefined && totalTaskTime != Infinity) {
@@ -168,6 +171,11 @@ var ganttSketch = function(s) {
 		} catch(err) {}
 	}
 	
+	s.setScale = function() {
+		if (scale < scaleTarget) scale += 250;
+		if (scale > scaleTarget) scale -= 250;
+		
+	}
 	
 	s.drawBackground = function() {
 		//erase the canvas
@@ -718,12 +726,12 @@ var ganttSketch = function(s) {
 			
 			// detect click on zoom in (+) button
 			if (s.mouseY >= zoomY  && s.mouseY <= middleY) {
-				scale = Math.max(5000, scale - 5000);
+				scaleTarget = Math.max(1000, scale - 5000);
 			}
 			
 			// detect click on zoom out (-) button
 			else if (s.mouseY >= middleY  && s.mouseY <= bottomY) {
-				scale = Math.min(60000, scale + 5000);
+				scaleTarget = Math.min(60000, scale + 5000);
 			}
 		}
 		

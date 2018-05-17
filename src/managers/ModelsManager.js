@@ -3,6 +3,7 @@ class ModelsManager {
 		
 		this.update();
 		this.selected = "";
+		this.newlyLoaded = true;
 		
 		$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) {
 			G.modelsManager.saveModel();
@@ -32,7 +33,8 @@ class ModelsManager {
 	
 	
 	saveModel() {
-		G.io.writeToFile(this.selected, G.quill.getText());
+		if(!this.newlyLoaded) G.io.writeToFile(this.selected, G.quill.getText());
+		this.newlyLoaded = false;
 	}
 	
 	
@@ -63,6 +65,7 @@ class ModelsManager {
 		this.selected = p;
 		G.io.loadFile(p, this.displayModel);
 	} displayModel(code) {
+		G.modelsManager.newlyLoaded = true;
 		G.quill.setText(code);
 		G.quill.focus();
 		G.modelsSidebar.showSelected(G.modelsManager.selected, false);
