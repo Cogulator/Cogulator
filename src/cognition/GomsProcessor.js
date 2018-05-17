@@ -108,44 +108,48 @@ class GomsProcessor {
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			var line = codeLines[lineIndex];
 			this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-			
-			
+
 //			var line = codeLines[lineIndex];
 //			beginIndex = this.findBeginningIndex(codeLines, lineIndex);
 //			endIndex = beginIndex + line.length;
-//
-//			if (G.stringUtils.trim(line) != "") {
-//				var tokens = codeLines[lineIndex].split(' ');
-//				tokens = tokens.filter(noEmpty);
-//				if(tokens.length > 0){
-//					switch (tokens[0].toLowerCase()) {
-//						case "createstate":
-//							if (!this.hasError(tokens, lineIndex)) this.createState(tokens[1], tokens[2]);
-//							break;
-//						case "setstate":
-//							if (!this.hasError(tokens, lineIndex)) this.setState(tokens);
-//							break;
-//						case "if":
-//							if (!this.hasError(tokens, lineIndex)) lineIndex = nextIfLine(codeLines, lineIndex); //should return int of next line to be processed based on the resolution of the if statement.
-//							break;
-//						case "goto":
-//							//Checks for infinite loops and syntax errors. Jumps are limited to 25, after which all jumps will be considered errors and not processed.
-//							if (!this.hasError(tokens, lineIndex, jumps)) {
-//								//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
-//								var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
-//								if(goalTable[goalLabel] !== undefined){
-//									lineIndex = goalTable[goalLabel] - 1;
-//									jumps++;
-//								}
-//							}
-//							break;
-//						default:
-//							//var syntaxArray: = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
-//							//this.processBaseCogulatorLine(syntaxArray, lineIndex);
-//							this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-//					}
-//				}
-//			}
+			// var parsed = this.parser.parseControl(line);
+			// if (parsed.components != null && parsed.error != null) {
+				// console.log('control line');
+				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+			// if (G.stringUtils.trim(line) != "") {
+				// var tokens = codeLines[lineIndex].split(' ');
+				// tokens = tokens.filter(noEmpty);
+				// if(tokens.length > 0){
+				// 	switch (tokens[0].toLowerCase()) {
+				// 		case "createstate":
+				// 			if (!this.hasError(tokens, lineIndex)) this.createState(tokens[1], tokens[2]);
+				// 			break;
+				// 		case "setstate":
+				// 			if (!this.hasError(tokens, lineIndex)) this.setState(tokens);
+				// 			break;
+				// 		case "if":
+				// 			if (!this.hasError(tokens, lineIndex)) lineIndex = nextIfLine(codeLines, lineIndex); //should return int of next line to be processed based on the resolution of the if statement.
+				// 			break;
+				// 		case "goto":
+				// 			//Checks for infinite loops and syntax errors. Jumps are limited to 25, after which all jumps will be considered errors and not processed.
+				// 			if (!this.hasError(tokens, lineIndex, jumps)) {
+				// 				//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
+				// 				var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
+				// 				if(goalTable[goalLabel] !== undefined){
+				// 					lineIndex = goalTable[goalLabel] - 1;
+				// 					jumps++;
+				// 				}
+				// 			}
+				// 			break;
+				// 		default:
+				// 			//var syntaxArray: = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
+				// 			//this.processBaseCogulatorLine(syntaxArray, lineIndex);
+				// 			this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+				// 	}
+				// }
+			// } else {
+				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+			// }
 		}
 		this.removeGoalSteps();
 		this.setPrevLineNo();
@@ -183,7 +187,7 @@ class GomsProcessor {
 			}
 		} else if (operator == "setstate") {
 			if(tokens.length != 3){
-				$.errors[lineNum] = "I was expecting 2  arguments."
+				$.errors[lineNum] = "I was expecting 2 arguments."
 				return true;
 			} else if(stateTable[tokens[1]] == undefined){
 				$.errors[lineNum] = "'"+tokens[1]+"' does not exist."
@@ -220,7 +224,7 @@ class GomsProcessor {
 			}
 			// Index all goals defined and check if goal exists
 			indexGoalLines(lines);
-			var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
+			var goalLabel = tokens.slice(2, tokens.length).join(" ");
 			var goalLine = goalTable[goalLabel];
 			if (goalLine == undefined) {
 				$.errors[lineNum] = "'"+goalLabel+"' does not exist."
@@ -238,9 +242,9 @@ class GomsProcessor {
 
 	//Filter Method to get rid of empty strings in token array.  Taken from example
 	//http://board.flashkit.com/board/showthread.php?805338-Remove-empty-elements-in-an-arry
-	noEmpty(item: * , index: int, array: Array) {
-		return item != "";
-	}
+	// noEmpty(item: * , index: int, array: Array) {
+	// 	return item != "";
+	// }
 
 
 	// Purpose: removes all colons from a string to make it be optional for parsing
@@ -270,7 +274,7 @@ class GomsProcessor {
 	//Output: int beginIndex: the correct index to feed solarize function
 	findBeginningIndex(lines, lineNumber) {
 		var beginIndex = 0;
-		for (var i: int = 0; i < lineNumber; i++) {
+		for (var i = 0; i < lineNumber; i++) {
 			beginIndex += lines[i].length + 1; //Plus new line character
 		}
 		return beginIndex;
@@ -313,7 +317,7 @@ class GomsProcessor {
 		}
 
 		if (stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
-			var s: Step = new Step(indentCount, 
+			var s = new Step(indentCount, 
 								   methodGoal, 
 								   methodThread,
 								   methodIndex,
@@ -420,8 +424,8 @@ class GomsProcessor {
 		threadTO = this.threadAvailability[thread];
 		threadTime = threadTO.et;
 
-		var startTime: Number = threadTime;
-		var endTime: Number = startTime + stepTime + this.cycleTime;
+		var startTime = threadTime;
+		var endTime = startTime + stepTime + this.cycleTime;
 
 		if (resource != "system") {
 			startTime = this.getResourceAvailability(resource, startTime, endTime, stepTime);
@@ -455,7 +459,7 @@ class GomsProcessor {
 	getResourceAvailability(resource, startTime, endTime, stepTime) {
 		//pull the resource array of TimeObjects associated with the resource
 		var resourceArray = this.resourceAvailability[resource]; //time the resource becomes available
-		for (var i: int = 0; i < resourceArray.length - 1; i++) {
+		for (var i = 0; i < resourceArray.length - 1; i++) {
 			if (resourceArray[i].et < resourceArray[i + 1].st) { //this means there's a gap - it's worth digging further
 				if (startTime >= resourceArray[i].et) { //if the resource availability occurs after the earliest possible start time, it's worth digging further
 					if (endTime <= resourceArray[i + 1].st) { //... check to see if there's a gap large enough to insert the operator
@@ -479,7 +483,7 @@ class GomsProcessor {
 
 		//start last line entered in steps and search backard until you find the goal for line being processed
 		if (this.steps.length > 0) {
-			for (var i: int = this.steps.length - 1; i >= 0; i--) {
+			for (var i = this.steps.length - 1; i >= 0; i--) {
 				if (this.steps[i].indentCount == indents - 1) { //if this step exists one level above the line being processed in the hiearchy
 					if (this.steps[i].operator == "goal") {
 						goalAndThread[0] = this.steps[i].goal;
@@ -624,8 +628,8 @@ class GomsProcessor {
 	// SideEffect: makes entries of all the goals in the model in $.goalTable
 	indexGoalLines(lines) {
 		for (var i = 0; i < lines.length; i++) {
-			var tokens: Array = lines[i].split(' ');
-			var operator: String = tokens[0].toLowerCase();
+			var tokens = lines[i].split(' ');
+			var operator = tokens[0].toLowerCase();
 			if (operator == "goal") {
 				// Goal line assumed to be in the form "goal goal_name"
 				var goalName = tokens.slice(1, tokens.length).join(" ");
@@ -660,8 +664,8 @@ class GomsProcessor {
 	// Notes: Handles possible nested ifs
 	// SideEffect: None besides solarizing the line
 	findMatchingEndIf(lines, lineNum) {
-		var numIfs: int = 0;
-		var numEndIfs: int = 0;
+		var numIfs = 0;
+		var numEndIfs = 0;
 		for (var i = lineNum; i < lines.length; i++) {
 			var tokens = lines[i].split(' ');
 			if (tokens[0].toLowerCase() == "if") { //Handles nested ifs

@@ -1,5 +1,49 @@
 class LineParser {
 	constructor() {}
+
+	parseControl(line) {
+		//if this line is empty, return null
+		if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
+		
+		//components to return
+		var components = new Components();
+		
+		//remove comments
+		if (line.indexOf("*") > -1) line = line.substring(0, line.indexOf("*"));
+
+		//count indents
+		let indentCountAndRemove = this.removeAndCountIndents(line)
+		components.indents = indentCountAndRemove.indents;
+		line = indentCountAndRemove.line;
+		
+		//look for an operator
+		let regex = this.controlRegEx();
+		let match = line.match(regex);
+		if (match == null) {
+			// console.log('no match for ' + line);
+			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
+			return {components: null, error: "operator_error"};
+		}
+		console.log('match ' + match);
+		//save the operator and remove it from the line
+		components.operator = match[0].replace(":","").toLowerCase();
+		line = line.substring(match[0].length + 1, line.length); //remove the operator from the line
+		// console.log('op '+components.operator);
+		
+		//get label
+		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
+		components.label = line;
+		// console.log('label '+components.label);
+		
+		//get any working memory chunks out
+		let chunkMatch = line.match( /<[^>]+>/gmi);
+		if (chunkMatch != null) {
+			for (var c = 0; c < chunkMatch.length; c++) components.chunkNames.push(chunkMatch[c]);
+		}
+		console.log(components);
+		
+		return {components: components, error: null};
+	}
 	
 	parse(line) {
 		//if this line is empty, return null
@@ -20,13 +64,15 @@ class LineParser {
 		let regex = this.operatorRegEx();
 		let match = line.match(regex);
 		if (match == null) {
+			// console.log('no match for ' + line);
 			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 			return {components: null, error: "operator_error"};
 		}
-		
+		// console.log('match ' + match.length);
 		//save the operator and remove it from the line
 		components.operator = match[0].replace(":","").toLowerCase();
 		line = line.substring(match[0].length + 1, line.length); //remove the operator from the line
+		// console.log('op '+components.operator);
 		
 		//get thread label if also
 		if (components.operator == 'also') {
@@ -48,6 +94,7 @@ class LineParser {
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
 		components.label = line;
+		// console.log('label '+components.label);
 		
 		//get any working memory chunks out
 		let chunkMatch = line.match( /<[^>]+>/gmi);
@@ -89,7 +136,22 @@ class LineParser {
 			operatorsStr += G.operatorsManager.operators[i].operator.toLowerCase();
 			if (i != G.operatorsManager.operators.length - 1) operatorsStr += "|";
 		}
+		// console.log("regex "+operatorsStr)
+
+		let regex = new RegExp(operatorsStr + suffix, "mi");
+		return regex;
+	}
+
+	controlRegEx() {
+		var operatorsStr = "^(if|endif|createstate:?|setstate:?|goto:?";
+		let suffix = ")\\b";
 		
+		// for (var i = 0; i < G.operatorsManager.operators.length; i++) {
+		// 	operatorsStr += G.operatorsManager.operators[i].operator.toLowerCase();
+		// 	if (i != G.operatorsManager.operators.length - 1) operatorsStr += "|";
+		// }
+		console.log("regex "+operatorsStr);
+
 		let regex = new RegExp(operatorsStr + suffix, "mi");
 		return regex;
 	}

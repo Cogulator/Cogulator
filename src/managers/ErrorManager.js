@@ -5,7 +5,7 @@ class GomsError {
 	//  forgetting_error
 	constructor(type, lineNo, hint = "") {
 		this.parser = new LineParser();
-		
+
 		this.type = type; //
 		this.lineNo = lineNo;
 		this.id = this.lineNo + "_" + this.type;
