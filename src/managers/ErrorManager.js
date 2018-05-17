@@ -37,7 +37,7 @@ class ErrorManager {
 		});
 		
 		$( document ).on( "Memory_Processed", function(evt, taskTimeMS) {
-		  	G.qutterHelper.updateErrorMarkers();
+		  	G.qutterManager.updateErrorMarkers();
 		});
 		
 		$( document ).on( "Line_Update", function() {

@@ -59,6 +59,7 @@ class InOutManager {
 		if (!this.fileExists(pth)) fs.mkdirSync(pth);
 		
 		let fullPath = path.join(pth, filename);
+		console.log("NEW FILE", fullPath);
 		fs.open(fullPath, 'w', function (err, file) {
 			if (err) throw err;
 			fs.close(file);
@@ -73,7 +74,7 @@ class InOutManager {
 	
 	
 	writeToFile(pth, text) {
-		// write to a new file named 2pac.txt
+		console.log("WRITE", pth, text);
 		fs.writeFile(pth, text, (err) => {  
 			if (err) throw err;
 		});

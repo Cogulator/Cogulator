@@ -1,4 +1,4 @@
-class QuillHelper {
+class QuillManager {
 	constructor() {
 		this.lastSelection;
 		
@@ -88,4 +88,4 @@ class QuillHelper {
 	
 }
 
-G.quillHelper = new QuillHelper();
+G.quillManager = new QuillManager();

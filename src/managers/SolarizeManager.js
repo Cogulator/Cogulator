@@ -1,4 +1,4 @@
-class Solarize {
+class SolarizeManager {
 	
 	constructor() {
 		this.selected = "";
@@ -157,4 +157,4 @@ class Solarize {
 	
 }
 
-G.solarize = new Solarize();
+G.solarize = new SolarizeManager();
