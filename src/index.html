@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Cogulator</title>
+		<link rel="stylesheet" type="text/css" href="./style/main.css">
+		<link rel="stylesheet" type="text/css" href="./style/sidebar.css">
+		<link rel="stylesheet" type="text/css" href="./style/buttons.css">
+		<link rel="stylesheet" type="text/css" href="./style/newfilechi.css">
+		<link rel="stylesheet" type="text/css" href="./style/quill.core.css">
+		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
+		<script type='text/javascript' src='./libraries/quill.min.js'></script>
+		<script type='text/javascript' src='./libraries/p5.min.js'></script>
+	</head>
+	<body>
+		
+		<div id='container'>
+			<div id='not_gantt_container'>
+				<div id='sidebar_left'></div>
+
+				<div id='main_nav'>
+					
+					<div id='nav_left_container'>
+						<div id='new_model_button_container'>
+							<div class='circle_button' id='new_model_button'>+</div>
+						</div>
+					</div>
+					
+					<div id='nav_right_container'>
+						<div id='new_file_container'>
+							<div id='new_file_tab_container'>
+								<div id='model_tab' class='new_file_tab selected_tab'>+ MODEL</div>
+								<div id='operator_tab' class='new_file_tab not_selected_tab'>+ OPERATOR</div>
+								<div id='method_tab' class='new_file_tab not_selected_tab'>+ METHOD</div>
+								<div id='new_file_close_container'>X</div>
+							</div>
+							<div id='new_file_inputs_container'></div>
+						</div>
+						
+						
+						<div class='nav_item'>
+							<div class='stat_container right_border'>
+								<div id='stat_task_time' class ='stat_content'>12 <span id="stat_task_time_units" class='stat_units'>s</span></div>
+								<div class='stat_label'>task time</div>
+							</div>
+						</div>
+						<div class='nav_item'>
+							<div class='stat_container right_border'>
+								<div id='stat_wm_load' class ='stat_content'>3.3 <span id="stat_wm_units" class='stat_units'>chunks</span></div>
+								<div class='stat_label'>memory load</div>
+							</div>
+						</div>	
+						<div class='nav_item'>
+							<div class='stat_container'>
+								<div id='stat_learning_time' class ='stat_content'>103 <span id="stat_lrning_units" class='stat_units'>s</span></div>
+								<div class='stat_label'>learning time</div>
+							</div>
+						</div>
+						
+						<div class='nav_item'>
+							<div id='reload_model_button_container' style='margin-top:15px; margin-left:15px;'>
+								<div class='circle_button' id='reload_model_button'>↻</div>
+							</div>
+						</div>
+
+
+					</div>
+					
+
+				</div>
+				
+				<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
+				<div id='code'></div>
+				<div id='autocomplete'> </div>
+				<div id='error_message_popover'> </div>
+
+				<div id='sidebar_right'>
+					<div id='help_button_container'>
+						<div class='circle_button' id='help_button' style='font-family:sans-serif; font-size:15px'>?</div>
+					</div>
+					<div class='edit_button_container'>
+						<div class='circle_button edit_button' id='comment_button'><img src='images/comment_toggle.png'></div>
+					</div>
+					<div class='edit_button_container'>
+						<div class='circle_button edit_button' id='indent_button'><img src='images/indent.png'></div>
+					</div>
+					<div class='edit_button_container'>
+						<div class='circle_button edit_button' id='dedent_button'><img src='images/dedent.png'></div>
+					</div>
+				</div>
+			</div>
+			
+			<div id='gantt_button'>
+				<div id='gantt_button_text'>^</div>
+			</div>
+			<div id='gantt_container'>
+				<div id='gantt_chart'></div>
+			</div>
+		</div>
+		
+		<script type='text/javascript' src='./utilities/Globals.js'></script>
+		<script type='text/javascript' src='./managers/FilePathManager.js'></script>
+		<script type='text/javascript' src='./managers/InOutManager.js'></script>
+		<script type='text/javascript' src='./managers/StartUpManager.js'></script>
+		<script type='text/javascript' src='./managers/FirstRunManager.js'></script>
+	</body>
+</html>
+ 

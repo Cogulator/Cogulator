@@ -1,0 +1,281 @@
+
+:root {
+	--main-bg-color: #F8F8F8;
+	--sidebar-left-bg-color: #EFEFEF;
+	--sidebar-right-bg-color: #EFEFEF;
+	--model-select-bg-color: #4CBD99;
+	--model-button-select-txt-color: white;
+	--model-button-txt-color: black;
+	--directory-txt-color: lightgray;
+	--delete-button-color: red;
+	--auto-complete-bg-color: #4A4A4A;
+	--stats-color: #555;
+	--stats-label-color: #777;
+	--border-color: #DFDFDF;
+	--gantt-stripe-color: #F0F0F0;
+}
+
+
+@font-face {
+  font-family: 'Lato';
+  src: url('./fonts/Lato-Regular.ttf')  format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato-Italic';
+  src: url('./fonts/Lato-Italic.ttf')  format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato-Bold';
+  src: url('./fonts/Lato-Bold.ttf')  format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato-Light';
+  src: url('./fonts/Lato-Light.ttf')  format('truetype');
+}
+
+@font-face {
+  font-family: 'Cogulato';
+  src: url('./fonts/Cogulato.ttf')  format('truetype');
+}
+
+.body, html {
+	background-color: var(--main-bg-color);
+	overflow:hidden;
+}
+
+#container {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height:100%;
+	width:100%;
+	overflow: hidden;
+}
+
+#not_gantt_container {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width:100%;
+	overflow: hidden;
+}
+
+#sidebar_left {
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:192px;
+	height:100%;
+	background-color:var(--sidebar-left-bg-color);
+	overflow-y:auto;
+	overflow-x:hidden;
+}
+
+
+#main_nav {
+	position:absolute;
+	top:0px;
+	left:203px;
+	width: calc(100% - 190px - 55px);
+	height:59px;
+	border-bottom: 1px solid;
+	border-color:var(--border-color);
+}
+
+
+#nav_left_container {
+	position:relative;
+	float:left;
+	width:25px;
+	height:inherit;
+} #nav_right_container {
+	position:relative;
+	float:left;
+	width:calc(100% - 25px);
+	height:inherit;
+	margin: 0 auto;
+	text-align: center;
+} .nav_item {
+	height:inherit;
+	margin-top: -15px;
+	display:inline-block;
+}
+
+.stat_content{
+	min-width: 100px;
+	font-family: 'Lato';
+	font-size: 18px;
+} .stat_units {
+	font-family: 'Lato-Italic';
+	font-size: 13px;
+	color:var(--stats-label-color);
+} .stat_label {
+	min-width: 100px;
+	font-family: 'Lato-Italic';
+	font-size: 12px;
+	color:var(--stats-label-color);
+} .right_border {
+	border-right: 1px solid;
+	border-color:var(--border-color);
+}
+
+#gutter {
+	font-family: 'Cogulato';
+	font-size: 16px;
+	position:absolute;
+	top:60px;
+	left:192px;
+	width: 40px;
+	height:calc(100% - 60px);
+	background-color:var(--main-bg-color);
+	overflow: hidden;
+} 
+
+.error_marker_container {
+	width: 22px;
+	height: 22px;
+	vertical-align: middle;
+}
+
+.error_marker {
+	display: block;
+	width: 16px;
+	height: 16px;
+	border-radius: 16px;
+	background-color:red;
+	color:var(--main-bg-color);
+	text-align: center;
+	font-size: 10px;
+	cursor: default;
+}
+
+#error_message_popover {
+	position: absolute;
+	padding: 5px;
+	margin: 5px;
+	top: 0px;
+	left: 0px;
+	border-radius: 0px 0px 6px 6px;
+	background: red;
+	color:var(--model-button-select-txt-color);
+	font-family: 'Lato';
+	font-size: 13px;
+	z-index: 100;
+}
+
+#code {
+	font-family: 'Cogulato';
+	font-size: 16px;
+	position:absolute;
+	top:60px;
+	left:232px;
+	width: calc(100% - 190px - 30px - 40px);
+	height:calc(100% - 60px);
+	background-color:var(--main-bg-color);
+}
+
+#autocomplete {
+	font-family: 'Cogulato';
+	font-size: 16px;
+	position:absolute;
+	top:50px;
+	left:50px;
+	height:19px;
+	color: var(--main-bg-color);
+	background-color:var(--auto-complete-bg-color);
+	z-index: 100;
+}
+
+#sidebar_right {
+	position:absolute;
+	top:0px;
+	right:0px;
+	width:30px;
+	height:100%;
+	background-color:var(--sidebar-right-bg-color);
+}
+
+
+
+#gantt_button {
+	position:absolute;
+	bottom:0px;
+	left: 60px; 
+	right: 0; 
+/*
+	margin-left: auto;
+	margin-right: auto;
+*/
+	border-top-left-radius: 30px;
+	border-top-right-radius: 30px;
+	width: 60px; /* Need a specific value to work */
+	height:20px;
+	line-height:25px;
+	text-align: center;
+	background-color:var(--main-bg-color);
+	font-family: "Lato-Bold";
+	font-size:20px;
+	cursor:default;
+	user-select: none;
+	box-shadow: 0px -2px 2px grey;
+	z-index: 100;
+}
+
+.rotate_180 {
+	transform: rotate(0deg);
+  	animation: spinTo180 0.5s forwards;
+} @keyframes spinTo180 {
+  100% {
+	  transform: rotate(180deg);
+	}
+}
+
+.rotate_0 {
+	transform: rotate(180deg);
+  	animation: spinTo0 0.5s forwards;
+} @keyframes spinTo0 {
+  	100% {
+    	transform: rotate(0deg);
+	}
+}
+
+.rotate_360 {
+	transform: rotate(0deg);
+  	animation: spinTo360 0.5s forwards;
+} @keyframes spinTo360 {
+  	100% {
+    	transform: rotate(360deg);
+	}
+}
+
+#gantt_container {
+	position:absolute;
+	left:0px;
+	bottom:-450px;
+	width:100%;
+	height:450px;
+	background-color:var(--main-bg-color);
+	box-shadow: 0px -1px 5px grey;
+}
+
+
+#gantt_chart {
+	position:relative;
+	float:left;
+	width: 100%;
+	height:100%;
+}
+
+.full_height {
+	height: 100%;
+}
+
+.partial_height {
+	height: calc(100% - 450px);
+}
+
+
+

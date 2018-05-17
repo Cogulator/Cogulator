@@ -1,0 +1,62 @@
+.circle_button {
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+	text-align:center;
+	border-radius: 20px;
+	user-select: none;
+	cursor: default;
+}
+
+#new_model_button_container {
+	position: relative;
+	float: left;
+	height:inherit;
+} #new_model_button {
+	position: relative;
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-size: 20px;
+	border: 1px solid;
+	border-color:var(--stats-label-color);
+}
+
+
+#reload_model_button_container {
+	position: relative;
+	float: left;
+	height:inherit;
+} #reload_model_button {
+	position: relative;
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-size: 20px;
+	border: 1px solid;
+	border-color:var(--stats-label-color);
+}
+
+#help_button_container {
+	position: relative;
+	float: left;
+	width:100%;
+	height:60px;
+} #help_button {
+	position: relative;
+	margin: auto;
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-size: 20px;
+	border: 1px solid;
+	border-color:var(--stats-label-color);
+}
+
+.edit_button_container {
+	position: relative;
+	float: left;
+	width:100%;
+	height:40px;
+} .edit_button {
+	position: relative;
+	margin: auto;
+	vertical-align: middle;
+} 
