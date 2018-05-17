@@ -3,8 +3,8 @@ class QuillManager {
 		this.lastSelection;
 		
 		G.quill.on('selection-change', function(range, oldRange, source) {
-			if (range && oldRange) G.quillHelper.lastSelection = range;
-			if (range == undefined && oldRange) G.quillHelper.lastSelection = oldRange;
+			if (range && oldRange) G.quillManager.lastSelection = range;
+			if (range == undefined && oldRange) G.quillManager.lastSelection = oldRange;
 		});
 	}
 	

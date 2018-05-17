@@ -12,7 +12,7 @@ class QutterManager { //Quill gutter
 		//renumber as needed
 		$( window ).resize(function() {
 		  	//G.qutterHelper.numberLines(); //cheap way to avoid "this" binding issues\
-			G.qutterHelper.updateErrorMarkers(); //cheap way to avoid "this" binding issues
+			G.qutterManager.updateErrorMarkers(); //cheap way to avoid "this" binding issues
 		});
 		
 		//handle error marker hover
