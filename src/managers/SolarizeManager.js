@@ -36,6 +36,7 @@ class SolarizeManager {
 	setRegexs() {
 		this.regexs = [];
 		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
+		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>]+>/gmi, clr: this.chunkClr }); //working memory
 		this.regexs.push({ exp: /\(\s{0,15}[0-9]{1,5}\s{1,5}(syllables|seconds|second|ms)\s{0,15}\)/gmi, clr: this.timeClr }); //time or syllables
@@ -151,6 +152,17 @@ class SolarizeManager {
 			if (i != G.operatorsManager.operators.length - 1) operatorsStr += "|";
 		}
 		
+		let regex = new RegExp(prefix + operatorsStr + suffix, "gmi");
+		return regex;
+	}
+
+	controlRegEx() {
+		let prefix = "^[\\.| ]{0,15}(";
+		var operatorsStr = "if|endif|createstate:?|setstate:?|goto:?";
+		let suffix = ")\\b";
+
+		// console.log("regex "+operatorsStr);
+
 		let regex = new RegExp(prefix + operatorsStr + suffix, "gmi");
 		return regex;
 	}

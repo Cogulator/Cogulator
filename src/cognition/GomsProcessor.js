@@ -98,58 +98,70 @@ class GomsProcessor {
 	//
 	// Notes: Cog+ modifies this method heavily.  New operators modify the line pointer during execution
 	generateStepsArray() {
-		this.stateTable = []; //dicitionary
-		
+		this.stateTable = []; //dictionary
+		this.goalTable = []; //dictionary
+
 		var codeLines = G.quill.getText().split("\n");
 		var beginIndex = 0;
 		var endIndex = codeLines[0].length;
 		var jumps = 0;
-
+		G.solarize.solarizeAll();
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			var line = codeLines[lineIndex];
-			this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+			// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
 
 //			var line = codeLines[lineIndex];
 //			beginIndex = this.findBeginningIndex(codeLines, lineIndex);
 //			endIndex = beginIndex + line.length;
-			// var parsed = this.parser.parseControl(line);
-			// if (parsed.components != null && parsed.error != null) {
-				// console.log('control line');
+			var parsed = this.parser.parseControl(line);
+			if (parsed.components != null && parsed.error == null) {
+				var components = parsed.components;
+				// console.log(parsed.components);
 				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-			// if (G.stringUtils.trim(line) != "") {
-				// var tokens = codeLines[lineIndex].split(' ');
+				var tokens = components.label.split(' ');
+				tokens.unshift(components.operator)
+				console.log(tokens);
 				// tokens = tokens.filter(noEmpty);
-				// if(tokens.length > 0){
-				// 	switch (tokens[0].toLowerCase()) {
-				// 		case "createstate":
-				// 			if (!this.hasError(tokens, lineIndex)) this.createState(tokens[1], tokens[2]);
-				// 			break;
-				// 		case "setstate":
-				// 			if (!this.hasError(tokens, lineIndex)) this.setState(tokens);
-				// 			break;
-				// 		case "if":
-				// 			if (!this.hasError(tokens, lineIndex)) lineIndex = nextIfLine(codeLines, lineIndex); //should return int of next line to be processed based on the resolution of the if statement.
-				// 			break;
-				// 		case "goto":
-				// 			//Checks for infinite loops and syntax errors. Jumps are limited to 25, after which all jumps will be considered errors and not processed.
-				// 			if (!this.hasError(tokens, lineIndex, jumps)) {
-				// 				//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
-				// 				var goalLabel: String = tokens.slice(2, tokens.length).join(" ");
-				// 				if(goalTable[goalLabel] !== undefined){
-				// 					lineIndex = goalTable[goalLabel] - 1;
-				// 					jumps++;
-				// 				}
-				// 			}
-				// 			break;
-				// 		default:
-				// 			//var syntaxArray: = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
-				// 			//this.processBaseCogulatorLine(syntaxArray, lineIndex);
-				// 			this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-				// 	}
-				// }
-			// } else {
-				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-			// }
+				if(tokens.length > 0){
+					switch (tokens[0].toLowerCase()) {
+						case "createstate":
+							if (!this.hasError(tokens, lineIndex)) {
+								this.createState(tokens[1], tokens[2]);
+								console.log('createstate for '+tokens[1]+' with value '+this.stateTable[tokens[1]]);
+							}
+							break;
+						case "setstate":
+							if (!this.hasError(tokens, lineIndex)) {
+								this.setState(tokens[1], tokens[2]);
+								console.log('setstate for '+tokens[1]+' with value '+this.stateTable[tokens[1]]);
+							}
+							break;
+						case "if":
+							// console.log('if!');
+							// if (!this.hasError(tokens, lineIndex)) lineIndex = this.nextIfLine(codeLines, lineIndex); //should return int of next line to be processed based on the resolution of the if statement.
+							break;
+						case "goto":
+							// console.log('goto!');
+							//Checks for infinite loops and syntax errors. Jumps are limited to 25, after which all jumps will be considered errors and not processed.
+							// if (!this.hasError(tokens, lineIndex, jumps)) {
+							// 	//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
+							// 	var goalLabel = tokens.slice(2, tokens.length).join(" ");
+							// 	console.log('goalLabel '+goalLabel);
+							// 	// if(goalTable[goalLabel] !== undefined){
+							// 	// 	lineIndex = goalTable[goalLabel] - 1;
+							// 	// 	jumps++;
+							// 	// }
+							// }
+							break;
+						default:
+							//var syntaxArray: = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
+							//this.processBaseCogulatorLine(syntaxArray, lineIndex);
+							// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+					}
+				}
+			} else {
+				this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
+			}
 		}
 		this.removeGoalSteps();
 		this.setPrevLineNo();
@@ -169,72 +181,75 @@ class GomsProcessor {
 	// Notes: Does not handle infinite loops or invalid GoTo jumps.  Those are handled in
 	//		  GenerateStepsArray when GoTo is processed.
 	//		  Empty (whitespace) tokens are removed before processing so that no field will be empty
-
 	hasError(tokens, lineNum, jumps = 0) {
-		var lines = $.codeTxt.text.split("\r");
-		tokens = tokens.filter(noEmpty);
+		var lines = G.quill.getText().split("\n");
+		// tokens = tokens.filter(noEmpty);
 		var operator = tokens[0].toLowerCase();
 		if (operator == "createstate") {
-			//CreateState name value extraStuff
-			//CreateState name
-			//Name already exists
+			// Expected: CreateState name value
 			if (tokens.length != 3) {
-				$.errors[lineNum] = "I was expecting 2 arguments."
+				// console.log("I was expecting 2 arguments.")
+				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
 				return true;
-			} else if (stateTable[tokens[1]] != undefined) {
-				$.errors[lineNum] = "'"+tokens[1]+"' already exists."
+			} else if (this.stateTable[tokens[1]] != undefined) {
+				G.errorManager.errors.push(new GomsError("invalid_var_create", lineNum));
+				// console.log("'"+tokens[1]+"' already exists.");
 				return true;
 			}
 		} else if (operator == "setstate") {
+			// Expected: SetState name value
 			if(tokens.length != 3){
-				$.errors[lineNum] = "I was expecting 2 arguments."
+				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				// console.log("I was expecting 2 arguments.")
 				return true;
-			} else if(stateTable[tokens[1]] == undefined){
-				$.errors[lineNum] = "'"+tokens[1]+"' does not exist."
+			} else if(this.stateTable[tokens[1]] == undefined){
+				// console.log("'"+tokens[1]+"' does not exist.")
+				G.errorManager.errors.push(new GomsError("invalid_var_set", lineNum));
 				return true;
 			} 
-		} else if (operator == "if") {
-			if (tokens.length != 3) {
-				$.errors[lineNum] = "I was expecting 2 arguments."
-				return true;
-			} else if (stateTable[tokens[1]] == undefined){
-				$.errors[lineNum] = "'"+tokens[1]+"' does not exist."
-				return true;
-			} else {
-				// Check if it's missing an endif
-				if (findMatchingEndIf(lines, lineNum) == lines.length) {
-					$.errors[lineNum] = "I was expecting an EndIf."
-					return true;
-				}
-			}
-		} else if (operator == "endif") {
-			if (tokens.length != 1) {
-				$.errors[lineNum] = "I was not expecting any arguments."
-				return true;
-			}
-		} else if (operator == "goto") {
-			if (tokens.length <= 2) {
-				$.errors[lineNum] = "Goto takes the form \"Goto Goal: goal_name\"."
-				return true;
-			}
-			if (tokens.slice(0, 2).join(" ").toLowerCase() != "goto goal") {
-				//trace("cleaned up goto "+clean(tokens.slice(0, 2).join(" ").toLowerCase()));
-				$.errors[lineNum] = "I was expecting something like 'goto goal'."
-				return true;
-			}
-			// Index all goals defined and check if goal exists
-			indexGoalLines(lines);
-			var goalLabel = tokens.slice(2, tokens.length).join(" ");
-			var goalLine = goalTable[goalLabel];
-			if (goalLine == undefined) {
-				$.errors[lineNum] = "'"+goalLabel+"' does not exist."
-				return true;
-			}
-			if (jumps > 25) {
-				$.errors[lineNum] = "I ran into an infinite loop."
-				return true;
-			}
-		}
+		} 
+		// else if (operator == "if") {
+		// 	if (tokens.length != 3) {
+		// 		$.errors[lineNum] = "I was expecting 2 arguments."
+		// 		return true;
+		// 	} else if (stateTable[tokens[1]] == undefined){
+		// 		$.errors[lineNum] = "'"+tokens[1]+"' does not exist."
+		// 		return true;
+		// 	} else {
+		// 		// Check if it's missing an endif
+		// 		if (this.findMatchingEndIf(lines, lineNum) == lines.length) {
+		// 			$.errors[lineNum] = "I was expecting an EndIf."
+		// 			return true;
+		// 		}
+		// 	}
+		// } else if (operator == "endif") {
+		// 	if (tokens.length != 1) {
+		// 		$.errors[lineNum] = "I was not expecting any arguments."
+		// 		return true;
+		// 	}
+		// } else if (operator == "goto") {
+		// 	if (tokens.length <= 2) {
+		// 		$.errors[lineNum] = "Goto takes the form \"Goto Goal: goal_name\"."
+		// 		return true;
+		// 	}
+		// 	if (tokens.slice(0, 2).join(" ").toLowerCase() != "goto goal") {
+		// 		//trace("cleaned up goto "+clean(tokens.slice(0, 2).join(" ").toLowerCase()));
+		// 		$.errors[lineNum] = "I was expecting something like 'goto goal'."
+		// 		return true;
+		// 	}
+		// 	// Index all goals defined and check if goal exists
+		// 	this.indexGoalLines(lines);
+		// 	var goalLabel = tokens.slice(2, tokens.length).join(" ");
+		// 	var goalLine = goalTable[goalLabel];
+		// 	if (goalLine == undefined) {
+		// 		$.errors[lineNum] = "'"+goalLabel+"' does not exist."
+		// 		return true;
+		// 	}
+		// 	if (jumps > 25) {
+		// 		$.errors[lineNum] = "I ran into an infinite loop."
+		// 		return true;
+		// 	}
+		// }
 
 		return false;
 	}
@@ -252,19 +267,15 @@ class GomsProcessor {
 	//	Example: "CreateState: goal_name value"
 	//  Output: String: trimmed operator 
 	//	Example: "CreateState goal_name value"
-	trimColon(string) { //return String
-		var trimmed = string;
-		var colon = trimmed.indexOf(':');
-		while (colon != -1) {
-			trimmed = trimmed.substring(0, colon) + trimmed.substring(colon + 1, trimmed.length);
-			colon = trimmed.indexOf(':');
-		}
-		return trimmed;
-	}
-
-	trim(s) {
-		return s.replace(/^[\s|\t|\n]+|[\s|\t|\n]+$/gmi, '');
-	}
+	// trimColon(string) { //return String
+	// 	var trimmed = string;
+	// 	var colon = trimmed.indexOf(':');
+	// 	while (colon != -1) {
+	// 		trimmed = trimmed.substring(0, colon) + trimmed.substring(colon + 1, trimmed.length);
+	// 		colon = trimmed.indexOf(':');
+	// 	}
+	// 	return trimmed;
+	// }
 
 	//Purpose:  Find the "beginIndex" used in process steps array. Should be the sum 
 	//			of the length of all lines that came before. Necessary for line jumping
@@ -279,8 +290,6 @@ class GomsProcessor {
 		}
 		return beginIndex;
 	}
-
-		
 	
 	//Purpose: Creates the stepArray to be processed.
 	//Input: Array syntaxArray: created from solarizeLine().
@@ -371,7 +380,6 @@ class GomsProcessor {
 
 	}
 
-
 	interleaveStep(thread, goal) {
 		for (var i = 0; i < this.steps.length; i++) {
 			var step = this.steps[i];
@@ -398,7 +406,6 @@ class GomsProcessor {
 
 		}
 	}
-
 
 	findStartEndTime(step) {
 		var resource = step.resource;
@@ -610,15 +617,11 @@ class GomsProcessor {
 	}
 
 	// Purpose: Changes an existing state in the stateTable, all values are represented as strings.
-	// Input: Array:String line		
-	// 		  (Form) Operator, String key, String value 
-	//		  Example: setstate, target1, visited  
+	//  Input: String key, String value (target1, visited)
 	// Output: none
 	// SideEffect:  An existing entry in global stateTable is changed
-	setState(line) {
-		if(line.length == 3){
-			this.stateTable[line[1]] = line[2];
-		}
+	setState(key, value) {
+		this.stateTable[key] = value;
 	}
 
 	// Purpose: finds the lineNumbers of all goals in the program and stores them in the $.goalTable
@@ -633,7 +636,7 @@ class GomsProcessor {
 			if (operator == "goal") {
 				// Goal line assumed to be in the form "goal goal_name"
 				var goalName = tokens.slice(1, tokens.length).join(" ");
-				goalTable[goalName] = i;
+				this.goalTable[goalName] = i;
 			}
 		}
 	}

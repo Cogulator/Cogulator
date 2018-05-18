@@ -5,7 +5,6 @@ class GomsError {
 	//  forgetting_error
 	constructor(type, lineNo, hint = "") {
 		this.parser = new LineParser();
-
 		this.type = type; //
 		this.lineNo = lineNo;
 		this.id = this.lineNo + "_" + this.type;
@@ -19,6 +18,12 @@ class GomsError {
 				return "I couldn&#39;t find an operator at the start of this line."
 			case "time_modifier_error":
 				return "Inside the parenthetical, use seconds, millseconds, ms, or syllables.";
+			case "invalid_args_create":
+				return "I was expecting 2 arguments!"
+			case "invalid_var_create":
+				return "State variable already exists!"
+			case "invalid_var_set":
+				return "State variable does not exist!"
 			default:
 				text = "";
 		}

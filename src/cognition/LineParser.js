@@ -24,23 +24,17 @@ class LineParser {
 			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 			return {components: null, error: "operator_error"};
 		}
-		console.log('match ' + match);
+		// console.log('match ' + match);
 		//save the operator and remove it from the line
 		components.operator = match[0].replace(":","").toLowerCase();
 		line = line.substring(match[0].length + 1, line.length); //remove the operator from the line
-		// console.log('op '+components.operator);
 		
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
 		components.label = line;
 		// console.log('label '+components.label);
-		
-		//get any working memory chunks out
-		let chunkMatch = line.match( /<[^>]+>/gmi);
-		if (chunkMatch != null) {
-			for (var c = 0; c < chunkMatch.length; c++) components.chunkNames.push(chunkMatch[c]);
-		}
-		console.log(components);
+
+		// console.log(components);
 		
 		return {components: components, error: null};
 	}
@@ -145,16 +139,13 @@ class LineParser {
 	controlRegEx() {
 		var operatorsStr = "^(if|endif|createstate:?|setstate:?|goto:?";
 		let suffix = ")\\b";
-		
-		// for (var i = 0; i < G.operatorsManager.operators.length; i++) {
-		// 	operatorsStr += G.operatorsManager.operators[i].operator.toLowerCase();
-		// 	if (i != G.operatorsManager.operators.length - 1) operatorsStr += "|";
-		// }
 		console.log("regex "+operatorsStr);
 
 		let regex = new RegExp(operatorsStr + suffix, "mi");
 		return regex;
 	}
+
+	
 }
 
 
