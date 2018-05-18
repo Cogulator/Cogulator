@@ -22,8 +22,18 @@ class GomsError {
 				return "I was expecting 2 arguments!"
 			case "invalid_var_create":
 				return "State variable already exists!"
-			case "invalid_var_set":
+			case "invalid_var_dne":
 				return "State variable does not exist!"
+			case "invalid_if_unclosed":
+				return "I was expecting an EndIf"
+			case "invalid_endif":
+				return "I was not expecting any arguments."
+			case "invalid_goto":
+				return "I was expecting something like: goto goal."
+			case "invalid_goal_dne":
+				return "Goal does not exist!"
+			case "infinite_loop":
+				return "I ran into an infinite loop!"
 			default:
 				text = "";
 		}

@@ -32,8 +32,6 @@ class LineParser {
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
 		components.label = line;
-		// console.log('label '+components.label);
-
 		// console.log(components);
 		
 		return {components: components, error: null};
@@ -62,11 +60,10 @@ class LineParser {
 			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 			return {components: null, error: "operator_error"};
 		}
-		// console.log('match ' + match.length);
+
 		//save the operator and remove it from the line
 		components.operator = match[0].replace(":","").toLowerCase();
 		line = line.substring(match[0].length + 1, line.length); //remove the operator from the line
-		// console.log('op '+components.operator);
 		
 		//get thread label if also
 		if (components.operator == 'also') {
@@ -88,7 +85,6 @@ class LineParser {
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
 		components.label = line;
-		// console.log('label '+components.label);
 		
 		//get any working memory chunks out
 		let chunkMatch = line.match( /<[^>]+>/gmi);
@@ -139,13 +135,10 @@ class LineParser {
 	controlRegEx() {
 		var operatorsStr = "^(if|endif|createstate:?|setstate:?|goto:?";
 		let suffix = ")\\b";
-		console.log("regex "+operatorsStr);
-
 		let regex = new RegExp(operatorsStr + suffix, "mi");
 		return regex;
 	}
 
-	
 }
 
 

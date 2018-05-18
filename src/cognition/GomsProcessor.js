@@ -108,55 +108,38 @@ class GomsProcessor {
 		G.solarize.solarizeAll();
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			var line = codeLines[lineIndex];
-			// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-
-//			var line = codeLines[lineIndex];
-//			beginIndex = this.findBeginningIndex(codeLines, lineIndex);
-//			endIndex = beginIndex + line.length;
 			var parsed = this.parser.parseControl(line);
 			if (parsed.components != null && parsed.error == null) {
 				var components = parsed.components;
 				// console.log(parsed.components);
 				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-				var tokens = components.label.split(' ');
+				var tokens = components.label.split(' ').filter(String);
 				tokens.unshift(components.operator)
-				console.log(tokens);
 				// tokens = tokens.filter(noEmpty);
 				if(tokens.length > 0){
 					switch (tokens[0].toLowerCase()) {
 						case "createstate":
-							if (!this.hasError(tokens, lineIndex)) {
-								this.createState(tokens[1], tokens[2]);
-								console.log('createstate for '+tokens[1]+' with value '+this.stateTable[tokens[1]]);
-							}
+							if (!this.hasError(tokens, lineIndex)) this.createState(tokens[1], tokens[2]);
 							break;
 						case "setstate":
-							if (!this.hasError(tokens, lineIndex)) {
-								this.setState(tokens[1], tokens[2]);
-								console.log('setstate for '+tokens[1]+' with value '+this.stateTable[tokens[1]]);
-							}
+							if (!this.hasError(tokens, lineIndex)) this.setState(tokens[1], tokens[2]);
 							break;
 						case "if":
-							// console.log('if!');
-							// if (!this.hasError(tokens, lineIndex)) lineIndex = this.nextIfLine(codeLines, lineIndex); //should return int of next line to be processed based on the resolution of the if statement.
+							//should return int of next line to be processed based on the resolution of the if statement.
+							if (!this.hasError(tokens, lineIndex)) lineIndex = this.nextIfLine(codeLines, lineIndex); 
 							break;
 						case "goto":
-							// console.log('goto!');
 							//Checks for infinite loops and syntax errors. Jumps are limited to 25, after which all jumps will be considered errors and not processed.
-							// if (!this.hasError(tokens, lineIndex, jumps)) {
-							// 	//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
-							// 	var goalLabel = tokens.slice(2, tokens.length).join(" ");
-							// 	console.log('goalLabel '+goalLabel);
-							// 	// if(goalTable[goalLabel] !== undefined){
-							// 	// 	lineIndex = goalTable[goalLabel] - 1;
-							// 	// 	jumps++;
-							// 	// }
-							// }
+							if (!this.hasError(tokens, lineIndex, jumps)) {
+								//line should be in the form "GoTo Goal: goal_name" (name can contain spaces, colons are optional) 
+								tokens[1] = this.trimColon(tokens[1])
+								var goalLabel = tokens.slice(2, tokens.length).join(" ");
+								if(this.goalTable[goalLabel] !== undefined){
+									lineIndex = this.goalTable[goalLabel] - 1;
+									jumps++;
+								}
+							}
 							break;
-						default:
-							//var syntaxArray: = SyntaxColor.solarizeLineNum($.codeTxt, lineIndex, beginIndex, endIndex);
-							//this.processBaseCogulatorLine(syntaxArray, lineIndex);
-							// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
 					}
 				}
 			} else {
@@ -184,7 +167,7 @@ class GomsProcessor {
 	hasError(tokens, lineNum, jumps = 0) {
 		var lines = G.quill.getText().split("\n");
 		// tokens = tokens.filter(noEmpty);
-		var operator = tokens[0].toLowerCase();
+		var operator = this.trimColon(tokens[0].toLowerCase());
 		if (operator == "createstate") {
 			// Expected: CreateState name value
 			if (tokens.length != 3) {
@@ -204,52 +187,54 @@ class GomsProcessor {
 				return true;
 			} else if(this.stateTable[tokens[1]] == undefined){
 				// console.log("'"+tokens[1]+"' does not exist.")
-				G.errorManager.errors.push(new GomsError("invalid_var_set", lineNum));
+				G.errorManager.errors.push(new GomsError("invalid_var_dne", lineNum));
 				return true;
 			} 
 		} 
-		// else if (operator == "if") {
-		// 	if (tokens.length != 3) {
-		// 		$.errors[lineNum] = "I was expecting 2 arguments."
-		// 		return true;
-		// 	} else if (stateTable[tokens[1]] == undefined){
-		// 		$.errors[lineNum] = "'"+tokens[1]+"' does not exist."
-		// 		return true;
-		// 	} else {
-		// 		// Check if it's missing an endif
-		// 		if (this.findMatchingEndIf(lines, lineNum) == lines.length) {
-		// 			$.errors[lineNum] = "I was expecting an EndIf."
-		// 			return true;
-		// 		}
-		// 	}
-		// } else if (operator == "endif") {
-		// 	if (tokens.length != 1) {
-		// 		$.errors[lineNum] = "I was not expecting any arguments."
-		// 		return true;
-		// 	}
-		// } else if (operator == "goto") {
-		// 	if (tokens.length <= 2) {
-		// 		$.errors[lineNum] = "Goto takes the form \"Goto Goal: goal_name\"."
-		// 		return true;
-		// 	}
-		// 	if (tokens.slice(0, 2).join(" ").toLowerCase() != "goto goal") {
-		// 		//trace("cleaned up goto "+clean(tokens.slice(0, 2).join(" ").toLowerCase()));
-		// 		$.errors[lineNum] = "I was expecting something like 'goto goal'."
-		// 		return true;
-		// 	}
-		// 	// Index all goals defined and check if goal exists
-		// 	this.indexGoalLines(lines);
-		// 	var goalLabel = tokens.slice(2, tokens.length).join(" ");
-		// 	var goalLine = goalTable[goalLabel];
-		// 	if (goalLine == undefined) {
-		// 		$.errors[lineNum] = "'"+goalLabel+"' does not exist."
-		// 		return true;
-		// 	}
-		// 	if (jumps > 25) {
-		// 		$.errors[lineNum] = "I ran into an infinite loop."
-		// 		return true;
-		// 	}
-		// }
+		else if (operator == "if") {
+			// Expected: If state value
+			if (tokens.length != 3) {
+				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				return true;
+			} else if (this.stateTable[tokens[1]] == undefined){
+				G.errorManager.errors.push(new GomsError("invalid_var_dne", lineNum));
+				return true;
+			} else {
+				// Check if it's missing an endif
+				if (this.findMatchingEndIf(lines, lineNum) == lines.length) {
+					G.errorManager.errors.push(new GomsError("invalid_if_unclosed", lineNum));
+					return true;
+				}
+			}
+		} else if (operator == "endif") {
+			if (tokens.length != 1) {
+				G.errorManager.errors.push(new GomsError("invalid_endif", lineNum));
+				return true;
+			}
+		} else if (operator == "goto") {
+			// Expected: GoTo Goal: value (case can be lower and colon optional)
+			if (tokens.length <= 2) {
+				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				return true;
+			}
+			tokens[1] = this.trimColon(tokens[1]);
+			if (tokens.slice(0, 2).join(" ").toLowerCase() != "goto goal") {
+				G.errorManager.errors.push(new GomsError("invalid_goto", lineNum));
+				return true;
+			}
+			// Index all goals defined and check if goal exists
+			this.indexGoalLines(lines);
+			var goalLabel = tokens.slice(2, tokens.length).join(" ");
+			var goalLine = this.goalTable[goalLabel];
+			if (goalLine == undefined) {
+				G.errorManager.errors.push(new GomsError("invalid_goal_dne", lineNum));
+				return true;
+			}
+			if (jumps > 25) {
+				G.errorManager.errors.push(new GomsError("infinite_loop", lineNum));
+				return true;
+			}
+		}
 
 		return false;
 	}
@@ -267,15 +252,15 @@ class GomsProcessor {
 	//	Example: "CreateState: goal_name value"
 	//  Output: String: trimmed operator 
 	//	Example: "CreateState goal_name value"
-	// trimColon(string) { //return String
-	// 	var trimmed = string;
-	// 	var colon = trimmed.indexOf(':');
-	// 	while (colon != -1) {
-	// 		trimmed = trimmed.substring(0, colon) + trimmed.substring(colon + 1, trimmed.length);
-	// 		colon = trimmed.indexOf(':');
-	// 	}
-	// 	return trimmed;
-	// }
+	trimColon(string) { //return String
+		// var trimmed = string;
+		// var colon = trimmed.indexOf(':');
+		// while (colon != -1) {
+		// 	trimmed = trimmed.substring(0, colon) + trimmed.substring(colon + 1, trimmed.length);
+		// 	colon = trimmed.indexOf(':');
+		// }
+		return string.replace(":","").toLowerCase();
+	}
 
 	//Purpose:  Find the "beginIndex" used in process steps array. Should be the sum 
 	//			of the length of all lines that came before. Necessary for line jumping
@@ -617,24 +602,25 @@ class GomsProcessor {
 	}
 
 	// Purpose: Changes an existing state in the stateTable, all values are represented as strings.
-	//  Input: String key, String value (target1, visited)
+	// Input: String key, String value (target1, visited)
 	// Output: none
 	// SideEffect:  An existing entry in global stateTable is changed
 	setState(key, value) {
 		this.stateTable[key] = value;
 	}
 
-	// Purpose: finds the lineNumbers of all goals in the program and stores them in the $.goalTable
+	// Purpose: finds the lineNumbers of all goals in the program and stores them in the goalTable
 	// 			The value is an Object with attributes lineNo, start (start of actual steps), end
 	// Input: Array of lines representing the text on the editor
 	// Output: none
 	// SideEffect: makes entries of all the goals in the model in $.goalTable
 	indexGoalLines(lines) {
 		for (var i = 0; i < lines.length; i++) {
-			var tokens = lines[i].split(' ');
-			var operator = tokens[0].toLowerCase();
+			var tokens = this.trimIndents(lines[i]).split(' ');
+			var operator = this.trimColon(tokens[0]);
 			if (operator == "goal") {
 				// Goal line assumed to be in the form "goal goal_name"
+				tokens[1] = tokens[1].replace(":","");
 				var goalName = tokens.slice(1, tokens.length).join(" ");
 				this.goalTable[goalName] = i;
 			}
@@ -649,7 +635,7 @@ class GomsProcessor {
 	// ifTrue: lineCounter - continue processing where you are.
 	// ifFalse: the line of the matching EndIf;
 	nextIfLine(lines, lineCounter) {
-		var ifIsTrue = this.evaluateIfStatement(trimIndents(lines[lineCounter]));
+		var ifIsTrue = this.evaluateIfStatement(this.trimIndents(lines[lineCounter]));
 		if (ifIsTrue) {
 			//do not jump any lines, lineCounter in parseloop will iterate to next line
 			return lineCounter;
@@ -670,7 +656,7 @@ class GomsProcessor {
 		var numIfs = 0;
 		var numEndIfs = 0;
 		for (var i = lineNum; i < lines.length; i++) {
-			var tokens = lines[i].split(' ');
+			var tokens = this.trimColon(this.trimIndents(lines[i])).split(' ');
 			if (tokens[0].toLowerCase() == "if") { //Handles nested ifs
 				numIfs++; //for each if found, it must find an additional endif
 			} else if (tokens[0].toLowerCase() == "endif") {
@@ -694,7 +680,7 @@ class GomsProcessor {
 		//input must be in the form "If key value"
 		var key = ifLine.split(' ')[1];
 		var ifValue = ifLine.split(' ')[2];
-		var tableValueString = stateTable[key];
+		var tableValueString = this.stateTable[key];
 
 		return (tableValueString == ifValue);
 	}
