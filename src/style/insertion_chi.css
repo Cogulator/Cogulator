@@ -1,0 +1,26 @@
+#insertion_container {
+	position:absolute;
+	top:0px;
+	left:0px;
+	background-color: var(--purple-color);
+	min-height:150px;
+	min-width:200px;
+	box-shadow: inset 0px 10px 5px -10px #000;
+	visibility: hidden;
+	z-index: 1000000;
+}
+
+#insertion_options_container{
+	position:relative;
+	float:left;
+	width:calc(100% - 300px);
+	height:inherit;
+}
+
+#insertion_details_container{
+	position:relative;
+	float:left;
+	width:300px;
+	height:inherit;
+	background-color: var(--main-bg-color);
+}

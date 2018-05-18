@@ -9,10 +9,15 @@ class QutterManager { //Quill gutter
 			$('#gutter').scrollTop(this.scrollTop);
 		})
 		
-		//renumber as needed
+		//recalculate as needed
 		$( window ).resize(function() {
 		  	//G.qutterHelper.numberLines(); //cheap way to avoid "this" binding issues\
-			G.qutterManager.updateErrorMarkers(); //cheap way to avoid "this" binding issues
+			G.qutterManager.updateMarkers(); //cheap way to avoid "this" binding issues
+		});
+		
+		//onselection change, redo view if needed
+		G.quill.on('selection-change', function(range, oldRange, source) {
+			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
 		});
 		
 		//handle error marker hover
@@ -44,17 +49,16 @@ class QutterManager { //Quill gutter
 			txt += i.toString();
 			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
 			for (var j = 0; j < wrappedLines; j++) txt += "\n";
-			
-			console.log(lines[i].domNode.clientHeight, wrappedLines, lines[i].domNode.innerHTML);
-		}
+ 		}
 		
 		$('#gutter').text(txt);
 	}
 	
 	
-	updateErrorMarkers() { 
+	updateMarkers() { 
 		let errors = G.errorManager.errors;
 		let tips = G.tipManager.tips;
+		let insertionLine = G.qutterManager.getInsertionLine();
 		var html = "";
 		
 		//for each line, see if an error exists
@@ -83,6 +87,15 @@ class QutterManager { //Quill gutter
 				}
 			}
 			
+			//if there are no errors or tips on the line, and it's the selected line, check to see if the line is blank. If so, and insertion marker
+			if (!foundErrorOrTip && insertionLine != null) {
+				if (insertionLine == i) {
+					html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
+					foundErrorOrTip = true;
+				}
+				
+			}
+			
 			if (!foundErrorOrTip) { html += "<br>" };
 			
 			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
@@ -94,6 +107,18 @@ class QutterManager { //Quill gutter
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);
 		}
+	}
+	
+	
+	getInsertionLine() {
+		let selection = G.quill.getSelection();
+		if (selection == null) return null;
+		if (selection.length > 1) return null;
+		
+		let lineText = G.quillManager.getLine(selection.index);
+		if (lineText.length > 0) return null;
+		
+		return G.quillManager.getLineNumber(selection.index);
 	}
 	
 	

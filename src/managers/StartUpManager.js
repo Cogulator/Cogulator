@@ -30,7 +30,8 @@ class StartUpManager {
 					"./interface/GanttChart.js",
 					"./interface/PopOver.js",
 				    "./managers/ReloadManager.js",
-				    "./interface/NewFileCHI.js"];
+				    "./interface/NewFileCHI.js",
+				  	"./interface/InsertionCHI.js"];
 		
 		$.getScript( this.js[this.index], function(){
 			G.startUp.getNext();

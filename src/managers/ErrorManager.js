@@ -52,7 +52,7 @@ class ErrorManager {
 		});
 		
 		$( document ).on( "Memory_Processed", function(evt, taskTimeMS) {
-		  	G.qutterManager.updateErrorMarkers();
+		  	G.qutterManager.updateMarkers();
 		});
 		
 		$( document ).on( "Line_Update", function() {
@@ -99,7 +99,7 @@ class ErrorManager {
 		if (exists) return; //if the error is already in the error stack, there's nothing to do
 		if (!replaced) this.errors.push(errorToAdd); //if you did not replace an existing error with errorToAdd, push errorToAdd
 		
-		G.qutterHelper.updateErrorMarkers();
+		G.qutterHelper.updateMarkers();
 	}
 	
 	
@@ -115,7 +115,7 @@ class ErrorManager {
 			}
 		}
 		
-		if (this.errors.length < startingLength) G.qutterHelper.updateErrorMarkers();
+		if (this.errors.length < startingLength) G.qutterHelper.updateMarkers();
 	}
 
 }

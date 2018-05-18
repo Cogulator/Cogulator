@@ -13,6 +13,7 @@
 	--stats-label-color: #777;
 	--border-color: #DFDFDF;
 	--gantt-stripe-color: #F0F0F0;
+	--purple-color: #85587A;
 }
 
 
@@ -140,12 +141,12 @@
 	vertical-align: middle;
 }
 
-.error_and_tip_marker {
+.error_and_tip_marker, .insertion_marker {
 	display: block;
 	width: 16px;
 	height: 16px;
 	border-radius: 16px;
-	color:var(--main-bg-color);
+	color:white;
 	text-align: center;
 	font-size: 10px;
 	cursor: default;
@@ -157,6 +158,10 @@
 
 .orange_background {
 	background-color:orange;
+}
+
+.purple_background {
+	background-color:var(--purple-color);
 }
 
 

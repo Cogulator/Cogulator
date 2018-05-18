@@ -91,7 +91,7 @@ class TipManager {
 		
 		for (var i = 0; i < this.tips.length; i++) console.log(this.tips[i]);
 		
-		G.qutterManager.updateErrorMarkers();
+		G.qutterManager.updateMarkers();
 	}
 									
 	
