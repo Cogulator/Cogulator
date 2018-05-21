@@ -66,8 +66,8 @@ class ErrorManager {
 		if (selection == null)  return;
 		
 		let index = selection.index;
-		let lineNumber = G.quillHelper.getLineNumber(index);
-		let lineTxt = G.quillHelper.getLine(index);
+		let lineNumber = G.quillManager.getLineNumber(index);
+		let lineTxt = G.quillManager.getLine(index);
 		
 		let componentsAndErrors = this.lineParser.parse(lineTxt);
 		if (componentsAndErrors.error != null) {
@@ -99,7 +99,7 @@ class ErrorManager {
 		if (exists) return; //if the error is already in the error stack, there's nothing to do
 		if (!replaced) this.errors.push(errorToAdd); //if you did not replace an existing error with errorToAdd, push errorToAdd
 		
-		G.qutterHelper.updateMarkers();
+		G.qutterManager.updateMarkers();
 	}
 	
 	
@@ -115,7 +115,7 @@ class ErrorManager {
 			}
 		}
 		
-		if (this.errors.length < startingLength) G.qutterHelper.updateMarkers();
+		if (this.errors.length < startingLength) G.qutterManager.updateMarkers();
 	}
 
 }

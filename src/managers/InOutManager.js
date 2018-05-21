@@ -74,9 +74,9 @@ class InOutManager {
 	
 	
 	writeToFile(pth, text) {
-		console.log("WRITE", pth, text);
-		if (text.length == 0) console.log("CRAP, CRAP, CRAP");
-		else console.log("OK", text.length);
+		//console.log("WRITE", pth, text);
+		//if (text.length == 0) console.log("CRAP, CRAP, CRAP");
+		//else console.log("OK", text.length);
 		fs.writeFile(pth, text, (err) => {  
 			if (err) throw err;
 		});

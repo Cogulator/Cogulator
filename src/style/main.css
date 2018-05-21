@@ -173,7 +173,7 @@
 	left: 0px;
 	border-radius: 0px 0px 6px 6px;
 	background: red;
-	color:var(--model-button-select-txt-color);
+	color:white;
 	font-family: 'Lato';
 	font-size: 13px;
 	z-index: 100;

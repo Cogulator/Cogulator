@@ -48,7 +48,7 @@ class AutocompleteManager {
 		if (caretIndex < 0) caretIndex = 0;
 		
 		//get the text on the current line from line start to current cursor position
-		let startIndex = G.quillHelper.getLineStart(caretIndex);
+		let startIndex = G.quillManager.getLineStart(caretIndex);
 		let length = caretIndex - startIndex + 1;
 		let line = G.quill.getText(startIndex, length); //from beginning of line to current caret position
 		if (line.indexOf("\*") > -1) return; //into the comments, don't bother continuing
@@ -74,7 +74,7 @@ class AutocompleteManager {
 		else if (type == "time") matchToArray = this.times;
 		
 		//find the word right before the cursor, determine if it matches with the keyword shortened to the same length as typed text
-		let typed = G.quillHelper.getWord(caretIndex).toLowerCase();
+		let typed = G.quillManager.getWord(caretIndex).toLowerCase();
 		if (typed.length == 0) return false;
 		
 		for (var i = 0; i < matchToArray.length; i++) {

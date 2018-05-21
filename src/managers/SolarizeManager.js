@@ -141,6 +141,64 @@ class SolarizeManager {
 	}
 	
 	
+	//Function for updating the quillet
+	solarizeQuillet() {
+		var matches = [];
+		var retain = [];
+		let text = G.quillet.getText();
+		
+		for (var i = 0; i < this.regexs.length; i++) {
+			let regex = this.regexs[i].exp;
+			let clr = this.regexs[i].clr;
+			
+			// push all the matches into an array that can then be reordered and processed for retain operations
+			var match;
+			while( (match = regex.exec(text)) != null ) matches.push( {index: match.index, length: match[0].length, color: clr} );
+		}
+				
+		//sort the matches by index
+		matches.sort(function(a, b){
+			return a.index-b.index;
+		});
+		
+		//remove matches that are "inside" of a comment match (probably better with a regex, but negetive lookbehinds are tricky, and I ain't too bright)
+		const commentMatches = matches.filter(match => match.color == this.commentClr);
+		for (var i = 0; i < matches.length; i++) {
+			let match = matches[i];
+			if (match.color == this.commentClr) continue;
+			
+			for (var j = 0; j < commentMatches.length; j++) {
+				let comment = commentMatches[j];
+				if (match.index >= comment.index && match.index <= comment.index + comment.length) {
+					matches.splice(i, 1);
+					i--;
+					break;
+				}
+			}
+		}
+		
+		//build the retain array
+		var index = 0;
+		for (var i = 0; i < matches.length; i++) {
+			let match = matches[i];
+			//if (match.index < index) console.log("HOUSTON, WE HAVE A PROBLEM");
+			
+			//if there is space between text that needs to be solarized
+			if (match.index > index) {
+				let retainBlack = match.index - index;
+				retain.push({ retain: retainBlack, attributes: { color: this.blackClr } }); 
+				index += retainBlack
+			}  
+			
+			retain.push({ retain: match.length, attributes: { color: match.color } }); 
+			index += match.length;
+		}
+						
+		//update
+		G.quillet.updateContents(retain, 'silent');
+	}
+	
+	
 	operatorRegEx() {
 		//^[\.| ]{0,15}(say|look)\b/gmi
 		let prefix = "^[\\.| ]{0,15}(";

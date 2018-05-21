@@ -56,6 +56,7 @@ class QutterManager { //Quill gutter
 	
 	
 	updateMarkers() { 
+		console.log("UPDATE");
 		let errors = G.errorManager.errors;
 		let tips = G.tipManager.tips;
 		let insertionLine = G.qutterManager.getInsertionLine();

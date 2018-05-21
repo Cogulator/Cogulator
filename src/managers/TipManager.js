@@ -87,10 +87,7 @@ class TipManager {
 				else this.tips.push(new Tip("missing_point", step.lineNo));
 			}
 		}
-		
-		
-		for (var i = 0; i < this.tips.length; i++) console.log(this.tips[i]);
-		
+				
 		G.qutterManager.updateMarkers();
 	}
 									
