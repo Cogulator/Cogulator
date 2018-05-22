@@ -3,31 +3,28 @@ let Delta = Quill.import('delta');
 class InsertionCHI {
 	constructor() {
 		this.deleteIndex = 0;
+		this.hiddening = false; //that's right, hiddening
 		
 		//hide if click on anything other than insertion chi, show if click on insertion marker
 		$(document).bind('click', function(e) {
 			if (e.target.className.includes("insertion_marker")) {
-				let lineNumber =  $(this).data("line");
+				let lineNumber = $(this).data("line");
 				G.insertionCHI.show(lineNumber);
 				return;
 			}
 			
-			if (e.target.id == "insertion_container") return;
-			
-			var hide = true;
-			$(e.target).parents().each(function(){
-				if (this.id == "insertion_container") {
-					hide = false;
-				}
-			});
-			
-			if (hide) G.insertionCHI.hide(true);
+			if (!G.insertionCHI.targetIsThis(e.target)) G.insertionCHI.hide();
 		});
 		
 		//set up to hide on resize or scroll
 		$( window ).resize(function() {
-			G.insertionCHI.hide(true);
+			G.insertionCHI.hide();
 		});
+		
+		$(document).on('mousewheel', function(e){
+			if (!G.insertionCHI.targetIsThis(e.target)) G.insertionCHI.hide();
+		});
+
 		
 		//toggle click
 		$(document).on("click", ".insertion_options_toggle_button", function(evt) {
@@ -44,8 +41,70 @@ class InsertionCHI {
 		//method info click
 		$(document).on("click", ".insertion_option_method_button_info", function(evt) {
 			let path = $(this).parent().data("path");
-			G.io.loadFile(path, G.insertionCHI.showMethodInfo);
+			G.io.loadFile(path, G.insertionCHI.showInfo);
 		});
+		
+		
+		//operator button click
+		$(document).on("click", ".insertion_option_operator_button_model", function(evt) {
+			let operator = $(this).text();
+			G.insertionCHI.insert(operator);
+		});
+		
+		//operator info click
+		$(document).on("click", ".insertion_option_operator_button_info", function(evt) {
+			let info = $(this).data("info");
+			G.insertionCHI.showInfo(info);
+		});
+	}
+	
+	
+	show(atLine) {
+		if (this.hiddening) return;
+		if ( $('#insertion_chi_container').css("display") != "none" ) return;
+		
+		G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
+		G.quill.updateContents(new Delta()
+		  .retain(G.insertionCHI.deleteIndex)           
+		  .insert({ 
+			image: './'
+		  },
+		  {
+			height: '175px'
+		  })
+		);
+		
+		let offset = $(".insertion_marker").offset();
+		let top = offset.top + 20;
+		let left = offset.left - 10;
+		let width = G.insertionCHI.getWidth();
+				
+		$('#insertion_chi_container').css({top: top, left: left});
+		$('#insertion_chi_container').css({"width": width + "px"});
+		
+		if ($('#insertion_method_toggle').hasClass('insertion_options_toggle_selected')) this.setMethodHTML();
+		else this.setOperatorHTML();
+		
+		$("#insertion_chi_container").slideToggle( "fast" );
+	}
+	
+	
+	hide() {
+		if (this.hiddening) return;
+		if ( $('#insertion_chi_container').css("display") == "none" ) return;
+		
+		G.insertionCHI.hiddening = true;
+		$('#insertion_chi_container').slideToggle("fast", function() {
+			G.insertionCHI.hiddening = false;
+		});
+				
+		G.quill.updateContents(new Delta()
+		  .retain(G.insertionCHI.deleteIndex)           
+		  .delete(1)
+		);
+		
+		G.qutterManager.updateMarkers();
+		G.quillet.setText("");
 	}
 	
 	
@@ -63,6 +122,8 @@ class InsertionCHI {
 			
 			this.setOperatorHTML();
 		}
+		
+		$('#insertion_options_content').scrollTop(0);
 	}
 	
 	
@@ -84,8 +145,6 @@ class InsertionCHI {
 		
 		let html = leftColumnHTML + rightColumnHTML;
 		$('#insertion_options_content').html(html);
-		
-		console.log("SET METHOD");
 	} 
 	
 	
@@ -98,63 +157,80 @@ class InsertionCHI {
 	}
 	
 	
-	showMethodInfo(method) {
-		G.quillet.setText(method);
+	showInfo(txt) {
+		G.quillet.setText(txt);
 		G.solarize.solarizeQuillet();
 	}
 	
 	
 	setOperatorHTML() {
-		console.log("SET OPERATOR");
+		var cogColumnHTML = "<div class='insertion_options_column_four_columns'><div class='insertion_column_header'>Cognitive</div>";
+		var seeColumnHTML = "<div class='insertion_options_column_four_columns'><div class='insertion_column_header'>See</div>";
+		var sayHearColumnHTML = "<div class='insertion_options_column_four_columns'><div class='insertion_column_header'>Say/Hear</div>";
+		var handsColumnHTML = "<div class='insertion_options_column_four_columns'><div class='insertion_column_header'>Hands</div>";
+		
+		//insert buttons for each method. built in in left column.  custom in right column.
+		for (var i = 0; i < G.operatorsManager.operators.length; i++) {
+			let operator = G.operatorsManager.operators[i];
+			let buttonHTML = this.getOperatorButtonHTML(operator);
+			
+			switch (operator.resource) {
+				case "see":
+					seeColumnHTML += buttonHTML;
+					break;
+				case "speech":
+				case "hear":
+					sayHearColumnHTML += buttonHTML;
+					break;
+				case "cognitive":
+					cogColumnHTML += buttonHTML;
+					break;
+				case "hands":
+					handsColumnHTML += buttonHTML;
+					break;
+			}
+		}
+		
+		cogColumnHTML += "</div>";
+		seeColumnHTML += "</div>";
+		sayHearColumnHTML += "</div>";
+		handsColumnHTML += "</div>";
+		
+		let html = cogColumnHTML + seeColumnHTML + sayHearColumnHTML + handsColumnHTML;
+		$('#insertion_options_content').html(html);
 	}
 	
 	
-	show(atLine) {
-		if ( $('#insertion_container').css("visibility") != "hidden" ) return;
+	getOperatorButtonHTML(operator) {
+		var timeMod = "";
 		
-		G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
-		G.quill.updateContents(new Delta()
-		  .retain(G.insertionCHI.deleteIndex)           
-		  .insert({ 
-			image: './'
-		  },
-		  {
-			height: '175px'
-		  })
-		);
+		if (operator.timeModifier == "count_label_words") timeMod = " per word in label.";
+		else if (operator.timeModifier == "count_label_characters") timeMod = " per character in label.";
+		else if (operator.operator.toLowerCase() == "type") timeMod = " per character in label.";
 		
-		let offset = $(".insertion_marker").offset();
-		let top = offset.top + 20;
-		let left = offset.left - 10;
-		let width = G.insertionCHI.getWidth();
+		var info = operator.operator + "\n"; 
+			info += "*Time: " + operator.time + " milliseconds" + timeMod + "\n";
+			info += "*Description: " + operator.description.replace(/_/g, " ");
 		
-		$('#insertion_container').offset({top: top, left: left});
-		$('#insertion_container').css({"width": width + "px"});
-		
-		this.setMethodHTML();
-		$('#insertion_container').css({"visibility": "visible"});
+		var html = "<div class='insertion_option_button'> \
+						<div class='insertion_option_operator_button_info' data-info='" + info + "'>i</div> \
+						<div class='insertion_option_operator_button_model'>" + operator.operator + "</div> \
+					</div>"
+		return html;
 	}
 	
 	
 	insert(text) {
-		G.quill.insertText(G.insertionCHI.deleteIndex, text);
-		G.insertionCHI.hide(false);
-	}
-
-	
-	hide(dlt) {
-		if ( $('#insertion_container').css("visibility") == "hidden" ) return;
-		$('#insertion_container').css({"visibility": "hidden"});
+		G.quill.focus();
 		
-		if (dlt) {
-			G.quill.updateContents(new Delta()
-			  .retain(G.insertionCHI.deleteIndex)           
-			  .delete(1)
-			);
-		}
+		let insertIndex = G.insertionCHI.deleteIndex;
+		G.insertionCHI.hide();
+		G.quill.insertText(insertIndex, text);
 		
-		G.qutterManager.updateMarkers();
-		G.quillet.setText("");
+		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
+		else  G.quill.setSelection(insertIndex + text.length);
+		
+		G.quill.focus();
 	}
 	
 	
@@ -167,6 +243,21 @@ class InsertionCHI {
 		if (scrollbarWidth > 0) return $("#gutter").width() + $("#code").width() + 4;
 		return ($("#gutter").width() + $("#code").width() + 18);
 	}
+	
+	
+	targetIsThis(target) {
+		console.log(target.id);
+		if (target.id == "insertion_chi_container") return true;
+		
+		var itIs = false;
+		$(target).parents().each(function(){
+			if (this.id == "insertion_chi_container") itIs = true;
+		});
+		
+		return itIs;
+	}
+	
+
 }
 	
 G.insertionCHI = new InsertionCHI();

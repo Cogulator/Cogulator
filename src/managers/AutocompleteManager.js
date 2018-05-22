@@ -36,6 +36,7 @@ class AutocompleteManager {
 	complete() {
 		let text = $( '#autocomplete' ).text();
 		G.quill.insertText(G.quill.getSelection().index, text + " ");
+		this.hide();
 	}
 			
 	

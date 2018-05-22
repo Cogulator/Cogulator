@@ -2,7 +2,6 @@ class QutterManager { //Quill gutter
 	
 	constructor() {
 		this.lineHeight = 22; //dependent on set font size
-		//this.numberLines(); //initial line numbers
 		
 		//Sync Qutter scroll to Quill scroll
 		$( G.quill.scrollingContainer ).scroll(function(){
@@ -11,12 +10,12 @@ class QutterManager { //Quill gutter
 		
 		//recalculate as needed
 		$( window ).resize(function() {
-		  	//G.qutterHelper.numberLines(); //cheap way to avoid "this" binding issues\
 			G.qutterManager.updateMarkers(); //cheap way to avoid "this" binding issues
 		});
 		
 		//onselection change, redo view if needed
 		G.quill.on('selection-change', function(range, oldRange, source) {
+			console.log("SELECTION CHANGE");
 			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
 		});
 		
@@ -56,7 +55,6 @@ class QutterManager { //Quill gutter
 	
 	
 	updateMarkers() { 
-		console.log("UPDATE");
 		let errors = G.errorManager.errors;
 		let tips = G.tipManager.tips;
 		let insertionLine = G.qutterManager.getInsertionLine();
