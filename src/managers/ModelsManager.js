@@ -1,18 +1,16 @@
 class ModelsManager {
 	constructor() {
-		
 		this.update();
 		this.selected = "";
-		this.newlyLoaded = true;
 		
 		$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) {
 			G.modelsManager.saveModel();
 		});
 		
-		app.on('window-all-closed', () => {
+		window.addEventListener('unload', function(event) {
 			G.modelsManager.saveModel();
 			G.modelsManager.deleteModels();
-		});
+		})
 	}
 	
 	
@@ -27,14 +25,13 @@ class ModelsManager {
 		G.io.newFile(pth, name + ".goms", "", this.onNewModelCreated);
 	} onNewModelCreated(pth, text) {
 		G.modelsManager.update();
-		G.modelsManager.loadModel(pth);
 		G.modelsSidebar.buildSideBar();
+		G.modelsManager.loadModel(pth);
 	}
 	
 	
 	saveModel() {
-		if(!this.newlyLoaded) G.io.writeToFile(this.selected, G.quill.getText());
-		this.newlyLoaded = false;
+		G.io.writeToFile(this.selected, G.quill.getText());
 	}
 	
 	
@@ -62,14 +59,15 @@ class ModelsManager {
 	
 	
 	loadModel(p) {
+		//¡IMPORTANT: The second condition prevents blanking the model on load!  Not entirely clear why this is.
+		if (this.selected != "" && this.selected != p) G.modelsManager.saveModel(); 
+		
 		this.selected = p;
 		G.io.loadFile(p, this.displayModel);
 	} displayModel(code) {
-		G.modelsManager.newlyLoaded = true;
-		G.quill.setText(code);
+		G.quill.setText(code); //setting text will be picked up on in customeventmanager and cause the model to process
 		G.quill.focus();
 		G.modelsSidebar.showSelected(G.modelsManager.selected, false);
-		$( document ).trigger( "Model_Loaded" );
 		G.modelsManager.setLastOpened();
 	}
 	

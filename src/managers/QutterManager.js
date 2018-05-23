@@ -13,9 +13,11 @@ class QutterManager { //Quill gutter
 			G.qutterManager.updateMarkers(); //cheap way to avoid "this" binding issues
 		});
 		
-		//onselection change, redo view if needed
+		//on selection change on keydown, check to see if the current line is blank, if so update the markers so the insert button will be shown
 		G.quill.on('selection-change', function(range, oldRange, source) {
-			console.log("SELECTION CHANGE");
+			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
+		});
+		$( document ).on("keyup", function() {
 			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
 		});
 		
@@ -86,7 +88,7 @@ class QutterManager { //Quill gutter
 				}
 			}
 			
-			//if there are no errors or tips on the line, and it's the selected line, check to see if the line is blank. If so, and insertion marker
+			//if there are no errors or tips on the line, and it's the selected line, check to see if the line is blank. If so, add insertion marker
 			if (!foundErrorOrTip && insertionLine != null) {
 				if (insertionLine == i) {
 					html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"

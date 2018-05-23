@@ -1,23 +1,18 @@
 class ModelEvents {
 	
 	constructor() {
-		this.lengthWas = G.quill.getLength();
-		this.lengthIs = G.quill.getLength();
-		
+		this.textWas = G.quill.getText();
+		this.textIs = this.textWas;
+				
 		this.linesWere = G.quill.getText().split('\n').length;
 		this.linesAre = this.linesWere;
 		
-		$( document ).on( "Model_Loaded", function() {
-			$( document ).trigger( "Model_Update_MultiLine" );
-		});
-		
 		G.quill.on('text-change', function(eventName) {
-			G.modelEvents.lengthIs = G.quill.getLength();
+			G.modelEvents.textIs = G.quill.getText();
 			G.modelEvents.linesAre = G.quill.getText().split('\n').length;
 			
 			G.modelEvents.handleEvent();
 		});
-		
 	}
 	
 	
@@ -27,32 +22,43 @@ class ModelEvents {
 
 	
 	triggerSingleline() {
-		$( document ).trigger( "Model_Update_SingleLine" );
+		$( document ).trigger( "Line_Update" );
 	}
 	
 
 	handleEvent() {
-		let lengthDelta = this.lengthDelta();
-		let lineDelta = this.linesDelta();
-		if (lineDelta > 1) {
-			//triggers solarize all, and goms processor run (which in turn triggers error check run)
-			$( document ).trigger( "Model_Update_MultiLine" );
-		} else if (lineDelta == 1) {
-			//triggers solarize line, and goms proceessor run (which in turn triggers error check run)
-			$( document ).trigger( "Model_Update_SingleLine" );
-		} else if (lengthDelta > 1) {
-			$( document ).trigger( "Model_Update_MultiLine" );
-		} else if (lengthDelta > 0) {
-			$( document ).trigger( "Line_Update" );
+		let textDelta = this.textDelta(); //if two models are different in content, but the same number of charaters and lines, we still want the thing to fire
+		let lineDelta = this.linesDelta(); //this might not be necessary anymore
+				
+		if (lineDelta > 0 || textDelta > 1) $( document ).trigger( "Model_Update_MultiLine" ); //triggers solarize all, goms processor, and error check
+		else 								$( document ).trigger( "Line_Update" );
+	}
+	
+	
+	textDelta() {
+		var longer = this.textIs;
+		var shorter = this.textWas;
+		if (longer.length < shorter.length) {
+			var longer = this.textWas;
+			var shorter = this.textIs;
 		}
+
+		var i = 0;
+		var j = 0;
+		var delta = "";
+
+		while (j < longer.length) {
+			if (shorter[i] != longer[j] || i == shorter.length) delta += longer[j];
+			else i++;
+			j++;
+			
+			if (delta.length > 2) break; //for right now, we can stop here
+		}
+	
+		this.textWas = this.textIs;
+		return delta.length;
 	}
 	
-	
-	lengthDelta() {
-		let delta = this.lengthIs - this.lengthWas;
-		this.lengthWas = this.lengthIs;
-		return Math.abs(delta);
-	}
 	
 	linesDelta() {
 		let delta = this.linesAre - this.linesWere;

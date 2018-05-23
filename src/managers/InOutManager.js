@@ -43,14 +43,18 @@ class InOutManager {
 	
 	
 	loadFile(pth, callback) {
-		fs.readFile(pth, function (err, data) {
-			if (err) {
-				alert("Could not read file at " + pth + ". Either does not exist or permissions do not allow.");
-				throw err; 
-			}
-			
-			callback(data.toString());
-		});
+		console.log("LOAD", pth, callback);
+
+		try {  
+			var data = fs.readFileSync(pth, 'utf8');
+			console.log("LOADED", pth);
+			//callback(data);  
+		} catch(err) {
+			alert("Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+		}
+		
+		console.log("-------TRHOUGH---------");
+		callback(data); 
     }
 	
 	
@@ -60,11 +64,17 @@ class InOutManager {
 		
 		let fullPath = path.join(pth, filename);
 		console.log("NEW FILE", fullPath);
-		fs.open(fullPath, 'w', function (err, file) {
-			if (err) throw err;
+		
+		try {  
+			fs.openSync(fullPath, 'w');
 			fs.close(file);
-			callback(fullPath, text);
-		});
+			//callback(fullPath, text);
+		} catch(err) {
+			alert("Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+		}
+		
+		console.log("-------THROUGH NEW---------");
+		callback(fullPath, text);
 	}
 	
 	
@@ -73,21 +83,29 @@ class InOutManager {
 	}
 	
 	
-	writeToFile(pth, text) {
-		//console.log("WRITE", pth, text);
-		//if (text.length == 0) console.log("CRAP, CRAP, CRAP");
-		//else console.log("OK", text.length);
-		fs.writeFile(pth, text, (err) => {  
-			if (err) throw err;
-		});
+	writeToFile(pth, text, callback = 0) {
+		console.log("WRITE", pth);
+
+		try {  
+			fs.writeFileSync(pth, text);
+		} catch(err) {
+			alert("Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+		}
+		
+		if (typeof callback === 'function' && callback()) callback();
 	}
 	
 	
-	appendToFile(pth, text, callback) {
-		fs.appendFile(pth, text, function (err) {
-		  if (err) throw err;
-		  callback();
-		});
+	appendToFile(pth, text, callback) {		
+		try {  
+			fs.appendFileSync(pth, text)
+			//callback();
+		} catch(err) {
+			alert("Could not save operator. Verify you have permission to write to " + pth);
+		}
+		
+		console.log("THROUGH APPEND");
+		callback();
 	}
 	
 	

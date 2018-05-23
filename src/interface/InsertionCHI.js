@@ -4,6 +4,7 @@ class InsertionCHI {
 	constructor() {
 		this.deleteIndex = 0;
 		this.hiddening = false; //that's right, hiddening
+		this.showring = false;
 		
 		//hide if click on anything other than insertion chi, show if click on insertion marker
 		$(document).bind('click', function(e) {
@@ -18,11 +19,15 @@ class InsertionCHI {
 		
 		//set up to hide on resize or scroll
 		$( window ).resize(function() {
-			G.insertionCHI.hide();
+			if ( $('#insertion_chi_container').css("display") != "none" )  {
+				G.insertionCHI.setPosition();
+			}
 		});
 		
 		$(document).on('mousewheel', function(e){
-			if (!G.insertionCHI.targetIsThis(e.target)) G.insertionCHI.hide();
+			if ( $('#insertion_chi_container').css("display") != "none" )  {
+				G.insertionCHI.setPosition();
+			}
 		});
 
 		
@@ -64,28 +69,61 @@ class InsertionCHI {
 		if ( $('#insertion_chi_container').css("display") != "none" ) return;
 		
 		G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
-		G.quill.updateContents(new Delta()
-		  .retain(G.insertionCHI.deleteIndex)           
-		  .insert({ 
-			image: './'
-		  },
-		  {
-			height: '175px'
-		  })
-		);
 		
-		let offset = $(".insertion_marker").offset();
-		let top = offset.top + 20;
-		let left = offset.left - 10;
-		let width = G.insertionCHI.getWidth();
-				
-		$('#insertion_chi_container').css({top: top, left: left});
-		$('#insertion_chi_container').css({"width": width + "px"});
+		
+	//ultimately, I want to have the quill "split" to look as if this chi is shown behin on opening up.  But, that's causing problems, so...
+//		G.quill.updateContents(new Delta()
+//		  .retain(G.insertionCHI.deleteIndex)           
+//		  .insert({ 
+//			image: './'
+//		  },
+//		  {
+//			height: '176px'
+//		  })
+//		);
+//		
+//		//method to find image your adding and get it's height (and change it's height)
+//		var x = $("img[src$='//:0']");
+//		console.log("IMG", x, x.height());
+	//--
+		
+		this.setPosition();
 		
 		if ($('#insertion_method_toggle').hasClass('insertion_options_toggle_selected')) this.setMethodHTML();
 		else this.setOperatorHTML();
 		
-		$("#insertion_chi_container").slideToggle( "fast" );
+		G.insertionCHI.showring = true;
+		$("#insertion_chi_container").slideToggle( "fast", function() {
+			G.insertionCHI.showring = false;
+		});
+	}
+	
+	setPosition() {
+		let offset = $(".insertion_marker").offset();
+		if (offset == undefined || offset == null) return;
+		
+		var top = offset.top + 20;
+		let left = offset.left - 10;
+		let width = G.insertionCHI.getWidth();
+		let height = $('#insertion_chi_container').height();
+		if (top + height > $(document).height()) top = top - height - 25; //if this is going to put the chi below the bottom of hte window, put it over the line instead
+		
+		$('#insertion_chi_container').css({top: top, left: left});
+		$('#insertion_chi_container').css({"width": width + "px"});
+	}
+	
+	
+	insert(text) {
+		G.quill.focus();
+		
+		let insertIndex = G.insertionCHI.deleteIndex;
+		G.insertionCHI.hide();
+		G.quill.insertText(insertIndex, text);
+		
+		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
+		else  G.quill.setSelection(insertIndex + text.length);
+		
+		G.quill.focus();
 	}
 	
 	
@@ -97,11 +135,13 @@ class InsertionCHI {
 		$('#insertion_chi_container').slideToggle("fast", function() {
 			G.insertionCHI.hiddening = false;
 		});
-				
-		G.quill.updateContents(new Delta()
-		  .retain(G.insertionCHI.deleteIndex)           
-		  .delete(1)
-		);
+		
+		//commented out until I get the effect working correctlyu
+//		G.quill.updateContents(new Delta()
+//		  .retain(G.insertionCHI.deleteIndex)           
+//		  .delete(1)
+//		);
+		//--
 		
 		G.qutterManager.updateMarkers();
 		G.quillet.setText("");
@@ -151,7 +191,7 @@ class InsertionCHI {
 	getMethodButtonHTML(name, path) {
 		var html = "<div class='insertion_option_button' data-path='" + path + "'> \
 						<div class='insertion_option_method_button_info'>i</div> \
-						<div class='insertion_option_method_button_model'>" + name + "</div> \
+						<div class='insertion_option_method_button_model'>" + name.replace(/_/g, " ") + "</div> \
 					</div>"
 		return html;
 	}
@@ -214,23 +254,9 @@ class InsertionCHI {
 		
 		var html = "<div class='insertion_option_button'> \
 						<div class='insertion_option_operator_button_info' data-info='" + info + "'>i</div> \
-						<div class='insertion_option_operator_button_model'>" + operator.operator + "</div> \
+						<div class='insertion_option_operator_button_model'>" + operator.operator.replace(/_/g, " ") + "</div> \
 					</div>"
 		return html;
-	}
-	
-	
-	insert(text) {
-		G.quill.focus();
-		
-		let insertIndex = G.insertionCHI.deleteIndex;
-		G.insertionCHI.hide();
-		G.quill.insertText(insertIndex, text);
-		
-		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
-		else  G.quill.setSelection(insertIndex + text.length);
-		
-		G.quill.focus();
 	}
 	
 	
@@ -246,7 +272,6 @@ class InsertionCHI {
 	
 	
 	targetIsThis(target) {
-		console.log(target.id);
 		if (target.id == "insertion_chi_container") return true;
 		
 		var itIs = false;
@@ -255,6 +280,12 @@ class InsertionCHI {
 		});
 		
 		return itIs;
+	}
+	
+	
+	isVisible() {
+		if ( $('#insertion_chi_container').css("display") != "none" && !this.hiddening) return true;
+		return false;
 	}
 	
 

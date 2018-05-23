@@ -19,6 +19,11 @@ class AutocompleteManager {
 		$( document ).on( "New_Operator", function() {
 			G.autocomplete.setRegExs();
 		});
+		
+		//handle creation of new operator
+		$( document ).on( "Model_Loaded", function() {
+			G.autocomplete.hide();
+		});
 	}
 	
 	

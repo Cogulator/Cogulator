@@ -93,13 +93,10 @@
 .insertion_option_method_button_model, .insertion_option_operator_button_model {
 	position:relative;
 	float:left;
-	height: inherit;
 	margin-left: 5px;
 	margin-bottom: 5px;
 	font-size:14px;
-	line-height:20px;
 	width:95px;
-	overflow: hidden;
 }
 
 .insertion_option_method_button_info, .insertion_option_operator_button_info {

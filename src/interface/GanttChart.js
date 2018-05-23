@@ -347,6 +347,8 @@ var ganttSketch = function(s) {
 				var startTime = step.startTime;
 				var endTime = step.endTime;
 				
+				if (step.operator == "wait") continue;
+				
 				//draw the line
 				let stepX1 = s.ganttTimeToX(startTime, windowStartTime);
 				let stepX2 = s.ganttTimeToX(endTime, windowStartTime);
@@ -360,12 +362,15 @@ var ganttSketch = function(s) {
 				
 				//draw the connecting line
 				if (i < threadSteps.length - 1) {
-					let nextStep = threadSteps[i + 1]; 
-					let nextY = s.resourceY(nextStep.resource);
+					let nextStep = threadSteps[i + 1];
+					
+					if (nextStep.operator != "wait") {
+						let nextY = s.resourceY(nextStep.resource);
 
-					if (stepY == nextY) 	s.line(stepX2, stepY - tickHeight, stepX2, stepY + tickHeight);
-					else if (stepY < nextY) s.line(stepX2, stepY - tickHeight, stepX2, nextY + tickHeight);
-					else 					s.line(stepX2, stepY + tickHeight, stepX2, nextY - tickHeight);
+						if (stepY == nextY) 	s.line(stepX2, stepY - tickHeight, stepX2, stepY + tickHeight);
+						else if (stepY < nextY) s.line(stepX2, stepY - tickHeight, stepX2, nextY + tickHeight);
+						else 					s.line(stepX2, stepY + tickHeight, stepX2, nextY - tickHeight);
+					}
 				} else {
 					s.line(stepX2, stepY - tickHeight, stepX2, stepY + tickHeight);
 				}

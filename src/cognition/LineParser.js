@@ -52,12 +52,16 @@ class LineParser {
 		components.indents = indentCountAndRemove.indents;
 		line = indentCountAndRemove.line;
 		
+		//look to see if this is a control line
+		let cntrlRegex = this.controlRegEx();
+		if (line.match(cntrlRegex) != null) return {components: null, error: null}; // if it's a control line, pack up your bags
+		
 		//look for an operator
 		let regex = this.operatorRegEx();
 		let match = line.match(regex);
 		if (match == null) {
-			// console.log('no match for ' + line);
-			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
+			//if (line.match(/[a-zA-Z0-9]{1,20}[\s]/) != null) return {components: null, error: "operator_error"}; //if there hasn't been a full word typed yet
+			//return {components: null, error: null};
 			return {components: null, error: "operator_error"};
 		}
 
@@ -80,7 +84,10 @@ class LineParser {
 		if (timeMatch != null) {
 			line = line.substring(0, timeMatch.index);
 			components.parenthetical = timeMatch[0].replace("(","").replace(")","");
+		} else {
+			if (line.match(/\(\s{0,15}[0-9]{1,3}.{0,15}\)/mi) != null) return {components: null, error: "time_modifier_error"};
 		}
+		
 		
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);

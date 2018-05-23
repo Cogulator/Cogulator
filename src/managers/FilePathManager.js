@@ -1,8 +1,3 @@
-const electron = require('electron')
-var remote = require('electron').remote
-const app = remote.app
-const path = require('path');
-
 class FilePathManager {
 	constructor() {
 		this.desktop = app.getPath('desktop');

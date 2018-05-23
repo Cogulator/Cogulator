@@ -58,7 +58,7 @@ class FirstRunManager {
 		G.io.newFile(examplesPath, "Mental-Math.goms", this.mentalMathTxt, this.writeFile);
 		G.io.newFile(examplesPath, "Sundry_Methods.goms", this.sundryTxt, this.writeFile);
 		G.io.newFile(examplesPath, "Forgetting.goms", this.chunkTxt, this.writeFile);
-		//G.io.writeToFile(G.paths.operators Selection_Rules, selectionRules);
+		G.io.newFile(examplesPath, "Selection_Rules.goms", this.selectionRules, this.writeFile);
 		
 		//CREATE DEFAULT METHODS
 		G.io.newFile(G.paths.methods, "Point_and_Click.goms", this.pointAndClick, this.writeFile);
