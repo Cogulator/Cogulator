@@ -1,7 +1,7 @@
 class ReloadManager {
 	constructor() {
 		$('#reload_model_button_container').click(function() {
-			G.modelEvents.triggerSingleline();
+			G.modelEvents.triggerMultiline();
 			
 			var $this = $(this);
 			$this.removeClass('rotate_360');

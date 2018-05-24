@@ -1,8 +1,8 @@
 {
-  "name": "cogulator",
-  "productName": "cogulator",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "Cogulator",
+  "productName": "Cogulator",
+  "version": "3.0.0",
+  "description": "Cogulator: A Cognitive Calculator",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -12,8 +12,8 @@
     "lint": "eslint src --color"
   },
   "keywords": [],
-  "author": "sestes",
-  "license": "MIT",
+  "author": "The MITRE Corp",
+  "license": "Apache 2.0",
   "config": {
     "forge": {
       "make_targets": {
@@ -32,7 +32,7 @@
         "packageManager": "npm"
       },
       "electronWinstallerConfig": {
-        "name": "cogulator"
+        "name": "Cogulator"
       },
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
@@ -42,7 +42,7 @@
       },
       "windowsStoreConfig": {
         "packageName": "",
-        "name": "cogulator"
+        "name": "Cogulator"
       }
     }
   },

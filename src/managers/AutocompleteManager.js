@@ -24,6 +24,10 @@ class AutocompleteManager {
 		$( document ).on( "Model_Loaded", function() {
 			G.autocomplete.hide();
 		});
+		
+		G.quill.on('selection-change', function(range, oldRange, source) {
+			G.autocomplete.hide();
+		});
 	}
 	
 	

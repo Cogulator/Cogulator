@@ -62,6 +62,7 @@ class LineParser {
 		if (match == null) {
 			//if (line.match(/[a-zA-Z0-9]{1,20}[\s]/) != null) return {components: null, error: "operator_error"}; //if there hasn't been a full word typed yet
 			//return {components: null, error: null};
+			if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 			return {components: null, error: "operator_error"};
 		}
 
@@ -80,7 +81,7 @@ class LineParser {
 		}
 
 		//get time parenthetical, if present
-		let timeMatch = line.match(/\(\s{0,15}[0-9]{1,3}\s{1,5}(seconds|second|ms|syllables)\s{0,15}\)/mi);
+		let timeMatch = line.match(/\(\s{0,15}[0-9]{1,3}\s{1,5}(seconds|second|ms|milliseconds|syllables)\s{0,15}\)/mi);
 		if (timeMatch != null) {
 			line = line.substring(0, timeMatch.index);
 			components.parenthetical = timeMatch[0].replace("(","").replace(")","");

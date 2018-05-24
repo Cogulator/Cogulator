@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+const path = require('path');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -11,10 +12,7 @@ let mainWindow;
 
 const createWindow = () => {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 1000,
-  });
+  mainWindow = new BrowserWindow({width: 1200, height: 1000, titleBarStyle: 'hiddenInset'});
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
@@ -29,6 +27,9 @@ const createWindow = () => {
     // when you should delete the corresponding element.
     mainWindow = null;
   });
+
+  // Custom menu using the code at the bottom of this file
+  Menu.setApplicationMenu(menu)
 };
 
 // This method will be called when Electron has finished
@@ -36,11 +37,6 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
-//		app.on('before-quit', (event) => {
-//			console.log("BEFORE");
-//			event.preventDefault();
-//			$( document ).trigger( "BEFORE_QUIT" );
-//		});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -60,5 +56,198 @@ app.on('activate', () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
+
+// Template and initialization of custom menu
+const {Menu} = require('electron')
+const template = [
+	{
+		label: 'File',
+		submenu: [
+			{
+				label: 'Save',
+				accelerator: 'CmdOrCtrl+S',
+				click () { mainWindow.webContents.send('File->Save') } //handled in modelmanager
+			},
+//			{
+//				label: 'Duplicate',
+//				click () { mainWindow.webContents.send('File->Duplicate') } //handled in modelmanager
+//			},
+			{
+				label: 'Open Cogulator Folder',
+				click () { 
+					let cogulatorPath = path.join(app.getPath('documents'), "cogulator");
+					require('electron').shell.openExternal("file://" + cogulatorPath);
+				}
+			}
+		]
+	},
+	{
+		label: 'Edit',
+		submenu: [
+			{
+				role: 'undo'
+			},
+			{
+				role: 'redo'
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'cut'
+			},
+			{
+				role: 'copy'
+			},
+			{
+				role: 'paste'
+			},
+			{
+				role: 'pasteandmatchstyle'
+			},
+			{
+				role: 'delete'
+			},
+			{
+				role: 'selectall'
+			}
+		]
+	},
+	{
+		label: 'View',
+		submenu: [
+			{
+				label: 'Reload',
+				accelerator: 'CmdOrCtrl+R',
+				click (item, focusedWindow) {
+					if (focusedWindow) focusedWindow.reload()
+				}
+			},
+			{
+				label: 'Toggle Developer Tools',
+				accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
+				click (item, focusedWindow) {
+					if (focusedWindow) focusedWindow.webContents.toggleDevTools()
+				}
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'resetzoom'
+			},
+			{
+				role: 'zoomin'
+			},
+			{
+				role: 'zoomout'
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'togglefullscreen'
+			}
+		]
+	},
+	{
+		role: 'window',
+		submenu: [
+			{
+				role: 'minimize'
+			},
+			{
+				role: 'close'
+			}
+		]
+	},
+	{
+		role: 'help',
+		submenu: [
+			{
+				label: 'Learn More',
+				click () { require('electron').shell.openExternal('http://cogulator.io') }
+			}
+		]
+	}
+]
+
+if (process.platform === 'darwin') {
+	const name = app.getName()
+	template.unshift({
+	label: name,
+		submenu: [
+			{
+				role: 'about'
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'services',
+				submenu: []
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'hide'
+			},
+			{
+				role: 'hideothers'
+			},
+			{
+				role: 'unhide'
+			},
+			{
+				type: 'separator'
+			},
+			{
+				role: 'quit'
+			}
+		]
+	})
+	// Edit menu.
+	template[2].submenu.push(
+		{
+			type: 'separator'
+		},
+		{
+			label: 'Speech',
+			submenu: [
+				{
+				role: 'startspeaking'
+				},
+				{
+				role: 'stopspeaking'
+				}
+			]
+		}
+	)
+	// Window menu.
+	template[4].submenu = [
+		{
+			label: 'Close',
+			accelerator: 'CmdOrCtrl+W',
+			role: 'close'
+		},
+		{
+			label: 'Minimize',
+			accelerator: 'CmdOrCtrl+M',
+			role: 'minimize'
+		},
+		{
+			label: 'Zoom',
+			role: 'zoom'
+		},
+		{
+			type: 'separator'
+		},
+		{
+			label: 'Bring All to Front',
+			role: 'front'
+		}
+	]
+}
+
+const menu = Menu.buildFromTemplate(template)

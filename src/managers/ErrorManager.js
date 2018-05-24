@@ -73,8 +73,10 @@ class ErrorManager {
 		if (componentsAndErrors.error != null) {
 			let error = new GomsError(componentsAndErrors.error, lineNumber);
 			this.addError(error);
+			G.modelEvents.triggerMultiline();
 		} else {
 			this.removeErrorFromLine(lineNumber);
+			G.modelEvents.triggerMultiline();
 		}
 	}
 	

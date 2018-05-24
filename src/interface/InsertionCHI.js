@@ -5,6 +5,7 @@ class InsertionCHI {
 		this.deleteIndex = 0;
 		this.hiddening = false; //that's right, hiddening
 		this.showring = false;
+		this.isAboveLine = false;
 		
 		//hide if click on anything other than insertion chi, show if click on insertion marker
 		$(document).bind('click', function(e) {
@@ -19,15 +20,11 @@ class InsertionCHI {
 		
 		//set up to hide on resize or scroll
 		$( window ).resize(function() {
-			if ( $('#insertion_chi_container').css("display") != "none" )  {
-				G.insertionCHI.setPosition();
-			}
+			G.insertionCHI.hide();
 		});
 		
 		$(document).on('mousewheel', function(e){
-			if ( $('#insertion_chi_container').css("display") != "none" )  {
-				G.insertionCHI.setPosition();
-			}
+			if (!G.insertionCHI.targetIsThis(e.target)) G.insertionCHI.hide();;
 		});
 
 		
@@ -70,24 +67,38 @@ class InsertionCHI {
 		
 		G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
 		
+		// -- Determine the position of the insertCHI
+		let offset = $(".insertion_marker").offset();
+		if (offset == undefined || offset == null) return;
+		var top = offset.top + 20;
+		let left = offset.left - 10;
+		let height = $('#insertion_chi_container').height();
+		let width = G.insertionCHI.getWidth();
+		if (top + height > $(document).height()) this.isAboveLine = true;
+		else 									 this.isAboveLine = false;
 		
-	//ultimately, I want to have the quill "split" to look as if this chi is shown behin on opening up.  But, that's causing problems, so...
-//		G.quill.updateContents(new Delta()
-//		  .retain(G.insertionCHI.deleteIndex)           
-//		  .insert({ 
-//			image: './'
-//		  },
-//		  {
-//			height: '176px'
-//		  })
-//		);
-//		
-//		//method to find image your adding and get it's height (and change it's height)
-//		var x = $("img[src$='//:0']");
-//		console.log("IMG", x, x.height());
-	//--
-		
-		this.setPosition();
+		// If isAboveLine, don't do the "split" effect, and settle for slideToggle only
+		if (!this.isAboveLine) {
+			G.quill.updateContents(new Delta()
+			  .retain(G.insertionCHI.deleteIndex)           
+			  .insert({ 
+				image: './'
+			  },
+			  {
+				height: '1px'
+			  }), 'silent'
+			);
+
+			//method to find image your adding and get it's height (and change it's height)
+			let insertedImage = $("img[src$='//:0']");
+			insertedImage.animate({height: "176px"}, 'fast');
+		} else {
+			 top = top - height - 24; //place this above the line
+		}
+				
+		// Position insert CHI	
+		$('#insertion_chi_container').css({top: top, left: left});
+		$('#insertion_chi_container').css({"width": width + "px"});
 		
 		if ($('#insertion_method_toggle').hasClass('insertion_options_toggle_selected')) this.setMethodHTML();
 		else this.setOperatorHTML();
@@ -98,26 +109,13 @@ class InsertionCHI {
 		});
 	}
 	
-	setPosition() {
-		let offset = $(".insertion_marker").offset();
-		if (offset == undefined || offset == null) return;
-		
-		var top = offset.top + 20;
-		let left = offset.left - 10;
-		let width = G.insertionCHI.getWidth();
-		let height = $('#insertion_chi_container').height();
-		if (top + height > $(document).height()) top = top - height - 25; //if this is going to put the chi below the bottom of hte window, put it over the line instead
-		
-		$('#insertion_chi_container').css({top: top, left: left});
-		$('#insertion_chi_container').css({"width": width + "px"});
-	}
 	
-	
-	insert(text) {
-		G.quill.focus();
-		
+	insert(text) {		
 		let insertIndex = G.insertionCHI.deleteIndex;
-		G.insertionCHI.hide();
+		$.when(G.insertionCHI.hide()).done(function() {
+			G.insertionCHI.insertComplete(text, insertIndex)
+		});
+	}insertComplete(text, insertIndex) {
 		G.quill.insertText(insertIndex, text);
 		
 		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
@@ -125,26 +123,43 @@ class InsertionCHI {
 		
 		G.quill.focus();
 	}
-	
+
 	
 	hide() {
-		if (this.hiddening) return;
-		if ( $('#insertion_chi_container').css("display") == "none" ) return;
+		var deferred = $.Deferred();
+	
+		if (this.hiddening || $('#insertion_chi_container').css("display") == "none" ) {
+			deferred.resolve();
+			return deferred.promise();
+		}
 		
 		G.insertionCHI.hiddening = true;
 		$('#insertion_chi_container').slideToggle("fast", function() {
 			G.insertionCHI.hiddening = false;
 		});
 		
-		//commented out until I get the effect working correctlyu
-//		G.quill.updateContents(new Delta()
-//		  .retain(G.insertionCHI.deleteIndex)           
-//		  .delete(1)
-//		);
-		//--
+		// If above the line, don't need to remove inserted image, cause it was never added
+		if (!this.isAboveLine) {
+			let insertedImage = $("img[src$='//:0']");
+			insertedImage.animate({height: "1px"}, 'fast', function() {
+				G.quill.updateContents(new Delta()
+					.retain(G.insertionCHI.deleteIndex)           
+					.delete(1),
+					'silent'
+				);
+				
+				G.qutterManager.updateMarkers();
+				G.quillet.setText("");
+				deferred.resolve();
+			});
+		} else {
+			if (callTo != null) callTo();
+			G.qutterManager.updateMarkers();
+			G.quillet.setText("");
+			deferred.resolve();
+		}
 		
-		G.qutterManager.updateMarkers();
-		G.quillet.setText("");
+		return deferred.promise();
 	}
 	
 	
@@ -261,13 +276,14 @@ class InsertionCHI {
 	
 	
 	getWidth() {
-		let margin = 20;
-		let ql = $('#code').children('.ql-editor');
-		let p = ql.children('p');
-		var scrollbarWidth =  ql.innerWidth() - p.innerWidth() - margin;
-		
-		if (scrollbarWidth > 0) return $("#gutter").width() + $("#code").width() + 4;
-		return ($("#gutter").width() + $("#code").width() + 18);
+//		let margin = 20;
+//		let ql = $('#code').children('.ql-editor');
+//		let p = ql.children('p');
+//		var scrollbarWidth =  ql.innerWidth() - p.innerWidth() - margin;
+//		
+//		if (scrollbarWidth > 0) return $("#gutter").width() + $("#code").width() + 4;
+//		return ($("#gutter").width() + $("#code").width() + 18);
+		return ($("#gutter").width() + $("#code").width() + 23);
 	}
 	
 	

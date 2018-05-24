@@ -39,7 +39,7 @@ class SolarizeManager {
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>]+>/gmi, clr: this.chunkClr }); //working memory
-		this.regexs.push({ exp: /\(\s{0,15}[0-9]{1,5}\s{1,5}(syllables|seconds|second|ms)\s{0,15}\)/gmi, clr: this.timeClr }); //time or syllables
+		this.regexs.push({ exp: /\(\s{0,15}[0-9]{1,5}\s{1,5}(syllables|seconds|milliseconds|second|ms)\s{0,15}\)/gmi, clr: this.timeClr }); //time or syllables
 		this.regexs.push({ exp: /\*.*/gmi, clr: this.commentClr }); //comments must be last
 	}
 		
@@ -109,6 +109,8 @@ class SolarizeManager {
 		
 	
 	solarizeLine() {
+		console.log("SOLARIZE LINE"); 
+		
 		if (G.quill.getSelection() == null) return;
 		if (cursorIndex == null) G.quill.getSelection();
 		

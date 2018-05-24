@@ -43,17 +43,16 @@ class InOutManager {
 	
 	
 	loadFile(pth, callback) {
-		console.log("LOAD", pth, callback);
+		//console.log("LOAD", pth, callback);
 
 		try {  
 			var data = fs.readFileSync(pth, 'utf8');
-			console.log("LOADED", pth);
-			//callback(data);  
+			//console.log("LOADED", pth);
 		} catch(err) {
-			alert("Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+			//alert("Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+			dialog.showErrorBox("Could not open file.", "Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
 		}
 		
-		console.log("-------TRHOUGH---------");
 		callback(data); 
     }
 	
@@ -63,17 +62,17 @@ class InOutManager {
 		if (!this.fileExists(pth)) fs.mkdirSync(pth);
 		
 		let fullPath = path.join(pth, filename);
-		console.log("NEW FILE", fullPath);
+		//console.log("NEW FILE", fullPath);
 		
 		try {  
 			fs.openSync(fullPath, 'w');
 			fs.close(file);
-			//callback(fullPath, text);
 		} catch(err) {
-			alert("Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+			//alert("Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+			dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+
 		}
 		
-		console.log("-------THROUGH NEW---------");
 		callback(fullPath, text);
 	}
 	
@@ -84,12 +83,13 @@ class InOutManager {
 	
 	
 	writeToFile(pth, text, callback = 0) {
-		console.log("WRITE", pth);
+		//console.log("WRITE", pth);
 
 		try {  
 			fs.writeFileSync(pth, text);
 		} catch(err) {
-			alert("Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+			dialog.showErrorBox("Could not save.", "Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+			//alert("Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 		}
 		
 		if (typeof callback === 'function' && callback()) callback();
@@ -97,14 +97,15 @@ class InOutManager {
 	
 	
 	appendToFile(pth, text, callback) {		
+		//console.log("APPND", pth, text, callback);
+		
 		try {  
 			fs.appendFileSync(pth, text)
-			//callback();
 		} catch(err) {
-			alert("Could not save operator. Verify you have permission to write to " + pth);
+			dialog.showErrorBox("Could not save.", "Could not save operator. Verify you have permission to write to " + pth);
+			//alert("Could not save operator. Verify you have permission to write to " + pth);
 		}
 		
-		console.log("THROUGH APPEND");
 		callback();
 	}
 	

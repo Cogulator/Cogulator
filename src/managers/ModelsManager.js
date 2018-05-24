@@ -11,6 +11,10 @@ class ModelsManager {
 			G.modelsManager.saveModel();
 			G.modelsManager.deleteModels();
 		})
+		
+		ipcRenderer.on('File->Save', (sender, arg) => {
+			G.modelsManager.saveModel();
+		})
 	}
 	
 	

@@ -47,6 +47,16 @@
 	overflow:hidden;
 }
 
+.titlebar {
+	position:absolute;
+	top: 0;
+	left 0;
+	width: 100%;
+	height: 20px;
+	z-index: 10000;
+	-webkit-app-region: drag;
+}
+
 #container {
 	position: absolute;
 	left: 0px;
@@ -185,9 +195,33 @@
 	position:absolute;
 	top:60px;
 	left:232px;
-	width: calc(100% - 190px - 30px - 40px);
+	width: calc(100% - 190px - 30px - 40px - 5px); /*5px for custom scroll bar width*/
 	height:calc(100% - 60px);
 	background-color:var(--main-bg-color);
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: none;
+}
+ 
+::-webkit-scrollbar-thumb {
+    background: #CCC; 
+    border-radius:8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #EEE; 
+}
+
+
+
+
+.ql-editor{ /*is a class created by quill.  Just adding a property here to keep text from jumping.*/
+	overflow-y: scroll;
 }
 
 #autocomplete {

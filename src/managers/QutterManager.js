@@ -94,7 +94,6 @@ class QutterManager { //Quill gutter
 					html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
 					foundErrorOrTip = true;
 				}
-				
 			}
 			
 			if (!foundErrorOrTip) { html += "<br>" };
@@ -102,8 +101,13 @@ class QutterManager { //Quill gutter
 			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
 			for (var j = 0; j < wrappedLines - 1; j++) html += "<br>"; 
 		}
-		
-		html += "<br>"; 
+			
+		//Finish off side bar
+		if (insertionLine != null && insertionLine == lines.length) {
+			html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
+		} else {
+			html += "<br>"; 
+		}
 		
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);
@@ -113,9 +117,10 @@ class QutterManager { //Quill gutter
 	
 	getInsertionLine() {
 		let selection = G.quill.getSelection();
+		
 		if (selection == null) return null;
 		if (selection.length > 1) return null;
-		
+				
 		let lineText = G.quillManager.getLine(selection.index);
 		if (lineText.length > 0) return null;
 		
