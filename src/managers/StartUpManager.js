@@ -29,6 +29,7 @@ class StartUpManager {
 				    "./managers/ScreenShotManager.js",
 					"./interface/GanttChart.js",
 					"./interface/PopOver.js",
+				    "./interface/PopOverFix.js",
 				    "./managers/ReloadManager.js",
 				    "./interface/NewFileCHI.js",
 				  	"./interface/InsertionCHI.js"];

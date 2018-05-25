@@ -8,6 +8,7 @@ class QutterManager { //Quill gutter
 			$('#gutter').scrollTop(this.scrollTop);
 		})
 		
+		
 		//recalculate as needed
 		$( window ).resize(function() {
 			G.qutterManager.updateMarkers(); //cheap way to avoid "this" binding issues
@@ -20,6 +21,7 @@ class QutterManager { //Quill gutter
 		$( document ).on("keyup", function() {
 			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
 		});
+		
 		
 		//handle error marker hover
 		$( '#gutter' ).on( 'mouseenter', '.error_and_tip_marker', function () {
@@ -39,6 +41,31 @@ class QutterManager { //Quill gutter
 		$( '#gutter' ).on( 'mouseleave', '.error_and_tip_marker', function () {
 			G.errorPopOver.hide();
 		});
+		
+		
+		//handle fixable tip marker hover
+		$( '#gutter' ).on( 'mouseenter', '.fixable_tip_marker', function () {
+			let hint = $(this).data("hint");
+			let fix = $(this).data("fix");
+			let lineNo = $(this).data("line");
+			
+			G.fixPopOver.show($(this).offset(), fix, lineNo);
+			G.errorPopOver.show( hint, $(this).offset(), "orange" );
+		});
+		
+		$( '#fixable_tip_popover' ).on( 'mouseleave', function () {
+			G.errorPopOver.hide();
+			G.fixPopOver.hide();
+		});
+		
+		$( '#fixable_tip_button' ).on("click", function() {
+			G.fixPopOver.fix();
+			
+			//insert the fix
+			G.errorPopOver.hide();
+			G.fixPopOver.hide();
+		});
+		
 	} 
 	
 	
@@ -81,7 +108,12 @@ class QutterManager { //Quill gutter
 				for (var j = 0; j < tips.length; j++) {
 					let tip = tips[j];
 					if (tip.lineNo == i) {
-						html += "<div class='error_and_tip_marker_container'><div class='error_and_tip_marker orange_background' data-type='tip' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line>?</div></div>"
+						if (tip.fix != "") {
+							html += "<div class='error_and_tip_marker_container'><div class='fixable_tip_marker orange_background' data-type='tip' data-fix='" + tip.fix + "' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line='" + tip.lineNo + "'>?</div></div>"
+						} else {
+							html += "<div class='error_and_tip_marker_container'><div class='error_and_tip_marker orange_background' data-type='tip' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line>?</div></div>"
+						}
+						
 						foundErrorOrTip = true;
 						break;
 					}

@@ -1,0 +1,77 @@
+.error_and_tip_marker_container {
+	width: 22px;
+	height: 22px;
+	vertical-align: middle;
+}
+
+.error_and_tip_marker, .insertion_marker, .fixable_tip_marker, .fixable_tip_marker_static {
+	display: block;
+	width: 16px;
+	height: 16px;
+	border-radius: 16px;
+	color:white;
+	text-align: center;
+	font-size: 10px;
+	cursor: default;
+}
+
+.fixable_tip_marker_static {
+	position:absolute;
+	top: 5px;
+	left: 9px;
+	line-height: 16px;
+}
+
+.red_background {
+	background-color:red;
+}
+
+.orange_background {
+	background-color:orange;
+}
+
+.purple_background {
+	background-color:var(--purple-color);
+}
+
+#error_message_popover {
+	position: absolute;
+	padding: 5px;
+	margin: 5px;
+	top: 0px;
+	left: 0px;
+	border-radius: 0px 0px 6px 6px;
+	background: red;
+	color:white;
+	font-family: 'Lato';
+	font-size: 13px;
+	z-index: 100;
+}
+
+#fixable_tip_popover {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 35px;
+	height: 50px;
+	border-radius: 5px;
+	background-color: #FADFAF;
+	cursor: default;
+}
+
+#fixable_tip_button {
+	position: absolute;
+	bottom: 5px;
+	left: 4px;
+	width: 28px;
+	height: 15px;
+	line-height: 15px;
+	border-radius: 15px;
+	color:white;
+	font-family: 'Lato';
+	font-size: 12px;
+	text-align:center;
+	background-color: orange;
+	cursor: default;
+}
+

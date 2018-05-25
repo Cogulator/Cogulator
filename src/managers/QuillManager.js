@@ -50,6 +50,7 @@ class QuillManager {
 		return lineCount - 1;
 	}
 	
+	
 	getLine(index) {
 		var start = this.getLineStart(index);
 		let end = this.getLineEnd(index);
@@ -84,6 +85,45 @@ class QuillManager {
 	
 	getLineCount() {
 		return G.quill.getText().split('\n').length;
+	}
+	
+	getLineIndex(lineNo) {
+		let lines = G.quill.getText().split('\n');
+		if (lineNo > lines.length) return null;
+		
+		var index = 0;
+		for (var i = 0; i < lineNo; i++) {
+			index += lines[i].length + 1; //for the new line character you split out
+		}
+		
+		return index;
+	}
+	
+	insertTextAtLine(text, lineNo) {
+		let index = this.getLineIndex(lineNo);
+		if (index == null) return;
+		
+		G.quill.insertText(index, text);
+		G.quill.focus();
+	}
+	
+	//match the number of indents at the current line
+	insertIndentedTextAtLine(text, lineNo) {
+		let index = this.getLineIndex(lineNo);
+		if (index == null) return;
+		
+		let lineTxt = this.getLine(index);
+		
+		var indent = "";
+		for (var i = 0; i < lineTxt.length; i++) {
+			console.log(lineTxt[i]);
+			if (lineTxt[i] != " " && lineTxt[i] != ".") break;
+			indent += lineTxt[i];
+		}
+		text = indent + text;
+		
+		G.quill.insertText(index, text);
+		G.quill.focus();
 	}
 	
 }

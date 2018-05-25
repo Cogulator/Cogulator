@@ -9,6 +9,7 @@
 		<link rel="stylesheet" type="text/css" href="./style/buttons.css">
 		<link rel="stylesheet" type="text/css" href="./style/newfilechi.css">
 		<link rel="stylesheet" type="text/css" href="./style/insertion_chi.css">
+		<link rel="stylesheet" type="text/css" href="./style/errors_tips.css">
 		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
 		<script type='text/javascript' src='./libraries/quill.min.js'></script>
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
@@ -73,8 +74,14 @@
 				
 				<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
 				<div id='code'></div>
+				
+			<!-- Containers for popovers that occur with various interactions -->
 				<div id='autocomplete'> </div>
 				<div id='error_message_popover'> </div>
+				<div id='fixable_tip_popover'>
+					<div class='fixable_tip_marker_static orange_background'>?</div>
+					<div id='fixable_tip_button'>fix</div>
+				</div>
 				<div id='insertion_chi_container'> 
 					<div id='insertion_options_container'> 
 						<div id='insertion_options_toggle_container'> 
@@ -85,10 +92,11 @@
 					</div>
 					<div id='insertion_details_container'> </div> 
 				</div>
+			<!-- End popover containers -->
 
 				<div id='sidebar_right'>
 					<div id='help_button_container'>
-<!--						<div class='circle_button' id='help_button' style='font-family:sans-serif; font-size:15px'>?</div>-->
+						<!--<div class='circle_button' id='help_button' style='font-family:sans-serif; font-size:15px'>?</div>-->
 					</div>
 					<div class='edit_button_container'>
 						<div class='circle_button edit_button' id='comment_button'><img src='images/comment_toggle.png'></div>

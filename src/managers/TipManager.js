@@ -6,6 +6,7 @@ class Tip {
 		this.type = type; //
 		this.lineNo = lineNo;
 		this.hint = this.getHint(this.type); //
+		this.fix = this.getFix(this.type);
 		this.id = this.lineNo + "_" + this.type;
 	}
 	
@@ -22,7 +23,24 @@ class Tip {
 			case "missing_point":
 				return "Doesn&#39;t appear that there's a point before this click."; //add fix to end
 			default:
-				text = "";
+				return "";
+		}
+	}
+	
+	getFix(type) {
+		switch(type) {
+			case "missing_label":
+				return ""
+			case "hands_to_mouse":
+				return "Hands to mouse"; //add fix to end
+			case "hands_to_keyboard":
+				return "Hands to keyboard"; //add fix to end
+			case "eyes_to_target":
+				return "Look at target"; //add fix to end 
+			case "missing_point":
+				return "Point to target"; //add fix to end
+			default:
+				return "";
 		}
 	}
 }
