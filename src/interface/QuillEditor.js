@@ -15,11 +15,12 @@ var bindings = {
 
 
 G.quill = new Quill('#code', {
-  modules: {
-    keyboard: {
-      bindings: bindings
-    }
-  }
+	formats: ['color','font'],  //whitelist of acceptable formats
+	modules: {
+		keyboard: {
+		  bindings: bindings
+		}
+  	}
 });
 
 

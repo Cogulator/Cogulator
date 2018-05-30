@@ -110,16 +110,18 @@ class InsertionCHI {
 	}
 	
 	
-	insert(text) {		
+	insert(text) {	
 		let insertIndex = G.insertionCHI.deleteIndex;
 		$.when(G.insertionCHI.hide()).done(function() {
 			G.insertionCHI.insertComplete(text, insertIndex)
 		});
-	}insertComplete(text, insertIndex) {
+	}
+	
+	insertComplete(text, insertIndex) {
 		G.quill.insertText(insertIndex, text);
 		
-		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
-		else  G.quill.setSelection(insertIndex + text.length);
+		//if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
+		//else  G.quill.setSelection(insertIndex + text.length);
 		
 		G.quill.focus();
 	}
@@ -153,7 +155,6 @@ class InsertionCHI {
 				deferred.resolve();
 			});
 		} else {
-			if (callTo != null) callTo();
 			G.qutterManager.updateMarkers();
 			G.quillet.setText("");
 			deferred.resolve();

@@ -51,6 +51,11 @@ class GomsProcessor {
 		$( document ).on( "Model_Update_SingleLine", function() {
 			G.gomsProcessor.process();
 		});
+		
+		
+		$( document ).on( "Error_Count_Change", function() {
+			G.gomsProcessor.process();
+		});
 	}
 	
 
@@ -105,7 +110,7 @@ class GomsProcessor {
 		var beginIndex = 0;
 		var endIndex = codeLines[0].length;
 		var jumps = 0;
-		G.solarize.solarizeAll();
+		//G.solarize.solarizeAll();
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			var line = codeLines[lineIndex];
 			var parsed = this.parser.parseControl(line);

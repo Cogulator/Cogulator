@@ -116,14 +116,12 @@ class QuillManager {
 		
 		var indent = "";
 		for (var i = 0; i < lineTxt.length; i++) {
-			console.log(lineTxt[i]);
 			if (lineTxt[i] != " " && lineTxt[i] != ".") break;
 			indent += lineTxt[i];
 		}
 		text = indent + text;
 		
 		G.quill.insertText(index, text);
-		G.quill.focus();
 	}
 	
 }

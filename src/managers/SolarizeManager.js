@@ -8,6 +8,7 @@ class SolarizeManager {
 		this.timeClr = '#859900'; //green
 		this.commentClr = '#999999'; //grey
 		this.blackClr = '#000000'; //grey
+		this.forgotClr = 'red';
 					
 		this.setRegexs();
 					
@@ -16,18 +17,13 @@ class SolarizeManager {
 		});
 		
 		$( document ).on( "Model_Update_MultiLine", function() {
-			G.solarize.solarizeAll();
+			G.solarize.all();
 		});
-					
-		$( document ).on( "Model_Update_SingleLine", function() {
-			if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.solarizeAll();
-			else G.solarize.solarizeLine(true);
-			//G.solarize.solarizeAll();
-		});
-					
+										
 		$( document ).on( "Line_Update", function() {
-			if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.solarizeAll();
-			else G.solarize.solarizeLine();
+			G.solarize.all();
+			//if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
+			//else 													 G.solarize.line();
 		});
 		
 	}
@@ -47,12 +43,13 @@ class SolarizeManager {
 	//The updateContent Quill method chains together updates like so... quill.updateContents({ retain: length, attributes: { color: match.clr } },{ retain: length }); 
 	//The index of the current retain, is essentially the endIndex of the last retain + 1.  Index is pushed forward by the length of retain.  So, this method works out
 	//how to iterate through the matched regexs, order them so that you can chain the retains together, and apply black where needed
-	solarizeAll() {
-		this.selected =  G.modelsSidebar.selectedPath;
-
+	all() {
+		G.solarize.selected = G.modelsSidebar.selectedPath;
+	
 		var matches = [];
 		var retain = [];
 		let text = G.quill.getText();
+		
 		
 		for (var i = 0; i < this.regexs.length; i++) {
 			let regex = this.regexs[i].exp;
@@ -61,6 +58,19 @@ class SolarizeManager {
 			// push all the matches into an array that can then be reordered and processed for retain operations
 			var match;
 			while( (match = regex.exec(text)) != null ) matches.push( {index: match.index, length: match[0].length, color: clr} );
+		}
+		
+		//change the color to red for any forgetting errors
+		let forgettingErrors = G.errorManager.errors.filter(error => error.type == "forgetting_error");
+		for (var i = 0; i < forgettingErrors.length; i ++) {
+			for (var j = 0; j < matches.length; j++) {
+				let match = matches[j];
+				if (match.color == this.chunkClr) {
+					let chunk = G.quill.getText(match.index, match.length);
+					let matchLineNo = G.quillManager.getLineNumber(match.index);
+					if (chunk == forgettingErrors[i].chunkName && matchLineNo == forgettingErrors[i].lineNo) matches[j].color = this.forgotClr;
+				}
+			}
 		}
 				
 		//sort the matches by index
@@ -100,6 +110,12 @@ class SolarizeManager {
 			retain.push({ retain: match.length, attributes: { color: match.color } }); 
 			index += match.length;
 		}
+		
+		//format everything at the end black
+		if (index < G.quill.getLength()) {
+			let delta = G.quill.getLength() - index;
+			retain.push({ retain: delta, attributes: { color: this.blackClr } }); 
+		}
 						
 		//update
 		G.quill.updateContents(retain, 'silent');
@@ -108,9 +124,7 @@ class SolarizeManager {
 	}
 		
 	
-	solarizeLine() {
-		console.log("SOLARIZE LINE"); 
-		
+	line() {
 		if (G.quill.getSelection() == null) return;
 		if (cursorIndex == null) G.quill.getSelection();
 		
@@ -138,6 +152,18 @@ class SolarizeManager {
 				G.quill.formatText(match.index + lineStart + match[0].length + 1, 2, {'color': 'black'},  'silent');
 			}
 		}
+		
+		//change the color to red for any forgetting errors
+		// -- THIS NEVER GOT UP AND RUNNING
+//		let thisLineNo = G.quillManager.getLineNumber(cursorIndex);
+//		let forgettingError = G.errorManager.errors.filter(error => error.type == "forgetting_error" && error.lineNo == thisLineNo);
+//		if (forgettingError.length > 0) {
+//			let index = line.indexOf(forgettingError[0].chunkName);
+//			if (index >= 0) {
+//				G.quill.formatText(match.index + lineStart, match[0].length + 1, {'color': clr},  'silent');
+//				G.quill.formatText(match.index + lineStart + match[0].length + 1, 2, {'color': 'black'},  'silent');
+//			}
+//		}
 		
 		G.quill.format('color', 'black'); //color at current cursor index
 	}

@@ -65,9 +65,10 @@ class InOutManager {
 		//console.log("NEW FILE", fullPath);
 		
 		try {  
-			fs.openSync(fullPath, 'w');
+			let file = fs.openSync(fullPath, 'w');
 			fs.close(file);
 		} catch(err) {
+			console.log("CREATE ERROR", err);
 			//alert("Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 			dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 
@@ -88,6 +89,7 @@ class InOutManager {
 		try {  
 			fs.writeFileSync(pth, text);
 		} catch(err) {
+			console.log("SAVE ERROR", err);
 			dialog.showErrorBox("Could not save.", "Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 			//alert("Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 		}

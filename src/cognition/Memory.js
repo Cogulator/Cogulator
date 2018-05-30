@@ -128,7 +128,7 @@ class Memory {
 			this.pushRehearsals(chunkName, activation, chunkStack); //used by SubjectiveMentalWorkload
 			chunkAction = "pushed_rehearsals";
 		} else if (!existingChunk) {
-			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator."));
+			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName));
 		}
 
 		return chunkAction;

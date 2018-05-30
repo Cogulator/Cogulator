@@ -3,10 +3,11 @@ class GomsError {
 	//  operator_error
 	//  time_modifier_error
 	//  forgetting_error
-	constructor(type, lineNo, hint = "") {
+	constructor(type, lineNo, hint = "", chunkName = "") {
 		this.parser = new LineParser();
 		this.type = type; //
 		this.lineNo = lineNo;
+		this.chunkName = chunkName;
 		this.id = this.lineNo + "_" + this.type;
 		if (hint == "") this.hint = this.getHint(type);
 		else this.hint = hint;
@@ -39,6 +40,7 @@ class GomsError {
 		}
 	}
 }
+
 
 class ErrorManager {
 	
@@ -73,10 +75,8 @@ class ErrorManager {
 		if (componentsAndErrors.error != null) {
 			let error = new GomsError(componentsAndErrors.error, lineNumber);
 			this.addError(error);
-			G.modelEvents.triggerMultiline();
 		} else {
 			this.removeErrorFromLine(lineNumber);
-			G.modelEvents.triggerMultiline();
 		}
 	}
 	
@@ -102,6 +102,8 @@ class ErrorManager {
 		if (!replaced) this.errors.push(errorToAdd); //if you did not replace an existing error with errorToAdd, push errorToAdd
 		
 		G.qutterManager.updateMarkers();
+		$( document ).trigger( "Error_Count_Change" ); //Goms processor will process on this firing
+		//G.modelEvents.triggerMultiline();
 	}
 	
 	
@@ -117,7 +119,11 @@ class ErrorManager {
 			}
 		}
 		
-		if (this.errors.length < startingLength) G.qutterManager.updateMarkers();
+		if (this.errors.length < startingLength) {
+			G.qutterManager.updateMarkers();
+			$( document ).trigger( "Error_Count_Change" ); //Goms processor will process on this firing
+			//G.modelEvents.triggerMultiline();
+		}
 	}
 
 }

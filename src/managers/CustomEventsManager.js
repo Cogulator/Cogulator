@@ -29,7 +29,7 @@ class ModelEvents {
 	handleEvent() {
 		let textDelta = this.textDelta(); //if two models are different in content, but the same number of charaters and lines, we still want the thing to fire
 		let lineDelta = this.linesDelta(); //this might not be necessary anymore
-				
+		
 		if (lineDelta > 0 || textDelta > 1) $( document ).trigger( "Model_Update_MultiLine" ); //triggers solarize all, goms processor, and error check
 		else 								$( document ).trigger( "Line_Update" );
 	}
