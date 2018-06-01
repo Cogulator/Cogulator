@@ -10,6 +10,7 @@
 		<link rel="stylesheet" type="text/css" href="./style/newfilechi.css">
 		<link rel="stylesheet" type="text/css" href="./style/insertion_chi.css">
 		<link rel="stylesheet" type="text/css" href="./style/errors_tips.css">
+		<link rel="stylesheet" type="text/css" href="./style/magic_models.css">
 		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
 		<script type='text/javascript' src='./libraries/quill.min.js'></script>
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
@@ -18,103 +19,124 @@
 		<div class='titlebar'></div>
 		<div id='container'>
 			<div id='not_gantt_container'>
-				
-				<div id='sidebar_left'></div>
+				<div id='not_gantt_not_magic'>
+					<div id='sidebar_left'></div>
 
-				<div id='main_nav'>
-					
-					<div id='nav_left_container'>
-						<div id='new_model_button_container'>
-							<div class='circle_button' id='new_model_button'>+</div>
-						</div>
-					</div>
-					
-					<div id='nav_right_container'>
-						
-						<div id='new_file_container'>
-							<div id='new_file_tab_container'>
-								<div id='model_tab' class='new_file_tab selected_tab'>+ MODEL</div>
-								<div id='operator_tab' class='new_file_tab not_selected_tab'>+ OPERATOR</div>
-								<div id='method_tab' class='new_file_tab not_selected_tab'>+ METHOD</div>
-								<div id='new_file_close_container'>X</div>
-							</div>
-							<div id='new_file_inputs_container'></div>
-						</div>
-						
-						
-						<div class='nav_item'>
-							<div class='stat_container right_border'>
-								<div id='stat_task_time' class ='stat_content'>12 <span id="stat_task_time_units" class='stat_units'>s</span></div>
-								<div class='stat_label'>task time</div>
-							</div>
-						</div>
-						<div class='nav_item' >
-							<div class='stat_container right_border' id='stat_wm_container'>
-								<div id='stat_wm_load' class ='stat_content'>3.3 <span id="stat_wm_units" class='stat_units'>chunks</span></div>
-								<div class='stat_label'>memory load</div>
-							</div>
-						</div>	
-						<div class='nav_item' id='stat_workload_nav_item'>
-							<div class='stat_container'>
-								<div id='stat_workload' class ='stat_content'>1 <span id="stat_workload_units" class='stat_units'>(1-10)</span></div>
-								<div class='stat_label'>max workload</div>
-							</div>
-						</div>
-						
-						<div class='nav_item' id='reload_button_nav_item'>
-							<div id='reload_model_button_container' style='margin-top:15px; margin-left:15px;'>
-								<div class='circle_button' id='reload_model_button'>↻</div>
-							</div>
-						</div>
-						
-					</div>
-					
+					<div id='main_nav'>
 
-				</div>
-				
-				<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
-				<div id='code'></div>
-				
-			<!-- Containers for popovers that occur with various interactions -->
-				<div id='autocomplete'> </div>
-				<div id='error_message_popover'> </div>
-				<div id='fixable_tip_popover'>
-					<div class='fixable_tip_marker_static orange_background'>?</div>
-					<div id='fixable_tip_button'>fix</div>
-				</div>
-				<div id='insertion_chi_container'> 
-					<div id='insertion_options_container'> 
-						<div id='insertion_options_toggle_container'> 
-							<div id='insertion_method_toggle' class='insertion_options_toggle_button insertion_options_toggle_selected'>Methods</div>
-							<div id='insertion_operator_toggle' class='insertion_options_toggle_button'>Operators</div>
+						<div id='nav_left_container'>
+							<div id='new_model_button_container'>
+								<div class='circle_button' id='new_model_button'>+</div>
+							</div>
 						</div>
-						<div id='insertion_options_content'></div>
-					</div>
-					<div id='insertion_details_container'> </div> 
-				</div>
-			<!-- End popover containers -->
 
-				<div id='sidebar_right'>
-					<div id='help_button_container'>
-						<!--<div class='circle_button' id='help_button' style='font-family:sans-serif; font-size:15px'>?</div>-->
+						<div id='nav_right_container'>
+
+							<div id='new_file_container'>
+								<div id='new_file_tab_container'>
+									<div id='model_tab' class='new_file_tab selected_tab'>+ MODEL</div>
+									<div id='operator_tab' class='new_file_tab not_selected_tab'>+ OPERATOR</div>
+									<div id='method_tab' class='new_file_tab not_selected_tab'>+ METHOD</div>
+									<div id='new_file_close_container'>X</div>
+								</div>
+								<div id='new_file_inputs_container'></div>
+							</div>
+
+
+							<div class='nav_item'>
+								<div class='stat_container right_border'>
+									<div id='stat_task_time' class ='stat_content'>12 <span id="stat_task_time_units" class='stat_units'>s</span></div>
+									<div class='stat_label'>task time</div>
+								</div>
+							</div>
+							<div class='nav_item' >
+								<div class='stat_container right_border' id='stat_wm_container'>
+									<div id='stat_wm_load' class ='stat_content'>3.3 <span id="stat_wm_units" class='stat_units'>chunks</span></div>
+									<div class='stat_label'>memory load</div>
+								</div>
+							</div>	
+							<div class='nav_item' id='stat_workload_nav_item'>
+								<div class='stat_container'>
+									<div id='stat_workload' class ='stat_content'>1 <span id="stat_workload_units" class='stat_units'>(1-10)</span></div>
+									<div class='stat_label'>max workload</div>
+								</div>
+							</div>
+
+							<div class='nav_item' id='reload_button_nav_item'>
+								<div id='reload_model_button_container' style='margin-top:15px; margin-left:15px;'>
+									<div class='circle_button' id='reload_model_button'>↻</div>
+								</div>
+							</div>
+
+						</div>
+
+
 					</div>
-					<div class='edit_button_container'>
-						<div class='circle_button edit_button' id='comment_button'><img src='images/comment_toggle.png'></div>
+
+					<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
+					<div id='code'></div>
+
+				<!-- Containers for popovers that occur with various interactions -->
+					<div id='autocomplete'> </div>
+					<div id='error_message_popover'> </div>
+					<div id='fixable_tip_popover'>
+						<div class='fixable_tip_marker_static orange_background'>?</div>
+						<div id='fixable_tip_button'>fix</div>
 					</div>
-					<div class='edit_button_container'>
-						<div class='circle_button edit_button' id='indent_button'><img src='images/indent.png'></div>
+					<div id='insertion_chi_container'> 
+						<div id='insertion_options_container'> 
+							<div id='insertion_options_toggle_container'> 
+								<div id='insertion_method_toggle' class='insertion_options_toggle_button insertion_options_toggle_selected'>Methods</div>
+								<div id='insertion_operator_toggle' class='insertion_options_toggle_button'>Operators</div>
+							</div>
+							<div id='insertion_options_content'></div>
+						</div>
+						<div id='insertion_details_container'> </div> 
 					</div>
-					<div class='edit_button_container'>
-						<div class='circle_button edit_button' id='dedent_button'><img src='images/dedent.png'></div>
+				<!-- End popover containers -->
+
+					<div id='sidebar_right'>
+						<div id='magic_button_container'>
+							<div class='circle_button' id='magic_button'><img src='images/magicOff.png'></div>
+						</div>
+						<div class='edit_button_container'>
+							<div class='circle_button edit_button' id='comment_button'><img src='images/comment_toggle.png'></div>
+						</div>
+						<div class='edit_button_container'>
+							<div class='circle_button edit_button' id='indent_button'><img src='images/indent.png'></div>
+						</div>
+						<div class='edit_button_container'>
+							<div class='circle_button edit_button' id='dedent_button'><img src='images/dedent.png'></div>
+						</div>
 					</div>
-				</div>
-			</div>
+				</div> <!-- End not_gantt_not_magic -->
+				
+				<div id='not_gantt_but_is_magic'>
+					<div id='magic_header'>
+						<div id='close_magic_button_container'>
+							<div class='circle_button' id='close_magic_button'>X</div>
+						</div>
+					</div>
+					<div id='magic_content'>
+						<div id='magic_box'></div> <!-- P5 sketch -->
+					</div>
+					<div id='magic_footer'>
+						<div id='mm_selector_container'>
+							<div id='mm_desktop_chi'><img src='images/desktop_icon.png'></div>
+							<div id='mm_iphone_chi'><img src='images/iphone-icon.png'></div>
+							<div id='mm_desktop_selected' class='mm_selected_chi'><img src='images/mm_selector.png'></div>
+							<div id='mm_iphone_selected' class='mm_selected_chi'></div>
+						</div>
+					</div>
+				</div> <!-- End not_gantt but is magic -->
+				
+			</div> <!-- End not_gantt container -->
 			
 			<div id='gantt_button'>
 				<div id='gantt_button_text'>^</div>
 			</div>
 			<div id='gantt_container'>
-				<div id='gantt_chart'></div>
+				<div id='gantt_chart'></div> <!-- P5 sketch -->
 			</div>
 		</div>
 		

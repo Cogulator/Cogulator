@@ -1,0 +1,47 @@
+#magic_header{
+	width:100%;
+	height:60px;
+}
+
+#magic_content{
+	width:100%;
+	height:calc(100% - 60px - 60px);
+	border-left: 1px solid var(--border-color);
+	display: flex; /*flexbox*/
+	justify-content: center;
+	align-items: center; 
+}
+
+#magic_box{
+	width:100%;
+	height:450px;
+
+}
+
+#magic_footer{
+	display: flex; /*flexbox*/
+	justify-content: center;
+	width:100%;
+	height:60px;
+	border-left: 1px solid var(--border-color);
+	user-select: none;
+}
+
+#mm_selector_container{
+	width:120px;
+	height:60px;
+}
+
+#mm_desktop_chi, #mm_iphone_chi{
+	position: relative;
+	float: left;
+	width:60px;
+	height:45px;
+}
+
+.mm_selected_chi{
+	position: relative;
+	float: left;
+	width:60px;
+	height:15px;
+}

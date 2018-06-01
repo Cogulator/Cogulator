@@ -32,7 +32,8 @@ class StartUpManager {
 				    "./interface/PopOverFix.js",
 				    "./managers/ReloadManager.js",
 				    "./interface/NewFileCHI.js",
-				  	"./interface/InsertionCHI.js"];
+				  	"./interface/InsertionCHI.js",
+				    "./interface/MagicModels.js"];
 		
 		$.getScript( this.js[this.index], function(){
 			G.startUp.getNext();

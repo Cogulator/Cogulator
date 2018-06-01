@@ -89,7 +89,7 @@ class InsertionCHI {
 			  }), 'silent'
 			);
 
-			//method to find image your adding and get it's height (and change it's height)
+			//method to find image you're adding and get its height (and change its height)
 			let insertedImage = $("img[src$='//:0']");
 			insertedImage.animate({height: "176px"}, 'fast');
 		} else {

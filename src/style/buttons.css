@@ -35,12 +35,12 @@
 	border-color:var(--stats-label-color);
 }
 
-#help_button_container {
+#magic_button_container {
 	position: relative;
 	float: left;
 	width:100%;
 	height:60px;
-} #help_button {
+} #magic_button {
 	position: relative;
 	margin: auto;
 	top: 50%;
@@ -59,4 +59,20 @@
 	position: relative;
 	margin: auto;
 	vertical-align: middle;
-} 
+}
+
+#close_magic_button_container {
+	position: relative;
+	margin-right:10px;
+	float: right;
+	height:inherit;
+} #close_magic_button {
+	position: relative;
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-family: 'Lato-Light';
+	font-size: 14px;
+	border: 1px solid;
+	color:var(--purple-color);
+	border-color:var(--purple-color);
+}
