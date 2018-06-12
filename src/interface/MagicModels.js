@@ -1,9 +1,33 @@
+const MagicActions = {
+	POINT: "point",
+	HOVER: "hover",
+	CLICK: "click", 
+	POINTANDCLICK: "pointandclick",
+	DRAGFROM: "dragfrom",
+	DRAGTO: "dragto",
+	TYPE: "type",
+	KEYSTROKE: "keystroke",
+	TOUCH: "touch",
+	TAP: "tap",
+	SWIPE: "swipe",
+	HOME: "home",
+	SPEECHRECSAY: "speechrecsay",
+	SPEECHRECHEAR: "speechrechear",
+	UNKNOWN: "unknown"
+}
+
+
 class MagicModelsManager {
 	
 	constructor() {
 		this.selected = "desktop";
 		this.visible = false;
 		
+		this.fitts = new FittsLaw();
+		this.actions = [];
+		this.speechRecMode = "none";
+		this.handsPosition = "";
+				
 		//toggle magic models on wand click
 		$( '#magic_button_container' ).click(function() {
 			let visibility = $('#not_gantt_but_is_magic').css('visibility');
@@ -35,6 +59,194 @@ class MagicModelsManager {
 	}
 	
 	
+	run() {
+		console.log("run");
+		this.reset();
+		$(document).on("keydown", G.magicModels.handleKeystroke );
+	}
+	
+	
+	pause() {
+		console.log("pause")
+		$(document).off("keydown", G.magicModels.handleKeystroke );
+	}
+	
+	
+	reset() {
+		this.actions.length = 0;
+		this.speechRecMode = "none";
+		this.handsPosition = "";
+	}
+
+	
+	handleKeystroke(evt) {
+		if (G.magicModels.speechRecMode != "none") G.magicModels.handleSpeechRecKeystroke(evt.key);
+		else 							 		   G.magicModels.handleKeyboardKeystroke(evt.key)
+	}
+	
+	
+	handleSpeechRecKeystroke(keyCode) {
+		var lastAction = MagicActions.UNKNOWN;
+		if (this.actions.length > 0) lastAction = this.actions[this.actions.length - 1].name;
+		
+		if (keyCode == "Return") { 
+			if (lastAction == MagicActions.SPEECHRECHEAR) {
+				//close out speech rec mode
+				this.speechRecMode = "none";
+			} else if (lastAction == MagicActions.SPEECHRECSAY) {
+				//switch over to HEAR MODE
+				this.speechRecMode = "hear";
+			}
+		} else {
+			if (speechRecMode == "say") {
+				this.add(MagicActions.SPEECHRECSAY, null, keyCode)
+			} else if (speechRecMode == "hear") {
+				this.add(MagicActions.SPEECHRECHEAR, null, keyCode)
+			}
+		}
+	}
+	
+	
+	handleKeyboardKeystroke(keyCode) {
+		var lastAction = null
+		if (this.actions.length > 0) lastAction = this.actions[this.actions.length - 1].name;
+			
+		if (keyCode == "Enter" || keyCode == "Shift") {
+			if (this.selected == "desktop") this.add(MagicActions.KEYSTROKE, null, keyCode);
+			else                       		this.add(MagicActions.TOUCH, null, keyCode);
+		} else {
+			if (this.selected == "desktop") this.add(MagicActions.TYPE, null, keyCode);
+			else                      		this.add(MagicActions.TAP, null, keyCode);
+		}
+	}
+	
+	
+	add(action, location = null, text = "") {
+		this.actions.push({name: action, point: location});
+		this.actionToGOMS(action, text);
+	}
+	
+	
+	addPointBased(action, location, distance) {
+		console.log("ADD POINT BASED", action, location);
+		this.actions.push({name: action, point: location});
+		
+		var t = 1000;
+		if (action == MagicActions.POINTANDCLICK) t = this.fitts.pointAndClick(distance);
+		else if (action == MagicActions.DRAGTO)   t = this.fitts.dragAndDrop(distance);
+		else if (action == MagicActions.TOUCH)    t = this.fitts.pointAndTouch(distance);
+		else if (action == MagicActions.SWIPE)    t = this.fitts.touchDrag(distance);
+		else if (action == MagicActions.HOME)     t = this.fitts.pointAndTouch(distance);
+		
+		this.actionToGOMS(action, "", t);
+	}
+	
+	
+	actionToGOMS(action, text, fitts = null) {
+		var actionGOMS = "";
+		
+		var lastAction = MagicActions.UNKNOWN;
+		if (this.actions.length > 1) lastAction = this.actions[this.actions.length - 2].name;
+			
+		var timeModifier = "";
+		if (fitts != null) timeModifier = "(" + parseInt(fitts) + " milliseconds) *Fitts Law Point Estimate";
+		
+		
+		if (this.selected == "desktop") {
+			if (this.handsPosition == "" && (action == MagicActions.TYPE || action == MagicActions.KEYSTROKE)) {
+				this.handsPosition = "keyboard";
+			} else if (this.handsPosition != "keyboard" && (action == MagicActions.TYPE || action == MagicActions.KEYSTROKE)) {
+				this.handsPosition = "keyboard";
+				actionGOMS = "Hands to keyboard \n "
+			} else if (this.handsPosition != "mouse" && (action == MagicActions.POINTANDCLICK || action == MagicActions.DRAGFROM || action == MagicActions.DRAGTO)) {
+				this.handsPosition = "mouse";
+				actionGOMS = "Hands to mouse \n "
+			}
+			
+			if (action == MagicActions.POINT) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
+				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.CLICK) {
+				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
+				actionGOMS += "\nClick on <" + this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.POINTANDCLICK) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
+				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";				
+				actionGOMS += "\nClick on <" +  this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.DRAGFROM) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
+				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
+				actionGOMS += "\nClick on <" + this.actions.length  + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.DRAGTO) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
+				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";;				
+				actionGOMS += "\nClick on <" + this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.TYPE) {
+				if (lastAction != MagicActions.TYPE) actionGOMS += "\n " + "\nType ";
+				actionGOMS += text;
+			} else if (action == MagicActions.KEYSTROKE) {
+				actionGOMS += "\nCognitive_processor verify correct";
+				actionGOMS += "\nKeystroke ";
+				actionGOMS += text;
+			} 
+		} 
+		
+		else if (this.selected == "iphone") {
+			if (action == MagicActions.TOUCH) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nCognitive_processor verify <" + this.actions.length + ">";				
+				actionGOMS += "\nTouch <" + this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.SWIPE) {
+				actionGOMS += "\nLook at <" + this.actions.length + ">";
+				actionGOMS += "\nCognitive_processor <" + this.actions.length + ">";	
+				actionGOMS += "\nTouch <" + this.actions.length + ">";
+				actionGOMS += "\nSwipe on <" + this.actions.length + ">";
+				actionGOMS += "\nIgnore <" + this.actions.length + ">";
+			} else if (action == MagicActions.TAP) {
+				if (lastAction != MagicActions.TAP) actionGOMS += "\n " + "\nTap ";
+				actionGOMS += data;
+			} else if (action == MagicActions.HOME) {
+				actionGOMS += "\nLook at <Home " + this.actions.length + ">";
+				actionGOMS += "\nCognitive_processor <Home " + this.actions.length + ">";	
+				actionGOMS += "\nTouch <Home " + this.actions.length + ">";
+				actionGOMS += "\nClick <Home " + this.actions.length + ">";
+				actionGOMS += "\nIgnore <Home " + this.actions.length + ">";
+			} else if (action == MagicActions.SPEECHRECSAY) {
+				if (lastAction != MagicActions.SPEECHRECSAY) {
+					actionGOMS += "\nLook at <Home " + this.actions.length + ">";
+					actionGOMS += "\nCognitive_processor verify <Home " + this.actions.length + ">";	
+					actionGOMS += "\nTouch <Home " + this.actions.length + ">";
+					actionGOMS += "\nClick and hold <Home " + this.actions.length + ">";
+					actionGOMS += "\nIgnore <Home " + this.actions.length + ">";
+					actionGOMS += "\nWait for speech rec to start (1 seconds)";
+					actionGOMS += "\nHear <start sound> (2 syllables)";
+					actionGOMS += "\nIgnore <start sound>";
+					actionGOMS += "\nSay ";
+				}
+				actionGOMS += text;
+			} else if (action == MagicActions.SPEECHRECHEAR) {
+				if (lastAction != MagicActions.SPEECHRECHEAR) {
+					actionGOMS += "\nWait for system response (250 ms)";
+					actionGOMS += "\nHear ";
+				}
+				actionGOMS += text;
+			} 
+		}
+		
+		console.log("ACTION GOMS", actionGOMS);
+	}
+	
+	
 	show() {
 		$('#not_gantt_not_magic').css({ 'width': 'calc(100% - 356px'});
 		$('#not_gantt_but_is_magic').css("visibility", "visible");
@@ -55,6 +267,8 @@ class MagicModelsManager {
 
 }
 G.magicModels = new MagicModelsManager();
+
+
 
 
 var magicModelsSketch = function(s) {
@@ -101,6 +315,10 @@ var magicModelsSketch = function(s) {
 	var currentTopLeftY = (hght / 2) - (currentHeight / 2);
 	var currentScreenTopLeftX = currentTopLeftX + desktopScreenX;
 	var currentScreenTopLeftY = currentTopLeftY + desktopScreenY;
+
+	//iphone home button
+	let phoneHome = new Point(177, 334.5);
+	let phoneHomeRadius = 10;
 	
 	//clear button position
 	let buttonDiameter = 22;
@@ -112,6 +330,8 @@ var magicModelsSketch = function(s) {
 	let scrollBarHeight = 30;
 	let scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
 	var scrollBarY = currentScreenTopLeftY;
+	var scrollBarTravel = currentScreenHeight - scrollBarHeight;
+	
 	var percentScreenShown = scrollBarHeight / currentScreenHeight; //percentage of total scrollable content showing
 	var contentHeight = currentScreenHeight / percentScreenShown;
 	var contentY = 0;
@@ -128,11 +348,24 @@ var magicModelsSketch = function(s) {
 	let scrollBarClr = '#999'
 	let fontAndScaleClr = '#363A3B';
 	
+	//action tracking
+	var clickStartTime = 0;
+	var mouseDownXY = new Point(0,0);
+	var lastMouseDownXY = mouseDownXY;
+	var mouseUpXY = new Point(0,0);
+	var mouseTarget = "";
+	var typedText = "";
+	
+	//markers
+	var markers = [];
+	
 	//loop control: things get laggy while looping, so only loop when focus is on magic box
 	$( "#not_gantt_but_is_magic" ).hover(
 		function() { //on over
+			G.magicModels.run();
 			s.loop();
 		}, function() {
+			G.magicModels.pause();
 			s.noLoop();
 		}
 	);
@@ -157,16 +390,31 @@ var magicModelsSketch = function(s) {
 	s.draw = function() {
 		//the p5 renderer is evidently not quite ready on initial load. Try catch prevents 
 		//try { 
+			s.updateMarkers();
 			s.drawBackground();
 			if (selectedCHI != G.magicModels.selected) s.reset();
 			s.setScrollBarY();
 			s.drawGrid();
-			s.setBackgroundImage();
 			s.drawMarkers();
+			s.maskMarkers();
+			s.setBackgroundImage();
+			s.drawHomeMarkers();
 			s.drawScrollBar();
 			s.drawClearButton();
 			
 		//} catch(err) {}
+	}
+	
+	
+	s.updateMarkers = function() {
+		if (G.magicModels.actions.length == 0) markers.length = 0;
+		if (G.magicModels.actions.length > markers.length) {
+			let delta = G.magicModels.actions.length - markers.length;
+			for (var i = 0; i < delta; i++) {
+				let index = G.magicModels.actions.length - delta - i;
+				markers.push({name: G.magicModels.actions[index].name, point: G.magicModels.actions[index].point, contentY: contentY});
+			}
+		}
 	}
 	
 	
@@ -212,6 +460,8 @@ var magicModelsSketch = function(s) {
 		
 		scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
 		scrollBarY = currentScreenTopLeftY;
+		scrollBarTravel = currentScreenHeight - scrollBarHeight;
+		
 		percentScreenShown = scrollBarHeight / currentScreenHeight;
 		contentHeight = currentScreenHeight / percentScreenShown;
 		contentY = 0;
@@ -225,7 +475,7 @@ var magicModelsSketch = function(s) {
 	
 	
 	s.clear = function() {
-		console.log("CLEAR");
+		G.magicModels.reset();
 	}
 	
 	
@@ -274,13 +524,50 @@ var magicModelsSketch = function(s) {
 		if (selectedCHI == "desktop") contentPosition = scrollBarY / scrollBarHeight;
 		
 		if (selectedCHI == "iphone") scrollBarY = currentScreenTopLeftY + (contentPosition * (currentScreenHeight - scrollBarHeight));
-		else contentY = contentHeight * contentPosition;
+		else contentY = ( (scrollBarY - currentScreenTopLeftY) / scrollBarTravel) * contentHeight;
+		
+		
 		
 		let startY = contentY % lineSpacing;
 		for (var y = startY; y < currentScreenHeight; y += lineSpacing) {
-			let lineY = currentScreenTopLeftY + y;
+			let lineY = currentScreenTopLeftY + currentScreenHeight - y;
 			s.line(currentScreenTopLeftX, lineY, currentScreenTopLeftX + currentScreenWidth, lineY);
 		}
+	}
+	
+	
+	s.drawMarkers = function() {
+		s.noStroke();
+		s.fill(buttonClr);
+		
+		for (var i = 0; i < markers.length; i++) {
+			let name = markers[i].name;
+			let point = markers[i].point;
+			let yAdjust = markers[i].contentY;
+			
+			let delta = contentY - yAdjust;
+			let adjustedY = point.y - delta;
+			
+			if (name == MagicActions.POINTANDCLICK || name == MagicActions.TOUCH) {
+				s.ellipse(point.x, adjustedY, buttonDiameter);
+			} else if (name == MagicActions.DRAGFROM || name == MagicActions.DRAGTO) {
+				s.rect(point.x, point.y, scrollBarWidth, scrollBarHeight);
+			} else if (name == MagicActions.SWIPE) {
+				let x = point.x - (buttonDiameter / 2)
+				s.rect(x, adjustedY, buttonDiameter, buttonDiameter * 2, buttonDiameter);
+			} 
+		}
+	}
+	
+	s.maskMarkers = function() {
+		s.fill(backGroundClr);
+		//top - bottom
+		s.rect(currentScreenTopLeftX, currentScreenTopLeftY - currentScreenHeight, currentScreenWidth, currentScreenHeight);
+		s.rect(currentScreenTopLeftX, currentScreenTopLeftY + currentScreenHeight, currentScreenWidth, currentScreenHeight);
+		
+		//left - right
+		s.rect(currentScreenTopLeftX - currentScreenWidth, 0, currentScreenWidth, hght);
+		s.rect(currentScreenTopLeftX + currentScreenWidth, 0, currentScreenWidth, hght);
 	}
 	
 	
@@ -289,9 +576,16 @@ var magicModelsSketch = function(s) {
 	}
 	
 	
-	s.drawMarkers = function() {
+	s.drawHomeMarkers = function() {
+		s.noStroke();
+		s.fill(buttonClr);
+		
+		for (var i = 0; i < markers.length; i++) {
+			let name = markers[i].name;
+			let point = markers[i].point;
+			if (name == MagicActions.HOME) s.ellipse(point.x, point.y, buttonDiameter);
+		}
 	}
-	
 	
 	s.drawScrollBar = function() {
 		s.noStroke();
@@ -343,17 +637,39 @@ var magicModelsSketch = function(s) {
 	}
 	
 	
-	s.mousePressed = function() {	
+	s.mousePressed = function() {
+		lastMouseDownXY = mouseDownXY
+		mouseDownXY = new Point(s.mouseX, s.mouseY);
+		console.log("DOWN", mouseDownXY);
+		
+		let d = new Date();
+		clickStartTime = d.getTime();
+		
 		// if iphone, allow dragging of screen
 		if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
 			dragging = true;
 			touchY = s.mouseY;
+			mouseTarget = "phone_screen";
 		}
 		
-		// allow dragging of screen		  
+		else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
+			mouseTarget = "phone_home";
+		}
+		
+		// allow dragging scrollbar		  
 		else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
 			dragging = true;
 			dragOffset = scrollBarY - s.mouseY;
+			mouseTarget = "desktop_scroll_bar";
+			
+			let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+			let barPnt = new Point(scrollBarX, scrollBarY);
+			G.magicModels.addPointBased(MagicActions.DRAGFROM, barPnt, d);
+		}
+		
+		// allow clicking with mouse 		  
+		else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+			mouseTarget = "desktop_screen";
 		}
 		
 		//detect click on clear button
@@ -362,8 +678,96 @@ var magicModelsSketch = function(s) {
 		}
 	}		
 
-	s.mouseReleased = function() {		  
-		dragging = false;	
+	
+	s.mouseReleased = function() {
+		mouseUpXY = new Point(s.mouseX, s.mouseY);
+		console.log("UP", mouseUpXY);
+		let d = new Date();
+		let elapsedTime = d.getTime() - clickStartTime;
+		
+		dragging = false;
+		
+		if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+			G.magicModels.speechRecMode = "none";
+			if (mouseTarget == "phone_screen") {
+				if (mouseDownXY.equals(mouseUpXY)) {
+					let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+					G.magicModels.addPointBased(MagicActions.TOUCH, mouseDownXY, d);
+				} else {
+					let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+					G.magicModels.addPointBased(MagicActions.SWIPE, mouseUpXY, d);
+				}
+			}
+		}
+		
+		else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
+			if (mouseTarget = "phone_home") {
+				let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+				let homePnt = new Point(phoneHome.x, phoneHome.y);
+				
+				if (elapsedTime > 1000) {
+					G.magicModels.speechRecMode  = "Say";
+					G.magicModels.addPointBased(MagicActions.SPEECHRECSAY, homePnt, d);
+				}
+				else {
+					G.magicModels.speechRecMode  = "none";
+					G.magicModels.addPointBased(MagicActions.HOME, homePnt, d);
+				}
+			} 
+		}
+		
+		// allow dragging of screen		  
+		else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
+			G.magicModels.speechRecMode = "none";
+			if (mouseTarget == "desktop_scroll_bar")  {
+				let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
+				if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
+					let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+					let barPnt = new Point(scrollBarX, scrollBarY);
+					G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
+				}
+			}
+		}
+		
+		
+		// allow dragging of screen		  
+		else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+			G.magicModels.speechRecMode = "none";
+			let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
+			if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
+				let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+				let barPnt = new Point(scrollBarX, scrollBarY);
+				G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
+			} else if (mouseTarget == "desktop_screen")  {
+				let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+				G.magicModels.addPointBased(MagicActions.POINTANDCLICK, mouseUpXY, d);
+			}
+		}
+		
+
+		mouseTarget = "";
+	}
+	
+
+	s.mappedDistance = function(startPoint, endPoint) {
+		var startX = startPoint.x - currentScreenTopLeftX; //reference to 0,0
+		var startY = startPoint.y - currentScreenTopLeftY; 
+		var endX   = endPoint.x   - currentScreenTopLeftX
+		var endY   = endPoint.y   - currentScreenTopLeftY;
+		
+		if (selectedCHI == "desktop") {
+			startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 1366);
+			startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 768);
+			endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 1366);
+			endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 768);
+			return s.dist(startX, startY, endX, endY);
+		} else {
+			startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 750);
+			startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 1334);
+			endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 750);
+			endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 1334);
+			return s.dist(startX, startY, endX, endY);
+		}
 	}
 	
 }

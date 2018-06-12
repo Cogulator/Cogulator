@@ -81,7 +81,7 @@ class LineParser {
 		}
 
 		//get time parenthetical, if present
-		let timeMatch = line.match(/\(\s{0,15}[0-9]{1,3}\s{1,5}(seconds|second|ms|milliseconds|syllables)\s{0,15}\)/mi);
+		let timeMatch = line.match(/\(\s{0,15}[0-9]{1,5}\s{1,5}(seconds|second|ms|milliseconds|syllables)\s{0,15}\)/mi);
 		if (timeMatch != null) {
 			line = line.substring(0, timeMatch.index);
 			components.parenthetical = timeMatch[0].replace("(","").replace(")","");

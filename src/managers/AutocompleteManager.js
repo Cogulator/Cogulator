@@ -7,7 +7,7 @@ class AutocompleteManager {
 		
 		//arrays for autocomplete matches (operators taken from OperatorsManager global)
 		this.controls = ["goal", "operator"];
-		this.times = ["syllables)", "seconds)", "ms)"];
+		this.times = ["syllables)", "seconds)", "ms)", "milliseconds)"];
 		this.setRegExs();
 
 		//handle text change
@@ -37,7 +37,7 @@ class AutocompleteManager {
 		this.regexs = [];
 		this.regexs.push({ exp: /^[\.| ]{0,15}(go?a?\b|al?s?\b)/i,  type: "goal" }); //goals 
 		this.regexs.push({ exp: this.operatorRegEx(), type: "operator" }); //operators
-		this.regexs.push({ exp: /\([0-9]{1,5} (sy?l?l?a?b?le?\b|se?c?o?n?\b|m\b)/i, type: "time" }); //time or syllables
+		this.regexs.push({ exp: /\([0-9]{1,5} (sy?l?l?a?b?le?\b|mi?l?l?i?s?e?c?o?n?d?s?\b|se?c?o?n?\b|m\b)/i, type: "time" }); //time or syllables
 	}
 	
 	
