@@ -54,7 +54,8 @@ class StatsDisplayManager {
 			$('#stat_workload').html("x_x");
 		} else {
 			this.showWorkload();
-			$('#stat_workload').html(maxWorkload + " <span id='stat_workload_units' class='stat_units'>(1-10)</span>");
+			//$('#stat_workload').html(maxWorkload + " <span id='stat_workload_units' class='stat_units'>(1-10)</span>");
+			$('#stat_workload').html(this.fuzzyishWorkoad(maxWorkload));
 		}
 	}
 	
@@ -69,6 +70,12 @@ class StatsDisplayManager {
 		if ($('#stat_workload_nav_item').css('display') != 'none') return;
 		$('#stat_wm_container').addClass('right_border');
 		$('#stat_workload_nav_item').fadeIn('slow');
+	}
+	
+	fuzzyishWorkoad(maxWorkload) {
+		if (maxWorkload <= 4) return "Low";
+		else if (maxWorkload <= 6) return "Moderate";
+		else if (maxWorkload >= 7) return "High";
 	}
 }
 

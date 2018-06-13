@@ -60,15 +60,14 @@ class MagicModelsManager {
 	
 	
 	run() {
-		console.log("run");
-		this.reset();
+		G.quill.disable();
 		$(document).on("keydown", G.magicModels.handleKeystroke );
 	}
 	
 	
 	pause() {
-		console.log("pause")
 		$(document).off("keydown", G.magicModels.handleKeystroke );
+		G.quill.enable();
 	}
 	
 	
@@ -86,23 +85,12 @@ class MagicModelsManager {
 	
 	
 	handleSpeechRecKeystroke(keyCode) {
-		var lastAction = MagicActions.UNKNOWN;
-		if (this.actions.length > 0) lastAction = this.actions[this.actions.length - 1].name;
-		
-		if (keyCode == "Return") { 
-			if (lastAction == MagicActions.SPEECHRECHEAR) {
-				//close out speech rec mode
-				this.speechRecMode = "none";
-			} else if (lastAction == MagicActions.SPEECHRECSAY) {
-				//switch over to HEAR MODE
-				this.speechRecMode = "hear";
-			}
+		if (keyCode == "Enter") { 
+			if 		(this.speechRecMode == "hear") this.speechRecMode = "none";
+			else if (this.speechRecMode == "say")  this.speechRecMode = "hear";
 		} else {
-			if (speechRecMode == "say") {
-				this.add(MagicActions.SPEECHRECSAY, null, keyCode)
-			} else if (speechRecMode == "hear") {
-				this.add(MagicActions.SPEECHRECHEAR, null, keyCode)
-			}
+			if 		(this.speechRecMode == "say")  this.add(MagicActions.SPEECHRECSAY, null, keyCode)
+			else if (this.speechRecMode == "hear") this.add(MagicActions.SPEECHRECHEAR, null, keyCode)
 		}
 	}
 	
@@ -111,7 +99,7 @@ class MagicModelsManager {
 		var lastAction = null
 		if (this.actions.length > 0) lastAction = this.actions[this.actions.length - 1].name;
 			
-		if (keyCode == "Enter" || keyCode == "Shift") {
+		if (keyCode.length > 1) {
 			if (this.selected == "desktop") this.add(MagicActions.KEYSTROKE, null, keyCode);
 			else                       		this.add(MagicActions.TOUCH, null, keyCode);
 		} else {
@@ -123,12 +111,12 @@ class MagicModelsManager {
 	
 	add(action, location = null, text = "") {
 		this.actions.push({name: action, point: location});
-		this.actionToGOMS(action, text);
+		let goms = this.actionToGOMS(action, text);
+		this.insertGOMS(goms, action);
 	}
 	
 	
 	addPointBased(action, location, distance) {
-		console.log("ADD POINT BASED", action, location);
 		this.actions.push({name: action, point: location});
 		
 		var t = 1000;
@@ -138,7 +126,39 @@ class MagicModelsManager {
 		else if (action == MagicActions.SWIPE)    t = this.fitts.touchDrag(distance);
 		else if (action == MagicActions.HOME)     t = this.fitts.pointAndTouch(distance);
 		
-		this.actionToGOMS(action, "", t);
+		let goms = this.actionToGOMS(action, "", t);
+		this.insertGOMS(goms, action);
+	}
+	
+	
+	insertGOMS(goms, action) {
+		var goms = goms;
+		if (this.actions.length == 1) goms = "** Magic Model Start **" + goms;
+		
+		var index = G.quillManager.lastSelection.index;
+		if (index == null) index = G.quill.getLength();
+		
+		if (goms.length > 1) { //if you are not just appending a letter (as in type or tap) to the existing line, find the next empty line
+			if (G.quillManager.getLine(index).length > 0) {
+				let lineNo = G.quillManager.getLineNumber(index) + 1;
+				index = G.quillManager.getLineIndex(lineNo);
+				if (G.quillManager.getLine(index).length > 0) index = G.quill.getLength(); 
+			}
+			
+			G.quill.insertText(index, goms);
+			
+			//because we want to append the typed to text to the type, tap, etc, operator, adjust index accordingly
+			if (action != MagicActions.TYPE && action != MagicActions.TAP && action != MagicActions.SPEECHRECHEAR && action != MagicActions.SPEECHRECSAY) {
+				G.quillManager.lastSelection.index = index + goms.length;
+			} else {
+				G.quillManager.lastSelection.index = index + goms.length - 1;
+			}
+		} else {
+			index++;
+			G.quill.insertText(index, goms);
+			G.quillManager.lastSelection.index = index;
+		}
+		
 	}
 	
 	
@@ -157,10 +177,10 @@ class MagicModelsManager {
 				this.handsPosition = "keyboard";
 			} else if (this.handsPosition != "keyboard" && (action == MagicActions.TYPE || action == MagicActions.KEYSTROKE)) {
 				this.handsPosition = "keyboard";
-				actionGOMS = "Hands to keyboard \n "
+				actionGOMS = "\nHands to keyboard"
 			} else if (this.handsPosition != "mouse" && (action == MagicActions.POINTANDCLICK || action == MagicActions.DRAGFROM || action == MagicActions.DRAGTO)) {
 				this.handsPosition = "mouse";
-				actionGOMS = "Hands to mouse \n "
+				actionGOMS = "\nHands to mouse"
 			}
 			
 			if (action == MagicActions.POINT) {
@@ -191,7 +211,7 @@ class MagicModelsManager {
 				actionGOMS += "\nClick on <" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.TYPE) {
-				if (lastAction != MagicActions.TYPE) actionGOMS += "\n " + "\nType ";
+				if (lastAction != MagicActions.TYPE) actionGOMS += "\nType ";
 				actionGOMS += text;
 			} else if (action == MagicActions.KEYSTROKE) {
 				actionGOMS += "\nCognitive_processor verify correct";
@@ -214,7 +234,7 @@ class MagicModelsManager {
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.TAP) {
 				if (lastAction != MagicActions.TAP) actionGOMS += "\n " + "\nTap ";
-				actionGOMS += data;
+				actionGOMS += text;
 			} else if (action == MagicActions.HOME) {
 				actionGOMS += "\nLook at <Home " + this.actions.length + ">";
 				actionGOMS += "\nCognitive_processor <Home " + this.actions.length + ">";	
@@ -243,7 +263,7 @@ class MagicModelsManager {
 			} 
 		}
 		
-		console.log("ACTION GOMS", actionGOMS);
+		return actionGOMS;
 	}
 	
 	
@@ -343,9 +363,9 @@ var magicModelsSketch = function(s) {
 	let style = getComputedStyle(document.body);
 	let	backGroundClr = style.getPropertyValue('--sidebar-right-bg-color');
 	let	gridBckgrndClr = style.getPropertyValue('--main-bg-color');
-	let buttonClr = style.getPropertyValue('--purple-color');
+	let buttonClr = s.color(style.getPropertyValue('--purple-color'));
 	let	gridLineClr = '#CCC';
-	let scrollBarClr = '#999'
+	var scrollBarClr = '#999'
 	let fontAndScaleClr = '#363A3B';
 	
 	//action tracking
@@ -355,6 +375,11 @@ var magicModelsSketch = function(s) {
 	var mouseUpXY = new Point(0,0);
 	var mouseTarget = "";
 	var typedText = "";
+	
+	//speech rec mode timer and bloom animation
+	var timer;
+	var timerFired = false;
+	var frameCount = 0;
 	
 	//markers
 	var markers = [];
@@ -401,6 +426,8 @@ var magicModelsSketch = function(s) {
 			s.drawHomeMarkers();
 			s.drawScrollBar();
 			s.drawClearButton();
+			s.drawSpeechRecInstructions();
+			s.drawSpeechRecActive();
 			
 		//} catch(err) {}
 	}
@@ -439,6 +466,7 @@ var magicModelsSketch = function(s) {
 			currentScreenY = desktopScreenY;
 
 			currentImage = desktop;
+			scrollBarClr = '#999';
 			
 		} else {
 			currentWidth = iphoneWidth;
@@ -451,6 +479,7 @@ var magicModelsSketch = function(s) {
 			currentScreenY = iphoneScreenY;
 						
 			currentImage = iphone;
+			scrollBarClr = s.color(235, 235, 235, 180);
 		}
 		
 		currentTopLeftX = (wdth / 2) - (currentWidth / 2);
@@ -526,8 +555,6 @@ var magicModelsSketch = function(s) {
 		if (selectedCHI == "iphone") scrollBarY = currentScreenTopLeftY + (contentPosition * (currentScreenHeight - scrollBarHeight));
 		else contentY = ( (scrollBarY - currentScreenTopLeftY) / scrollBarTravel) * contentHeight;
 		
-		
-		
 		let startY = contentY % lineSpacing;
 		for (var y = startY; y < currentScreenHeight; y += lineSpacing) {
 			let lineY = currentScreenTopLeftY + currentScreenHeight - y;
@@ -541,9 +568,12 @@ var magicModelsSketch = function(s) {
 		s.fill(buttonClr);
 		
 		for (var i = 0; i < markers.length; i++) {
-			let name = markers[i].name;
 			let point = markers[i].point;
+			if (point == null) continue;
+			
+			let name = markers[i].name;
 			let yAdjust = markers[i].contentY;
+			
 			
 			let delta = contentY - yAdjust;
 			let adjustedY = point.y - delta;
@@ -637,10 +667,34 @@ var magicModelsSketch = function(s) {
 	}
 	
 	
+	s.drawSpeechRecInstructions = function() {
+		s.fill('#555');
+		if (G.magicModels.speechRecMode == "say") {
+			let txt = "Type the speech rec command. Press Enter when done."
+			s.text(txt, 30, currentTopLeftY + currentHeight + 15);
+		} else if (G.magicModels.speechRecMode == "hear") {
+			let txt = "Type the system aural response, if any. Press Enter when done."
+			s.text(txt, 30, currentTopLeftY + currentHeight + 15);
+		}
+	}
+	
+	
+	s.drawSpeechRecActive = function() {
+		if (timerFired || G.magicModels.speechRecMode == "say" || G.magicModels.speechRecMode == "hear") {
+			s.fill(133, 88, 122, Math.abs(255 - frameCount));
+			s.ellipse( phoneHome.x, phoneHome.y, buttonDiameter + (buttonDiameter * (frameCount / 255)) );
+			
+			frameCount += 2;
+			if (frameCount > 255) frameCount = 0;
+		} else {
+			frameCount = 0
+		}
+	}
+	
+	
 	s.mousePressed = function() {
 		lastMouseDownXY = mouseDownXY
 		mouseDownXY = new Point(s.mouseX, s.mouseY);
-		console.log("DOWN", mouseDownXY);
 		
 		let d = new Date();
 		clickStartTime = d.getTime();
@@ -654,6 +708,7 @@ var magicModelsSketch = function(s) {
 		
 		else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
 			mouseTarget = "phone_home";
+			timer = setTimeout(s.timeout, 1000);
 		}
 		
 		// allow dragging scrollbar		  
@@ -676,12 +731,16 @@ var magicModelsSketch = function(s) {
 		else if (s.dist(clearButtonX, clearButtonY, s.mouseX, s.mouseY) <= buttonDiameter / 2) {
 			s.clear();
 		}
+		
 	}		
+	
+	s.timeout = function() {
+		timerFired = true;
+	}
 
 	
 	s.mouseReleased = function() {
 		mouseUpXY = new Point(s.mouseX, s.mouseY);
-		console.log("UP", mouseUpXY);
 		let d = new Date();
 		let elapsedTime = d.getTime() - clickStartTime;
 		
@@ -706,11 +765,11 @@ var magicModelsSketch = function(s) {
 				let homePnt = new Point(phoneHome.x, phoneHome.y);
 				
 				if (elapsedTime > 1000) {
-					G.magicModels.speechRecMode  = "Say";
+					G.magicModels.speechRecMode = "say";
 					G.magicModels.addPointBased(MagicActions.SPEECHRECSAY, homePnt, d);
 				}
 				else {
-					G.magicModels.speechRecMode  = "none";
+					G.magicModels.speechRecMode = "none";
 					G.magicModels.addPointBased(MagicActions.HOME, homePnt, d);
 				}
 			} 
@@ -746,6 +805,8 @@ var magicModelsSketch = function(s) {
 		
 
 		mouseTarget = "";
+		clearTimeout(timer);
+		timerFired = false;
 	}
 	
 

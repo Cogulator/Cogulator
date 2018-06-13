@@ -172,8 +172,8 @@ var ganttSketch = function(s) {
 	}
 	
 	s.setScale = function() {
-		if (scale < scaleTarget) scale += 250;
-		if (scale > scaleTarget) scale -= 250;
+		if (scale < scaleTarget) scale += 1000;
+		if (scale > scaleTarget) scale -= 1000;
 		
 	}
 	
@@ -749,6 +749,12 @@ var ganttSketch = function(s) {
 		
 	s.mouseReleased = function() {		  
 		dragging = false;		
+	}
+	
+	
+	s.mouseWheel = function(evt) {
+		if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
+		else 			   scaleTarget = Math.min(60000, scale + 5000);
 	}
 	
 	
