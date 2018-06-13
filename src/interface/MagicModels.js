@@ -565,26 +565,31 @@ var magicModelsSketch = function(s) {
 	
 	s.drawMarkers = function() {
 		s.noStroke();
-		s.fill(buttonClr);
+		s.textAlign(s.CENTER);
 		
 		for (var i = 0; i < markers.length; i++) {
+			s.fill(buttonClr);
+			
 			let point = markers[i].point;
 			if (point == null) continue;
 			
 			let name = markers[i].name;
 			let yAdjust = markers[i].contentY;
 			
-			
 			let delta = contentY - yAdjust;
 			let adjustedY = point.y - delta;
 			
 			if (name == MagicActions.POINTANDCLICK || name == MagicActions.TOUCH) {
 				s.ellipse(point.x, adjustedY, buttonDiameter);
+				s.fill('#FFF');
+				s.text(i, point.x, adjustedY + 4);
 			} else if (name == MagicActions.DRAGFROM || name == MagicActions.DRAGTO) {
 				s.rect(point.x, point.y, scrollBarWidth, scrollBarHeight);
 			} else if (name == MagicActions.SWIPE) {
 				let x = point.x - (buttonDiameter / 2)
 				s.rect(x, adjustedY, buttonDiameter, buttonDiameter * 2, buttonDiameter);
+				s.fill('#FFF');
+				s.text(i, point.x, adjustedY + buttonDiameter);
 			} 
 		}
 	}

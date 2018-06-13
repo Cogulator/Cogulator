@@ -46,10 +46,10 @@ class InsertionCHI {
 			G.io.loadFile(path, G.insertionCHI.showInfo);
 		});
 		
-		
 		//operator button click
 		$(document).on("click", ".insertion_option_operator_button_model", function(evt) {
-			let operator = $(this).text();
+			var operator = $(this).text();
+				operator = operator.replace(/ /g, "_");
 			G.insertionCHI.insert(operator);
 		});
 		
