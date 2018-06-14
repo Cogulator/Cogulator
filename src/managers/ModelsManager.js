@@ -69,6 +69,7 @@ class ModelsManager {
 		this.selected = p;
 		G.io.loadFile(p, this.displayModel);
 	} displayModel(code) {
+		$( document ).trigger( "Model_Loaded" );
 		G.quill.setText(code); //setting text will be picked up on in customeventmanager and cause the model to process
 		G.quill.focus();
 		G.modelsSidebar.showSelected(G.modelsManager.selected, false);

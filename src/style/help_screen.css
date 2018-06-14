@@ -1,0 +1,56 @@
+#help_container {
+	display: flex;
+	position: absolute;
+	top:0;
+	left:0;
+	width: 100%;
+	height: 100%;
+	background-color: #363B3A;
+	justify-content: center;
+	align-items: center;
+	z-index: 10000;
+	visibility: hidden;
+}
+
+#help_image_container{
+	display: flex;
+	flex-direction: column;
+}
+
+#help_image{
+	
+}
+
+#help_nav {
+	display: flex;
+	flex-direction: row;
+	align-self: center;
+	justify-content: center;
+	height:50px;
+	font-family: 'Lato';
+	color: white;
+}
+
+#help_close_button_container {
+	align-self: flex-end
+} #help_close_button {
+	position: relative;
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-family: 'Lato-Light';
+	font-size: 14px;
+	color: white;
+	background-color: red;
+}
+	
+.help_nav_button {
+	top: 50%;
+	transform: perspective(1px) translateY(-50%);
+	font-family: 'Lato-Light';
+	font-size: 14px;
+	color: white;
+	border: 1px solid;
+	border-color: white;
+	margin: 10px;
+}
+

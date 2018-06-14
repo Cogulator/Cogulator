@@ -11,12 +11,14 @@
 		<link rel="stylesheet" type="text/css" href="./style/insertion_chi.css">
 		<link rel="stylesheet" type="text/css" href="./style/errors_tips.css">
 		<link rel="stylesheet" type="text/css" href="./style/magic_models.css">
+		<link rel="stylesheet" type="text/css" href="./style/help_screen.css">
 		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
 		<script type='text/javascript' src='./libraries/quill.min.js'></script>
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
 	</head>
 	<body>
 		<div class='titlebar'></div>
+		
 		<div id='container'>
 			<div id='not_gantt_container'>
 				<div id='not_gantt_not_magic'>
@@ -140,10 +142,21 @@
 			</div>
 		</div>
 		
+		<div id='help_container'>
+			<div id='help_image_container'>
+				<div id='help_close_button_container'>
+					<div class='circle_button' id='help_close_button'>X</div>
+				</div>
+				<div id='help_image'></div>
+				<div id='help_nav'>NAVIGATE</div>
+			</div>
+		</div>
+		
 		<script type='text/javascript' src='./utilities/Globals.js'></script>
 		<script type='text/javascript' src='./managers/FilePathManager.js'></script>
 		<script type='text/javascript' src='./managers/InOutManager.js'></script>
 		<script type='text/javascript' src='./managers/StartUpManager.js'></script>
+		<script type='text/javascript' src='./interface/HelpScreen.js'></script>
 		<script type='text/javascript' src='./managers/FirstRunManager.js'></script>
 	</body>
 </html>

@@ -28,9 +28,7 @@ class FirstRunManager {
 		if (G.io.fileExists(G.paths.cogulator)) {
 			G.startUp.load();
 		} else { 
-//			_firstRunQuickStart.x = 0;
-//			_firstRunQuickStart.y = 0;
-//			_firstRunQuickStart.visible = true;
+			G.helpScreen.show();
 			this.itIsTheFirstRun(); 
 		} 
 

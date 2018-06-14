@@ -169,6 +169,10 @@ const template = [
 		role: 'help',
 		submenu: [
 			{
+				label: 'Quick Start',
+				click () { mainWindow.webContents.send('Help->Quick Start') } //handled in modelmanager
+			},
+			{
 				label: 'Learn More',
 				click () { require('electron').shell.openExternal('http://cogulator.io') }
 			}

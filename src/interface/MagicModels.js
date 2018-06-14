@@ -221,10 +221,15 @@ class MagicModelsManager {
 		} 
 		
 		else if (this.selected == "iphone") {
-			if (action == MagicActions.TOUCH) {
+			if (action == MagicActions.TOUCH && text != "") {
+				actionGOMS += "\nLook at <" + text + ">";
+				actionGOMS += "\nCognitive_processor verify <" + text + ">";				
+				actionGOMS += "\nTouch <" + text + ">";
+				actionGOMS += "\nIgnore <" + text + ">";
+			} else if (action == MagicActions.TOUCH) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
 				actionGOMS += "\nCognitive_processor verify <" + this.actions.length + ">";				
-				actionGOMS += "\nTouch <" + this.actions.length + ">";
+				actionGOMS += "\nTouch " + text + "<" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.SWIPE) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
@@ -364,6 +369,7 @@ var magicModelsSketch = function(s) {
 	let	backGroundClr = style.getPropertyValue('--sidebar-right-bg-color');
 	let	gridBckgrndClr = style.getPropertyValue('--main-bg-color');
 	let buttonClr = s.color(style.getPropertyValue('--purple-color'));
+	let markerClr = style.getPropertyValue('--model-select-bg-color');
 	let	gridLineClr = '#CCC';
 	var scrollBarClr = '#999'
 	let fontAndScaleClr = '#363A3B';
@@ -428,6 +434,7 @@ var magicModelsSketch = function(s) {
 			s.drawClearButton();
 			s.drawSpeechRecInstructions();
 			s.drawSpeechRecActive();
+			s.drawGeneralInstructions();
 			
 		//} catch(err) {}
 	}
@@ -568,7 +575,7 @@ var magicModelsSketch = function(s) {
 		s.textAlign(s.CENTER);
 		
 		for (var i = 0; i < markers.length; i++) {
-			s.fill(buttonClr);
+			s.fill(markerClr);
 			
 			let point = markers[i].point;
 			if (point == null) continue;
@@ -582,14 +589,14 @@ var magicModelsSketch = function(s) {
 			if (name == MagicActions.POINTANDCLICK || name == MagicActions.TOUCH) {
 				s.ellipse(point.x, adjustedY, buttonDiameter);
 				s.fill('#FFF');
-				s.text(i, point.x, adjustedY + 4);
+				s.text(i + 1, point.x, adjustedY + 4);
 			} else if (name == MagicActions.DRAGFROM || name == MagicActions.DRAGTO) {
 				s.rect(point.x, point.y, scrollBarWidth, scrollBarHeight);
 			} else if (name == MagicActions.SWIPE) {
 				let x = point.x - (buttonDiameter / 2)
 				s.rect(x, adjustedY, buttonDiameter, buttonDiameter * 2, buttonDiameter);
 				s.fill('#FFF');
-				s.text(i, point.x, adjustedY + buttonDiameter);
+				s.text(i + 1, point.x, adjustedY + buttonDiameter);
 			} 
 		}
 	}
@@ -613,7 +620,7 @@ var magicModelsSketch = function(s) {
 	
 	s.drawHomeMarkers = function() {
 		s.noStroke();
-		s.fill(buttonClr);
+		s.fill(markerClr);
 		
 		for (var i = 0; i < markers.length; i++) {
 			let name = markers[i].name;
@@ -673,7 +680,10 @@ var magicModelsSketch = function(s) {
 	
 	
 	s.drawSpeechRecInstructions = function() {
-		s.fill('#555');
+		let alpha = Math.abs(frameCount - 255 / 2) * 2;
+		s.fill(85, 85, 85, alpha + 50);
+		
+		s.textAlign(s.LEFT);
 		if (G.magicModels.speechRecMode == "say") {
 			let txt = "Type the speech rec command. Press Enter when done."
 			s.text(txt, 30, currentTopLeftY + currentHeight + 15);
@@ -693,6 +703,21 @@ var magicModelsSketch = function(s) {
 			if (frameCount > 255) frameCount = 0;
 		} else {
 			frameCount = 0
+		}
+	}
+	
+	
+	s.drawGeneralInstructions = function() {
+		s.fill('#555');
+		if (selectedCHI == "desktop") {
+			s.text("Click on the monitor grid, drag the slider, or type while", 30, currentTopLeftY + currentHeight + 30);
+			s.text("your cursor is over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 43);
+		} else {
+			s.text("Click on the screen grid or home button; drag the grid (swipe);", 30, currentTopLeftY + currentHeight + 40);
+			s.text("or type (touch screen typing) with your cursor", 30, currentTopLeftY + currentHeight + 52);
+			s.text("over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 64);
+			s.text("Click and hold the home button to model speech rec.", 30, currentTopLeftY + currentHeight + 76);
+
 		}
 	}
 	

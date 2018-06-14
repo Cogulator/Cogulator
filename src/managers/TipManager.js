@@ -79,7 +79,7 @@ class TipManager {
 			}
 
 			if (step.resource == "hands") {
-				if (handsLocation == null) {
+				if (handsLocation == null && step.operator != "hands") {
 					if (step.operator == "point" || step.operator == "click") handsLocation = "mouse";
 					else handsLocation = "keyboard";
 				} else if (step.operator == "hands") { //operator rather than resource 
@@ -90,7 +90,7 @@ class TipManager {
 				} else if ((step.operator == "keystroke" || step.operator == "type") && handsLocation == "mouse"){
 					let tip = new Tip("hands_to_keyboard", step.lineNo);
 					this.tips.push(tip);
-				} 
+				}
 			}
 
 			if (step.operator == "look" || step.operator == "search") {
