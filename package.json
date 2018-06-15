@@ -46,7 +46,10 @@
       },
       "electronPackagerConfig": {
         "packageManager": "npm",
-        "icon": "./src/icons/1024x1024"
+        "icon": "./src/icons/1024x1024",
+        "osxSign": {
+          "identity": "Mac Developer: NAME (ID CODE HERE)"
+        }
       },
       "electronWinstallerConfig": {
         "name": "Cogulator",
