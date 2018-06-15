@@ -340,8 +340,6 @@ class FirstRunManager {
 
 		this.chunkTxt = 		"* In the Mental-Math example, we demonstrate automated working memory modeling. This model is very similar, but we use the more powerful Chunk Naming tool. Chunk Naming is simply the process of putting memory items inside angled brackets. For an example, a number that is familiar to you would be a single chunk like so: <123-4567>.An unfamiliar number would be consider seven chunks: <1><2><3> - <4><5><6><7>. Chunk naming allows for a couple of cool things, including forgetting. In this example, the model shows the user forgetting one of the numbers they are asked to add in their head.  The forgotten chunk is marked in red. Check out the primer at cogulator.io for more information."
 						+ "\n" 
-						+ "\n" + "* Important: In the Gantt chart (up arrow at bottom of interface) set working memory to Do not automate WM"
-						+ "\n" 
 						+ "\n" + "Goal: Listen To Problem"
 						+ "\n" + "*What is 354 plus 412?"
 						+ "\n" + ". Hear What is <3[354]> *retain the number 3 in 354"

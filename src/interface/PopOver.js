@@ -5,7 +5,8 @@ class PopOver {
 		this.hide();
 	}
 	
-
+	
+	//called by QutterManager.js, which creates the popover buttons in the gutter
 	show(message, offset, backgroundColor) {
 		let top = offset.top + 22;
 		let left = offset.left + 35;
@@ -17,7 +18,7 @@ class PopOver {
 		
 	}
 	
-	
+	//called by QutterManager.js, which creates the popover buttons in the gutter
 	hide() {
 		$(this.divID).css({"visibility": "hidden"});
 	}

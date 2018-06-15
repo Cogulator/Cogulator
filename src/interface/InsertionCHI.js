@@ -120,8 +120,8 @@ class InsertionCHI {
 	insertComplete(text, insertIndex) {
 		G.quill.insertText(insertIndex, text);
 		
-		//if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
-		//else  G.quill.setSelection(insertIndex + text.length);
+		if (text.includes("\n")) G.quill.setSelection(insertIndex, text.length);
+		else  G.quill.setSelection(insertIndex + text.length);
 		
 		G.quill.focus();
 	}
