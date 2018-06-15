@@ -4,3 +4,4 @@ node_modules/
 thumbs.db
 package.json
 package-lock.json
+out/
