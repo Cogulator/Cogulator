@@ -10,6 +10,7 @@
 	height: 16px;
 	border-radius: 16px;
 	color:white;
+	font-family: 'Lato';
 	text-align: center;
 	font-size: 10px;
 	cursor: default;
@@ -57,6 +58,7 @@
 	height: 50px;
 	border-radius: 5px;
 	background-color: #FADFAF;
+	font-family: 'Lato';
 	cursor: default;
 	visibility: hidden;
 }

@@ -39,7 +39,7 @@
 
 @font-face {
   font-family: 'Cogulato';
-  src: url('./fonts/Cogulato.ttf')  format('truetype');
+  src: url('./fonts/cogulato-webfont.woff2')  format('woff2');
 }
 
 .body, html {
