@@ -278,10 +278,12 @@ class MagicModelsManager {
 		$('#magic_button').html("<img src='images/magicOn.png'>");
 		G.magicModels.visible = true;
 		G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
+		
+		if ( $( window ).height() < 950 ) G.ganttManager.close(); //close gantt;
 	}
 	
 	
-	hide() {
+	hide() { //also called by ganttManager if not enough room for both windows
 		$('#not_gantt_not_magic').css('width', '100%');
 		$('#not_gantt_but_is_magic').css("visibility", "hidden");
 		$('#magic_button').html("<img src='images/magicOff.png'>");

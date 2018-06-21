@@ -30,11 +30,14 @@ class GanttManager {
 		$('#not_gantt_container').addClass('full_height');
 		$( '#gantt_button' ).click( function () {
 			if( $('#gantt_container').css('bottom') == '-450px'){
+				//show
+				if ( $( window ).height() < 950 ) G.magicModels.hide();
 				$('#gantt_container').animate({bottom:'0px'},"slow", function() {
 					$('#not_gantt_container').addClass('partial_height').removeClass('full_height');
 					$( '#gantt_button_text' ).addClass('rotate_180').removeClass('rotate_0');
 				 });
 				$('#gantt_button').animate({bottom:'450px'}, "slow");
+				//hide
 			} else {
 				$('#not_gantt_container').addClass('full_height').removeClass('partial_height');
 				$('#gantt_container').animate({bottom:'-450px'}, "slow", function() {
@@ -45,6 +48,18 @@ class GanttManager {
 			}
 		});
 	}
+	
+	//used by MagicModels to close Gantt if not enough room
+	close() {
+		if( $('#gantt_container').css('bottom') != '-450px'){
+			$('#not_gantt_container').addClass('full_height').removeClass('partial_height');
+			$('#gantt_container').animate({bottom:'-450px'}, "slow", function() {
+				$( '#gantt_button_text' ).addClass('rotate_0').removeClass('rotate_180');
+			});
+			$('#gantt_button').animate({bottom:'0px'}, "slow");
+		}
+	}
+
 }
 G.ganttManager = new GanttManager();
 

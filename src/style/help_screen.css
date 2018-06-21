@@ -15,10 +15,13 @@
 #help_image_container{
 	display: flex;
 	flex-direction: column;
+	max-width:100%;
+	max-height:100%;
 }
 
 #help_image{
-	
+	max-width:100%;
+	max-height:100%;
 }
 
 #help_nav {

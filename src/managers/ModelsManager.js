@@ -47,6 +47,17 @@ class ModelsManager {
 			if (marked == "u") G.io.deleteFile(p); //if it's marked u, that means it's be marked for deletion and "u" for undo is the shown option
 		});
 	}
+	
+	
+	copyModel(source) {
+		let fileName = path.basename(source)
+		let targetPath = path.join(G.paths.models, fileName);
+		G.io.copyFile(source, targetPath, this.onCopyComplete);
+	} onCopyComplete(pth) {
+		G.modelsManager.update();
+		G.modelsSidebar.buildSideBar();
+		G.modelsManager.loadModel(pth)
+	}
 
 	
 	getModels() {
@@ -72,6 +83,7 @@ class ModelsManager {
 		$( document ).trigger( "Model_Loaded" );
 		G.quill.setText(code); //setting text will be picked up on in customeventmanager and cause the model to process
 		G.quill.focus();
+		console.log("SELECTED IS", G.modelsManager.selected);
 		G.modelsSidebar.showSelected(G.modelsManager.selected, false);
 		G.modelsManager.setLastOpened();
 	}
