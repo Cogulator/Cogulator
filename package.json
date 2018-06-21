@@ -50,7 +50,8 @@
       },
       "electronWinstallerConfig": {
         "name": "Cogulator",
-        "setupIcon": "./src/icons/1024x1024.ico"
+        "setupIcon": "./src/icons/1024x1024.ico",
+        "loadingGif": "./src/icons/cogulator_win_loading.gif"
       },
       "electronInstallerDMG": {
         "icon": "./src/icons/1024x1024.icns",
