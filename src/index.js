@@ -15,6 +15,7 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
+								  frame: false,
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
 
