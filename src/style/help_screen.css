@@ -1,5 +1,6 @@
 #help_container {
 	display: flex;
+	flex-direction: column;
 	position: absolute;
 	top:0;
 	left:0;
@@ -7,35 +8,17 @@
 	height: 100%;
 	background-color: #363B3A;
 	justify-content: center;
-	align-items: center;
+	align-content: center;
 	z-index: 10000;
 	visibility: hidden;
 }
 
-#help_image_container{
-	display: flex;
-	flex-direction: column;
-	max-width:100%;
-	max-height:100%;
-}
-
-#help_image{
-	max-width:100%;
-	max-height:100%;
-}
-
-#help_nav {
-	display: flex;
-	flex-direction: row;
-	align-self: center;
-	justify-content: center;
-	height:50px;
-	font-family: 'Lato';
-	color: white;
-}
 
 #help_close_button_container {
-	align-self: flex-end
+	align-self: flex-end;
+	height:50px;
+	min-height:50px;
+	margin-right:20px;
 } #help_close_button {
 	position: relative;
 	top: 50%;
@@ -45,8 +28,24 @@
 	color: white;
 	background-color: red;
 }
-	
-.help_nav_button {
+
+#help_image{
+	display: flex;
+	align-self: center;
+	height:calc(100% - 100px);
+	width:100%;
+}
+
+#help_nav {
+	display: flex;
+	flex-direction: row;
+	align-self: center;
+	justify-content: center;
+	height:50px;
+	min-height:50px;
+	font-family: 'Lato';
+	color: white;
+}.help_nav_button {
 	top: 50%;
 	transform: perspective(1px) translateY(-50%);
 	font-family: 'Lato-Light';

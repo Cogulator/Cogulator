@@ -24,7 +24,8 @@ class HelpScreen {
 	}
 	
 	setImage(){
-		$('#help_image').html("<img src='" + this.images[this.index] + "' style='max-width:100%; max-height:100%'>");
+		let style = "max-height: 90%; max-width: 90%; position: flex; top: 0; bottom: 0; left: 0; right: 0; margin: auto";
+		$('#help_image').html("<img src='" + this.images[this.index] + "' style='" + style + "'>");
 		$('#help_nav').html(this.leftNavHTML + " " + (this.index + 1) + " of " + this.images.length + " " + this.rightNavHTML);
 	}
 	
