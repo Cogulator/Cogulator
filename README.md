@@ -18,9 +18,9 @@ Cogulator is developed using electron. To get setup:
 3. Initialize a new project with "electron-forge init my-new-project"
 4. Replace the src directory and in your new project with the src from this repo
 5. cd inside the project directory, and use npm to install:
-  a. jquery with the command "npm install jquery --save"
-  b. trash with the command "npm install trash --save"
-  c. electron-titlebar with the command "npm install electron-titlebar --save"
+- jquery with the command "npm install jquery --save"
+- trash with the command "npm install trash --save"
+- electron-titlebar with the command "npm install electron-titlebar --save"
 
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch. Cogulator is developed in Flash CS6 and deployed as an Air application.
