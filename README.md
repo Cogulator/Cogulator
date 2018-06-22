@@ -12,15 +12,10 @@ More for information about Cogulator can be found at [cogulator.io](http://cogul
 2. You're ready to roll.  Check out the [primer](http://cogulator.github.io/Cogulator/primer.html) & [screencast](http://cogulator.github.io/Cogulator/screencast.html)
 
 # Working With Source
-Cogulator is developed using electron. To get setup:
-- If you don't have it already, install [npm](https://www.npmjs.com/get-npm).
-- Install [electron-forge] (https://electronforge.io) from the command line with the command "npm install -g electron-forge"
-- Initialize a new project with "electron-forge init my-new-project"
-- Replace the src directory and in your new project with the src from this repo
-- cd inside the project directory, and use npm to install:
-    - jquery with the command "npm install jquery --save"
-    - trash with the command "npm install trash --save"
-    - electron-titlebar with the command "npm install electron-titlebar --save"
+Cogulator is developed with electron.  If you'd like to modify or expand Cogulator, you'll need [npm](https://www.npmjs.com/get-npm) and [electron-forge] (https://electronforge.io). You'll also need the following dependencies. Before using these install commands, clone the repo, and then cd inside of the repo folder:
+- jquery with the command "npm install jquery --save"
+- trash with the command "npm install trash --save"
+- electron-titlebar with the command "npm install electron-titlebar --save"
 
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch. Cogulator is developed in Flash CS6 and deployed as an Air application.
@@ -29,7 +24,7 @@ Cogulator is provided gratis under an Apache 2.0 license. Feel free to look unde
 This is beta software: don’t use Cogulator for critical work. Make sure your models folder (Documents/cogulator/models) is backed up regularly. 
 
 # Alternatives
-If Cogulator doesn't work for your purposes (say, you wanted to plug into a sim or want to build models graphically), consider some of these alternatives
+If Cogulator doesn't work for your purposes (say, you wanted to plug into a sim), consider some of these alternatives
 * [GLEAN](http://web.eecs.umich.edu/~kieras/goms.html) ([repo](https://github.com/dekieras/GLEANApp)): One of the primary inspirations for Cogulator
 * [CogTool](https://github.com/cogtool/): GUI based model building
 * [Apex](http://www.ai.sri.com/project/APEX): Open source architecture
