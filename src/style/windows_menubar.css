@@ -1,0 +1,17 @@
+#windows_menubar {
+    position: relative;
+    float:left;
+    height:30px;
+    margin-left:5px;
+}
+
+.windows_menubar_item {
+    position: relative;
+    float:left;
+    padding-left:5px;
+    padding-right:5px;
+    height:30px;
+    line-height: 30px;
+    font-family: 'Lato';
+    font-size: 13px;
+}
