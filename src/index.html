@@ -17,7 +17,9 @@
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
 	</head>
 	<body>
-		<div class='titlebar'></div>
+<!--		<div class='titlebar'></div>-->
+        <div id='electron-titlebar' class='drag' style='z-index: 10000; top:-9px; left: -9px; height:30px; width:calc(100% + 18px);'>
+        </div>
 		
 		<div id='container'>
 			<div id='not_gantt_container'>
@@ -153,6 +155,7 @@
 		<script type='text/javascript' src='./utilities/Globals.js'></script>
 		<script type='text/javascript' src='./managers/FilePathManager.js'></script>
 		<script type='text/javascript' src='./managers/InOutManager.js'></script>
+        <script type='text/javascript' src='./interface/WindowsTitleBar.js'></script>
 		<script type='text/javascript' src='./managers/StartUpManager.js'></script>
 		<script type='text/javascript' src='./interface/HelpScreen.js'></script>
 		<script type='text/javascript' src='./managers/FirstRunManager.js'></script>

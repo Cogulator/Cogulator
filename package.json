@@ -46,7 +46,7 @@
       "electronPackagerConfig": {
         "packageManager": "npm",
         "icon": "./src/icons/1024x1024",
-        "osxSign":{}
+        "osxSign": {}
       },
       "electronWinstallerConfig": {
         "name": "Cogulator",
@@ -69,6 +69,7 @@
     "debug": "^3.1.0",
     "electron-compile": "^6.4.2",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-titlebar": "0.0.3",
     "jquery": "^3.3.1",
     "trash": "^4.3.0",
     "update-electron-app": "^1.2.0"

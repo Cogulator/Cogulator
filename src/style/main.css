@@ -47,15 +47,10 @@
 	overflow:hidden;
 }
 
-.titlebar {
-	position:absolute;
-	top: 0;
-	left 0;
-	width: 100%;
-	height: 20px;
-	z-index: 10000;
+#electron-titlebar {
 	-webkit-app-region: drag;
 }
+
 
 #container {
 	position: absolute;
