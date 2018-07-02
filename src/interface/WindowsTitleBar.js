@@ -1,12 +1,13 @@
+require('electron-titlebar');
+
 class WindowsTitleBar {
+	
     constructor() {
-        let os = require('os');
-        if (os.type() == "Windows_NT") this.build();
+		console.log("CREATING");
+        
     }
     
     build() {
-        require('electron-titlebar');
-        
         let height = 20;
         let halfHeight = height / 2;
         let codeTop = 60 + halfHeight;
@@ -29,7 +30,30 @@ class WindowsTitleBar {
                         </div>";
         
         $( '#electron-titlebar' ).html(imgHTML + menuHTML);
+		
+		
+		
+		$( '#electron-titlebar' ).on( 'click', function () {
+			console.log("titlebar click");
+		});
+		
     }
+	
+	
+	handleFileClick() {
+		console.log("FILE CLICK");
+	}
+	
+	handleEditClick() {
+		console.log("EDIT CLICK");
+	}
+	
+	
+	showMenuOptions(options) {
+	}
 }
 
 G.windowsTitleBar = new WindowsTitleBar();
+//let os = require('os');
+//if (os.type() == "Windows_NT") G.windowsTitleBar.build();
+G.windowsTitleBar.build();
