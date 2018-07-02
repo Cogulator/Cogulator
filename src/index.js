@@ -13,11 +13,21 @@ let mainWindow;
 
 const createWindow = () => {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1200, 
+	
+	
+  if (require('os').type() == "Windows_NT") {
+	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
 								  frame: false,
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
+  } else {
+	  mainWindow = new BrowserWindow({width: 1200, 
+								  height: 1000, 
+								  titleBarStyle: 'hiddenInset',
+								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
+  }
+
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
@@ -171,7 +181,7 @@ const template = [
 		submenu: [
 			{
 				label: 'Quick Start',
-				click () { mainWindow.webContents.send('Help->Quick Start') } //handled in modelmanager
+				click () { mainWindow.webContents.send('Help->Quick Start') } //handled in HelpScreen.js
 			},
 			{
 				label: 'Learn More',
