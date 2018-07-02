@@ -53,12 +53,9 @@ class Memory {
 		this.workingmemory.length = 0;
 		this.overloadedStacks.length = 0;
 		this.rehearsals.length = 0;
-		
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
 		
 		var intersteps = G.gomsProcessor.intersteps;
-//TODO: get value of switch for automated BUtton.
-		var automateButtonCurrentFrame = 100; 
 
 		var totalCycles = (Math.round(taskTimeMS / 50) * 50) / 50;
 		if (totalCycles == 0) {
@@ -82,9 +79,9 @@ class Memory {
 			var stackToAddChunk = this.findChunkStackAtTime(step.endTime);
 			this.decayMemory(stackToAddChunk);
 
-			var isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, automateButtonCurrentFrame);
+			var isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, false); //set to false if you don't want to automate working memory
 			if (step.chunkNames.length > 0) {
-				isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, 0); //count any operators that would count if set to automatic if chunk name is inserted
+				isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, true); //count any operators that would count if set to automatic if chunk name is inserted
 				for (var j = 0; j < step.chunkNames.length; j++) {
 					var chunkName = step.chunkNames[j];
 					if (step.operator == "ignore") {
@@ -286,8 +283,8 @@ class Memory {
 	}
 
 
-	isWorkingMemoryOperator(operator, resource, automateButtonFrame = 1) {
-		if (automateButtonFrame < 3) { //if the user has the model set to automatic
+	isWorkingMemoryOperator(operator, resource, automate) {
+		if (automate) { //if the user has the model set to automatic
 			if ((resource == "see" || resource == "hear" || resource == "cognitive") && operator != "saccade" && operator != "verify") {
 				return true;
 			}
