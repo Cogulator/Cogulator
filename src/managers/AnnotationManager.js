@@ -19,10 +19,13 @@ class AnnotationManager {
 	//  - remove annotaiton from all lines
 	//  - toggle annotation for all lines
 	annotate(annotation, type) {
-		var annotatedText = "";
+		var selection = G.quill.getSelection();
+		if (selection == null) return;
 		
-		let index = G.quillManager.lastSelection;
-		let selectedText = G.quillManager.getLine(index);
+		var annotatedText = "";
+		var start = Math.max(0, G.quillManager.getLineStart(selection.index));
+		var end = G.quillManager.getLineEnd(selection.index + selection.length);
+		var selectedText = G.quill.getText(start, end - start);
 		
 		let lines = selectedText.split("\n");
 		for (var i = 0; i < lines.length; i++) {
@@ -39,13 +42,20 @@ class AnnotationManager {
 			
 			if (i != lines.length - 1) annotatedText += "\n";
 		}
-
+				
 		if (annotatedText.length > 0 && annotatedText != selectedText) {
-			G.quill.updateContents([
-				{retain: index.index},
-				{delete: index.length},
-				{insert: annotatedText},
-			]);
+			if (start <= 0) {
+				G.quill.updateContents([
+					{delete: end - start},
+					{insert: annotatedText}
+				]);
+			} else {
+				G.quill.updateContents([
+					{retain: start},
+					{delete: end - start},
+					{insert: annotatedText}
+				]);
+			}
 
 			//G.quill.setSelection(selectedText.index, annotatedText.length); //resets the selection
 			G.modelEvents.triggerMultiline(); //forces model rerun & solarize all (until I get the event listener working properly
