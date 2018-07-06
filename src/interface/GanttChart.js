@@ -133,13 +133,13 @@ var ganttSketch = function(s) {
 	let fontAndScaleClr = '#363A3B';
 	
 	//loop control: things get laggy while looping, so only loop when focus is on gantt container
-//	$( "#gantt_container" ).hover(
-//		function() { //on over
-//			s.loop();
-//		}, function() {
-//			s.noLoop();
-//		}
-//	);
+	$( "#gantt_container" ).hover(
+		function() { //on over
+			//s.loop();
+		}, function() {
+			s.noLoop(); //this can be on mouseout once we're sure it's working
+		}
+	);
 	
 	let looping = false;
 	let timer;
