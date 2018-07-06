@@ -133,18 +133,37 @@ var ganttSketch = function(s) {
 	let fontAndScaleClr = '#363A3B';
 	
 	//loop control: things get laggy while looping, so only loop when focus is on gantt container
-	$( "#gantt_container" ).hover(
-		function() { //on over
+//	$( "#gantt_container" ).hover(
+//		function() { //on over
+//			s.loop();
+//		}, function() {
+//			s.noLoop();
+//		}
+//	);
+	
+	let looping = false;
+	let timer;
+	$( "#gantt_container" ).mousedown(function() {
+		window.clearTimeout(timer)
+  		if (!looping) {
 			s.loop();
-		}, function() {
-			s.noLoop();
+			looping = true;
 		}
-	);
+	});
+	$( "#gantt_container" ).mouseup(function() {
+		timer = window.setTimeout(s.loopOff, 5000);
+	});
 	
 	//loop control: one loop to update chart, in case not already looping
 	$( document ).on( "Subjective_Workload_Processed", function(evt, taskTimeMS) {
 		s.draw();
 	});
+	
+	s.loopOff = function() {
+		looping = false;
+		s.noLoop()
+		console.log(" NO LOOP ");
+	}
 	
 	//load fonts
 	s.preload = function() {
