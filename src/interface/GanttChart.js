@@ -133,22 +133,21 @@ var ganttSketch = function(s) {
 	let fontAndScaleClr = '#363A3B';
 	
 	//loop control: things get laggy while looping, so only loop when focus is on gantt container
+	let mouseOverGantt = false;
 	$( "#gantt_container" ).hover(
 		function() { //on over
 			//s.loop();
+			mouseOverGantt = true;
 		}, function() {
-			s.noLoop(); //this can be on mouseout once we're sure it's working
+			mouseOverGantt = false;
+			s.loopOff //this can be on mouseout once we're sure it's working
 		}
 	);
 	
 	let looping = false;
 	let timer;
 	$( "#gantt_container" ).mousedown(function() {
-		window.clearTimeout(timer)
-  		if (!looping) {
-			s.loop();
-			looping = true;
-		}
+		s.loopOn();
 	});
 	$( "#gantt_container" ).mouseup(function() {
 		timer = window.setTimeout(s.loopOff, 5000);
@@ -159,10 +158,17 @@ var ganttSketch = function(s) {
 		s.draw();
 	});
 	
+	s.loopOn = function() {
+		window.clearTimeout(timer)
+  		if (!looping) {
+			s.loop();
+			looping = true;
+		}
+	}
+	
 	s.loopOff = function() {
 		looping = false;
 		s.noLoop()
-		console.log(" NO LOOP ");
 	}
 	
 	//load fonts
@@ -527,6 +533,9 @@ var ganttSketch = function(s) {
 		
 	
 	s.drawSubjectiveWorkload = function (windowStartTime) {
+		s.stroke(fontAndScaleClr);
+		s.fill(fontAndScaleClr);
+		
 		let workload = G.workload.workload; //{stack: chunk.stack, load: load}
 		let dotSize = 2;
 
@@ -541,7 +550,6 @@ var ganttSketch = function(s) {
 				if (j % 2 == 1) xAdjust = 4;
 				else loadY += 4;
 				
-				s.fill('#333');
 				s.ellipse(loadX + xAdjust, loadY, dotSize);
 			}
 		}
@@ -787,8 +795,13 @@ var ganttSketch = function(s) {
 	
 	
 	s.mouseWheel = function(evt) {
-		if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
-		else 			   scaleTarget = Math.min(60000, scale + 5000);
+		if (mouseOverGantt) {
+			s.loopOn();
+			timer = window.setTimeout(s.loopOff, 5000);
+
+			if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
+			else 			   scaleTarget = Math.min(60000, scale + 5000);
+		}
 	}
 	
 	
