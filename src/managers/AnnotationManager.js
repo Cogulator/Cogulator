@@ -11,6 +11,17 @@ class AnnotationManager {
 		$('#dedent_button').click(function() {
 			G.annotationManager.annotate(".", "remove");
 		});
+		
+		
+		$('.edit_button').mousedown(function() {
+			$( this ).animate({ opacity: 0.75}, 25);
+		});
+		$('.edit_button').mouseup(function() {
+			$( this ).animate({ opacity: 1}, 100);
+		});
+		$('.edit_button').mouseleave(function() {
+			$( this ).animate({ opacity: 1}, 100);
+		});
 	}
 	
 	
