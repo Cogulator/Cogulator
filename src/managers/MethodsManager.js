@@ -8,13 +8,14 @@ class MethodsManager {
 	update() {
 		this.paths = G.io.getDirectoryPaths(G.paths.methods);
 		this.methods = this.getMethods();
+		console.log(this.methods);
 	}
 
 	
 	newMethod(name, steps) {
 		this.stepsToWrite = steps;
-		let pth = path.join(G.paths.methods, "custom", name + ".goms");
-		G.io.newFile(pth, this.onNewMethodCreated);
+		let pth = path.join(G.paths.methods, "custom");
+		G.io.newFile(pth, name + ".goms", steps, this.onNewMethodCreated);
 	} onNewMethodCreated(pth, steps) {
 		G.io.writeToFile(pth, G.methodsManager.stepsToWrite);
 	}
