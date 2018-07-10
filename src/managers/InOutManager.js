@@ -101,7 +101,7 @@ class InOutManager {
 
 		}
 		
-		callback(fullPath, text);
+		if (typeof callback === 'function' && callback()) callback();
 	}
 	
 	

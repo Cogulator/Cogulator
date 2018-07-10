@@ -83,10 +83,14 @@ const template = [
 				accelerator: 'CmdOrCtrl+S',
 				click () { mainWindow.webContents.send('File->Save') } //handled in modelmanager
 			},
-//			{
-//				label: 'Duplicate',
-//				click () { mainWindow.webContents.send('File->Duplicate') } //handled in modelmanager
-//			},
+			{
+				label: 'Export Model',
+				click () { mainWindow.webContents.send('File->Export Model') } //handled in exportmanager
+			},
+			{
+				label: 'Export Working Memory',
+				click () { mainWindow.webContents.send('File->Export Working Memory') } //handled in exportmanager
+			},
 			{
 				label: 'Open Cogulator Folder',
 				click () { 

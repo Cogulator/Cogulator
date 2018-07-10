@@ -69,6 +69,8 @@ class WindowsTitleBar {
 	
 	handleFileClick() {
 		let options = [{text: "Save", shortcut: "Ctrl+S"},
+					   {text: "Export Model", shortcut: ""},
+					   {text: "Export Working Memory", shortcut: ""},
 					   {text: "Open Cogulator Folder", shortcut: ""}
 					  ];
 		let position = $( '#windows_file_btn' ).offset();
@@ -129,7 +131,6 @@ class WindowsTitleBar {
 	
 	
 	handleMenuButtonClick(evt) {
-		
 		let currentZoomFactor = webFrame.getZoomFactor();
 		let fullScreen = G.windowsTitleBar.currentWindow.isFullScreen();
 		
@@ -137,6 +138,8 @@ class WindowsTitleBar {
 		let rowTxt = $(evt.currentTarget).text();
 		
 		if 		(rowTxt == "SaveCtrl+S") G.modelsManager.saveModel();
+		else if (rowTxt == "Export Model") G.exportManager.exportModel();
+		else if (rowTxt == "Export Working Memory") G.exportManager.exportWM();
 		else if (rowTxt == "Open Cogulator Folder") require('electron').shell.openExternal("file://" + cogulatorPath);
 		
 		else if (rowTxt == "UndoCtrl+Z")  G.windowsTitleBar.webContents.undo();

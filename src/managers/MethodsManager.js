@@ -8,7 +8,6 @@ class MethodsManager {
 	update() {
 		this.paths = G.io.getDirectoryPaths(G.paths.methods);
 		this.methods = this.getMethods();
-		console.log(this.methods);
 	}
 
 	

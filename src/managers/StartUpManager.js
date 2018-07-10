@@ -21,6 +21,7 @@ class StartUpManager {
 					"./cognition/Memory.js",
 					"./cognition/SubjectiveWorkload.js",
 				    "./cognition/FittsLaw.js",
+				    "./managers/ExportManager.js",
 					"./managers/ModelsManager.js",
 					"./managers/OperatorsManager.js",
 					"./managers/MethodsManager.js",
