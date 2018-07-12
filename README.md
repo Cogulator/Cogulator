@@ -8,7 +8,7 @@ Cogulator, a portmanteau of Cognitive and Calculator, is a simple tool for task 
 More for information about Cogulator can be found at [cogulator.io](http://cogulator.io)
 
 # Get Started
-1. [Download](https://github.com/Cogulator/Cogulator/releases/download/v1.2/cogulator.air) & Install Cogulator
+1. [Download](https://github.com/Cogulator/Cogulator/releases/) & Install Cogulator
 2. You're ready to roll.  Check out the [primer](http://cogulator.github.io/Cogulator/primer.html) & [screencast](http://cogulator.github.io/Cogulator/screencast.html)
 
 # Working With Source
