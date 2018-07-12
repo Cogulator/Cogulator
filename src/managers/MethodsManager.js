@@ -17,6 +17,7 @@ class MethodsManager {
 		G.io.newFile(pth, name + ".goms", steps, this.onNewMethodCreated);
 	} onNewMethodCreated(pth, steps) {
 		G.io.writeToFile(pth, G.methodsManager.stepsToWrite);
+        G.methodsManager.update()
 	}
 	
 	

@@ -191,8 +191,8 @@ class InsertionCHI {
 		for (var i = 0; i < G.methodsManager.methods.length; i++) {
 			let method = G.methodsManager.methods[i];
 			let buttonHTML = this.getMethodButtonHTML(method.file, method.filePath);
-					
-			if (method.filePath.includes("Custom")) rightColumnHTML += buttonHTML;
+            
+			if (method.filePath.toLowerCase().includes("custom")) rightColumnHTML += buttonHTML;
 			else leftColumnHTML += buttonHTML;
 		}
 		
