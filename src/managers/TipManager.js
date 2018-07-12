@@ -13,15 +13,15 @@ class Tip {
 	getHint(type) {
 		switch(type) {
 			case "missing_label":
-				return "This operator should be followed by a label.  It's used to calculate the operator duration."
+				return "Typically this operator is followed by a label. The label is used to calculate operator time."
 			case "hands_to_mouse":
 				return "Doesn&#39;t look like the hands are on the mouse."; //add fix to end
 			case "hands_to_keyboard":
 				return "Doesn&#39;t look like the hands are on the keyboard."; //add fix to end
 			case "eyes_to_target":
-				return "Doesn&#39;t appear that a look operator precedes this operator."; //add fix to end 
+				return "Typically a Look precedes this operator."; //add fix to end 
 			case "missing_point":
-				return "Doesn&#39;t appear that there's a point before this click."; //add fix to end
+				return "Typically there&#39;s a Point before the Click."; //add fix to end
 			default:
 				return "";
 		}
