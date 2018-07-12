@@ -66,6 +66,10 @@ package {
 	import classes.SettingsFileManager;
 	import com.inruntime.utils.*;
 	
+	/////////////////////////////
+	// LETTING THE AIR OUT /////
+	////////////////////////////
+	
 	public class Main extends MovieClip {
 
 		//	  - setup some data holders
