@@ -12,7 +12,7 @@ More for information about Cogulator can be found at [cogulator.io](http://cogul
 2. You're ready to roll.  Check out the [primer](http://cogulator.github.io/Cogulator/primer.html) & [screencast](http://cogulator.github.io/Cogulator/screencast.html)
 
 # Working With Source
-Cogulator is developed with electron.  If you'd like to modify or expand Cogulator, you'll need [npm](https://www.npmjs.com/get-npm) and [electron-forge] (https://electronforge.io). You'll also need the following dependencies. Before using these install commands, clone the repo, and then cd inside of the repo folder:
+Cogulator is developed with electron.  If you'd like to modify or expand Cogulator, you'll need [npm](https://www.npmjs.com/get-npm) and [electron-forge](https://electronforge.io). You'll also need the following dependencies. Before using these install commands, clone the repo, and then cd inside of the repo folder:
 - jquery with the command "npm install jquery --save"
 - trash with the command "npm install trash --save"
 - electron-titlebar with the command "npm install electron-titlebar --save"
