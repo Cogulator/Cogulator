@@ -101,7 +101,7 @@ class InOutManager {
 
 		}
 		
-		if (typeof callback === 'function' && callback()) callback();
+		if (typeof callback === 'function') callback(fullPath, text);
 	}
 	
 	
@@ -111,8 +111,6 @@ class InOutManager {
 	
 	
 	writeToFile(pth, text, callback = 0) {
-		//console.log("WRITE", pth);
-
 		try {  
 			fs.writeFileSync(pth, text);
 		} catch(err) {
