@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
      <update xmlns="http://ns.adobe.com/air/framework/update/description/2.5"> 
-       <versionNumber>3.15</versionNumber> 
-       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.15/cogulator.air</url>
-       <description>Temporary fix for signing issue.</description> 
+       <versionNumber>3.16</versionNumber> 
+       <url>https://github.com/Cogulator/Cogulator/releases/download/v3.16/cogulator.air</url>
+       <description>Letting the Air out: This is the final release of Cogulator v3.0. We are simultaneously releasing Cogulator v4.0, which will no longer require Adobe Air. To jump on the 4.0 train, you'll need to download it directly at http://cogulator.io/download.html. Windows & Mac versions available. Let us know if you run into issues.</description> 
     </update>
