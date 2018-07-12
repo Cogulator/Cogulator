@@ -16,6 +16,7 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 - jquery with the command "npm install jquery --save"
 - trash with the command "npm install trash --save"
 - electron-titlebar with the command "npm install electron-titlebar --save"
+- update.electron.org service with the command "npm install update-electron-app --save"
 
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch. Cogulator is developed in Flash CS6 and deployed as an Air application.
