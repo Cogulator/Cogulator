@@ -3,3 +3,5 @@ dist/
 node_modules/
 thumbs.db
 out/
+package-lock.json
+package-lock.json
