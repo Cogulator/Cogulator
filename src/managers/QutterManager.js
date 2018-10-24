@@ -1,11 +1,15 @@
 class QutterManager { //Quill gutter
 	
 	constructor() {
-		this.lineHeight = 22; //dependent on set font size
+		this.lineHeight = 26; //dependent on set font size
 		
 		//Sync Qutter scroll to Quill scroll
 		$( G.quill.scrollingContainer ).scroll(function(){
 			$('#gutter').scrollTop(this.scrollTop);
+		})
+
+		$( G.quill.scrollingContainer ).scroll(function(){
+			$('#line_numbers_gutter').scrollTop(this.scrollTop);
 		})
 		
 		
@@ -79,7 +83,7 @@ class QutterManager { //Quill gutter
 			for (var j = 0; j < wrappedLines; j++) txt += "\n";
  		}
 		
-		$('#gutter').text(txt);
+		$('#line_numbers_gutter').text(txt);
 	}
 	
 	

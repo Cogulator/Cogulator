@@ -156,13 +156,25 @@
 	overflow: hidden;
 } 
 
+#line_numbers_gutter {
+	font-family: 'Cogulato';
+	font-size: 16px;
+	position:absolute;
+	top:70px;
+	left:232px;
+	width: 40px;
+	height:calc(100% - 60px);
+/*	background-color:var(--main-bg-color);*/
+	overflow: hidden;
+} 
+
 #code {
 	font-family: 'Cogulato';
 	font-size: 16px;
 	position:absolute;
 	top:60px;
-	left:232px;
-	width: calc(100% - 190px - 30px - 40px - 5px); /*5px for custom scroll bar width*/
+	left:272px;
+	width: calc(100% - 190px - 30px - 40px - 40px - 5px); /*5px for custom scroll bar width*/
 	height:calc(100% - 60px);
 	background-color:var(--main-bg-color);
 }
