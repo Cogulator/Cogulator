@@ -163,7 +163,7 @@
 	top:70px;
 	left:232px;
 	width: 40px;
-	height:calc(100% - 60px);
+	height:calc(100% - 70px);
 /*	background-color:var(--main-bg-color);*/
 	overflow: hidden;
 } 
