@@ -69,6 +69,12 @@ class QutterManager { //Quill gutter
 			G.errorPopOver.hide();
 			G.fixPopOver.hide();
 		});
+
+		//number the lines when the editor changes
+		G.quill.on('editor-change', function(eventName) {
+			var txt = G.qutterManager.numberLines();
+			$('#line_numbers_gutter').text(txt);
+        });
 		
 	} 
 	
