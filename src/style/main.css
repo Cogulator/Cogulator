@@ -162,7 +162,7 @@
 	position:absolute;
 	top:70px;
 	left:232px;
-	width: 40px;
+	width: 60px;
 	height:calc(100% - 70px);
 /*	background-color:var(--main-bg-color);*/
 	overflow: hidden;
@@ -173,8 +173,8 @@
 	font-size: 16px;
 	position:absolute;
 	top:60px;
-	left:272px;
-	width: calc(100% - 190px - 30px - 40px - 40px - 5px); /*5px for custom scroll bar width*/
+	left:292px;
+	width: calc(100% - 190px - 30px - 40px - 60px - 5px); /*5px for custom scroll bar width*/
 	height:calc(100% - 60px);
 	background-color:var(--main-bg-color);
 }
