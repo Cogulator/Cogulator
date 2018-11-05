@@ -28,6 +28,8 @@ const createWindow = () => {
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
 
+  //https://electronjs.org/docs/tutorial/application-debugging
+//   mainWindow.webContents.openDevTools()
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
