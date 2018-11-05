@@ -1,3 +1,5 @@
+var log = require("electron-log");
+
 class QutterManager { //Quill gutter
 	
 	constructor() {
@@ -82,14 +84,19 @@ class QutterManager { //Quill gutter
 	numberLines() {
 		var txt = "";
 		let lines = G.quill.getLines(1, G.quill.getLength());
+		let lineNumberLines = G.quillLineNumbers.getLines(1, G.quillLineNumbers.getLength());
+
+		var fontSize = $('#code').css('font-size');
+		var calculatedLineHeight = Math.floor(parseInt(fontSize.replace('px','')) * 1.5);
+
 		for (var i = 0; i < lines.length; i++) {
 			
 			txt += i.toString();
-			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
+			let wrappedLines = lines[i].domNode.clientHeight / calculatedLineHeight;
 			for (var j = 0; j < wrappedLines; j++) txt += "\n";
  		}
 		
-		$('#line_numbers_gutter').text(txt);
+		 return txt;
 	}
 	
 	
