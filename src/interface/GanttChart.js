@@ -63,11 +63,28 @@ class GanttManager {
 }
 G.ganttManager = new GanttManager();
 
+function ChunkRect (chunk, id, x, y, w, h) {
+
+	this.chunk = chunk;
+	this.id = id;
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+
+    this.contains = function (x, y) {
+        return this.x <= x && x <= this.x + this.width &&
+               this.y <= y && y <= this.y + this.height;
+    }
+}
+
 
 
 var ganttSketch = function(s) {
 	var wdth = $( '#gantt_chart' ).width();
 	var hght = $( '#gantt_chart' ).height();
+
+	var log = require("electron-log");
 	
 	//screenshots
 	var screenShot;
@@ -434,8 +451,11 @@ var ganttSketch = function(s) {
 		let timeLineY = marginTop + (rowHeight * 6);
 		let chunkHeight = tickHeight;
 		let chunkWidth = cycleTime * (timeLineWidth / scale); //cycle time * pixelsPerMS
-		
+
 		s.stroke(backGroundClr);
+
+		// log.info("drawing memory: " + memory.length.toString() + " stacks");
+		G.memoryChunks = [];
 		
 		for (var i = 0; i < memory.length; i++) {
 			let stack = memory[i];
@@ -448,6 +468,8 @@ var ganttSketch = function(s) {
 				let chunkClr = s.colorAlpha(chunk.color, s.map(chunk.probabilityOfRecall,0.5,1,0,1));
 				s.fill(chunkClr);
 				s.rect(stackX, chunkY, chunkWidth, chunkHeight);
+
+				G.memoryChunks.push(new ChunkRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
 			}
 		}
 	}
@@ -790,7 +812,31 @@ var ganttSketch = function(s) {
 
 		
 	s.mouseReleased = function() {		  
-		dragging = false;		
+		dragging = false;	
+		
+		// log.info("mouse click: (" + s.mouseX + "," + s.mouseY + ")");
+		for(var i = 0; i < G.memoryChunks.length; i++)
+		{
+			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+			{
+				// log.info("*** clicked: " + G.memoryChunks[i].id + " " + G.memoryChunks[i].chunk.chunkName + " line:" + G.memoryChunks[i].chunk.lineNumber);
+
+				let lines = G.quill.getLines(1, G.quill.getLength());
+				var line = lines[G.memoryChunks[i].chunk.lineNumber];
+				var index = G.quill.getIndex(line);
+
+				var nextline = lines[G.memoryChunks[i].chunk.lineNumber + 1];
+				var nextIndex = G.quill.getIndex(nextline);
+
+				var range = nextIndex - index;
+
+				G.quill.setSelection(index, range);
+
+				//need to call this twice because another event gets thrown that
+				//sets the editor selection to null after the first call to setSelection() above
+				G.quill.setSelection(index, range);
+			}
+		}
 	}
 	
 	
