@@ -156,6 +156,7 @@ class WindowsTitleBar {
 		else if (rowTxt == "Zoom OutCtrl+-") webFrame.setZoomFactor(Math.max(0, currentZoomFactor - .2));
 		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
 		else if (rowTxt == "Toggle Line Numbers") this.toggleLineNumbers();
+		else if (rowTxt == "Toggle Goal Outline") this.toggleGoalOutline();
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
 		else if (rowTxt == "Learn More") require('electron').shell.openExternal('http://cogulator.io');
@@ -173,6 +174,21 @@ class WindowsTitleBar {
 			$('#line_numbers_gutter').css('display', 'block');
 			$('#code').css('left','292px');
 			G.qutterManager.numberLines();
+		}
+	}
+
+	toggleGoalOutline()
+	{
+		if($('#goal_outline').css('display') == 'block')
+		{
+			$('#sidebar_left').css('height','100%');
+			$('#goal_outline').css('display', 'none');
+		}
+		else
+		{
+			$('#sidebar_left').css('height','50%');
+			$('#goal_outline').css('display', 'block');
+			G.goalOutlineManager.updateGoalOutline();
 		}
 	}
 

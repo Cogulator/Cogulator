@@ -1,0 +1,55 @@
+#goal_outline {
+	position:absolute;
+	top:50%;
+	left:0px;
+	width:192px;
+	height:50%;
+	background-color:var(--sidebar-left-bg-color);
+	overflow-y:auto;
+	overflow-x:hidden;
+	display: none;
+	border-top-width: 2px;
+	border-top-color: #858383;
+	border-top-style: solid;
+}
+
+.goal_outline_label {
+	font-family: 'Lato';
+	font-size: 17px;
+	position: relative;
+	float:center;
+	width:100%;
+	height:40px;
+	line-height: 40px;
+	font-family: 'Lato';
+	white-space: nowrap;
+    color:var(--directory-txt-color);
+    margin-left: 16px;
+}
+
+.goal_button{
+	font-family: 'Lato';
+	font-size: 11px;
+	position: relative;
+	float:left;
+	width:90%;
+	height:20px;
+    white-space: nowrap;
+    background-color:var(--sidebar-left-bg-color);
+	color: #D33682;
+	cursor:default;
+    user-select: none;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+div.goal_button:hover{
+    background-color: #eecaec;
+}
+
+.goal_label {
+	position: absolute;
+	height:20px;
+    line-height: 20px;
+    overflow:hidden;
+}

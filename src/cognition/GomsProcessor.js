@@ -26,6 +26,8 @@ class GomsProcessor {
 	
 	constructor() {
 		this.parser = new LineParser();
+
+		this.currentGoalLine = 0;
 		
 		this.steps = [];
 		this.intersteps = []; //interleaved steps
@@ -300,6 +302,10 @@ class GomsProcessor {
 		var methodGoal = "";
 		var methodThread = "";
 		var methodIndex = 0;
+		if (stepOperator == "goal" || stepOperator == "also") {
+			this.currentGoalLine = lineIndex;
+		}
+
 		if (stepOperator != "goal" && stepOperator != "also") {
 			var goalAndThread = this.findGoalAndThread(indentCount); //determine the operator and thread
 			methodGoal = goalAndThread[0];
@@ -324,8 +330,9 @@ class GomsProcessor {
 								   this.getOperatorTime(stepOperator, stepTime, stepLabel), 
 								   this.getOperatorResource(stepOperator), 
 								   stepLabel, 
-								   lineIndex, 
+								   lineIndex,
 								   0, 
+								   this.currentGoalLine,
 								   chunkNames);
 			this.steps.push(s);
 		}
