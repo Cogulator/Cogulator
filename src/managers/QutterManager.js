@@ -74,8 +74,7 @@ class QutterManager { //Quill gutter
 
 		//number the lines when the editor changes
 		G.quill.on('editor-change', function(eventName) {
-			var txt = G.qutterManager.numberLines();
-			$('#line_numbers_gutter').text(txt);
+			G.qutterManager.numberLines();
         });
 		
 	} 
@@ -96,7 +95,7 @@ class QutterManager { //Quill gutter
 			for (var j = 0; j < wrappedLines; j++) txt += "\n";
  		}
 		
-		 return txt;
+		$('#line_numbers_gutter').text(txt);
 	}
 	
 	

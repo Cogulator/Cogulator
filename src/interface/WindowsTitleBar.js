@@ -95,7 +95,9 @@ class WindowsTitleBar {
 		let options = [{text: "Actual Size", shortcut: " Ctrl+O"},
 					   {text: "Zoom In", shortcut: "Ctrl+Shift+="},
 					   {text: "Zoom Out", shortcut: "Ctrl+-"},
-					   {text: "Toggle Full Screen", shortcut: "F11"}
+					   {text: "Toggle Full Screen", shortcut: "F11"},
+					   {text: "Toggle Line Numbers", shortcut: ""},
+					   {text: "Toggle Goal Outline", shortcut: ""}
 					  ];
 		let offset = $( '#windows_view_btn' ).offset();
 		G.windowsTitleBar.showMenuOptions(offset, options);
@@ -153,10 +155,27 @@ class WindowsTitleBar {
 		else if (rowTxt == "Zoom InCtrl+Shift+=") webFrame.setZoomFactor(currentZoomFactor + .2);
 		else if (rowTxt == "Zoom OutCtrl+-") webFrame.setZoomFactor(Math.max(0, currentZoomFactor - .2));
 		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
+		else if (rowTxt == "Toggle Line Numbers") this.toggleLineNumbers();
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
 		else if (rowTxt == "Learn More") require('electron').shell.openExternal('http://cogulator.io');
 	}
+
+	toggleLineNumbers()
+	{
+		if($('#line_numbers_gutter').css('display') == 'block')
+		{
+			$('#line_numbers_gutter').css('display', 'none');
+			$('#code').css('left','232px');
+		}
+		else
+		{
+			$('#line_numbers_gutter').css('display', 'block');
+			$('#code').css('left','292px');
+			G.qutterManager.numberLines();
+		}
+	}
+
 }
 
 G.windowsTitleBar = new WindowsTitleBar();
