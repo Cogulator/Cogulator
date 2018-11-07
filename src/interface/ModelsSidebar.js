@@ -17,7 +17,12 @@ class ModelsSidebar {
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
-			$( '#sidebar_left' ).append("<div class='directory_label'>" + models.directory + "</div>");
+
+			//don't shot the initial empty heading
+			if(models.directory != "")
+			{
+				$( '#sidebar_left' ).append("<div class='directory_label'>" + models.directory + "</div>");
+			}
 			
 			for (var j = 0; j < models.files.length; j++) {
 				let file = models.files[j];
