@@ -409,6 +409,8 @@ var ganttSketch = function(s) {
 	
 	s.drawGantt = function(windowStartTime) {
 		s.textAlign(s.LEFT);
+
+		G.ganttChunks = [];
 		
 		//loop through each thread
 		var colorIndex = 0;
@@ -454,11 +456,28 @@ var ganttSketch = function(s) {
 					s.line(stepX2, stepY - tickHeight, stepX2, stepY + tickHeight);
 				}
 				
+				let ganttRect = undefined;
+
 				//add the label
 				s.noStroke();
-				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) s.text(step.time, stepX1 + tickHeight, stepY - 3);
+				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) {
+					s.text(step.time, stepX1 + tickHeight, stepY - 3);
+					ganttRect = new ChunkRect(step, "", 0, 0, 0, 0);
+					ganttRect.x = stepX1 + tickHeight;
+					ganttRect.y = stepY - 18;
+				} 
 				let operatorLabel = s.fitTextToSpace(step.operator, stepX2 - stepX1 - 15)
-				if (operatorLabel != "") s.text(operatorLabel, stepX1 + tickHeight, stepY + 15);
+				if (operatorLabel != "") {
+					s.text(operatorLabel, stepX1 + tickHeight, stepY + 15);
+					
+					if(ganttRect != undefined)
+					{
+						let gWidth = step.time;
+						ganttRect.width = s.textWidth(gWidth.toString());
+						ganttRect.height = (stepY + 15) - ganttRect.y;
+						G.ganttChunks.push(ganttRect);
+					}
+				}
 				
 			}
 			
@@ -835,29 +854,25 @@ var ganttSketch = function(s) {
 
 		
 	s.mouseReleased = function() {		  
-		dragging = false;	
+		dragging = false;
+
+		for(var i = 0; i < G.ganttChunks.length; i++)
+		{
+			// console.log("gantt chunk: (" + G.ganttChunks[i].x + "," + G.ganttChunks[i].y + ")  w: " + G.ganttChunks[i].width + "  h: " + G.ganttChunks[i].height );
+			if(G.ganttChunks[i].contains(s.mouseX, s.mouseY))
+			{
+				//the step is stored in the chunk member here
+				G.quillManager.selectLine(G.ganttChunks[i].chunk.lineNo);
+				break;
+			}
+		}
 		
 		for(var i = 0; i < G.memoryChunks.length; i++)
 		{
 			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
 			{
 				// console.log("*** clicked: " + G.memoryChunks[i].id + " " + G.memoryChunks[i].chunk.chunkName + " line:" + G.memoryChunks[i].chunk.lineNumber + " recall: " + G.memoryChunks[i].chunk.probabilityOfRecall);
-
-				let lines = G.quill.getLines(1, G.quill.getLength());
-				var line = lines[G.memoryChunks[i].chunk.lineNumber];
-				var index = G.quill.getIndex(line);
-
-				var nextline = lines[G.memoryChunks[i].chunk.lineNumber + 1];
-				var nextIndex = G.quill.getIndex(nextline);
-
-				var range = nextIndex - index;
-
-				G.quill.setSelection(index, range);
-
-				//need to call this twice because another event gets thrown that
-				//sets the editor selection to null after the first call to setSelection() above
-				G.quill.setSelection(index, range);
-
+				G.quillManager.selectLine(G.memoryChunks[i].chunk.lineNumber);
 				break;
 			}
 		}
