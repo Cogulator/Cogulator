@@ -15,58 +15,53 @@ class GoalOutlineManager
 		let titleHtml = "<div class='goal_outline_label'>GOAL OUTLINE</div>";
 		$( '#goal_outline' ).append(titleHtml);
 
-		var goals = [];
+        //copy the goals to a new array for re-ordering
+        var goalSteps = [];
+        for (var i = 0; i < G.gomsProcessor.goalSteps.length; i++) {
+            goalSteps.push(G.gomsProcessor.goalSteps[i][0]);
+        }
 
-		//TODO: instead of going through all the steps, we need a way to just get a list of goals.
-		//      maybe we make a goal object to store in the goms processor and use it instead
-
-		//get the intersteps and copy them to a new array
-		var intersteps = G.gomsProcessor.intersteps;
-		var interleavedSteps = [];
-		interleavedSteps.length = 0;
-		for (var i = 0; i < intersteps.length; i++) {
-			interleavedSteps.push(intersteps[i]);
-		}
+        //reverse the array to put goals in correct order
+        goalSteps.reverse();
 
 		//look at each step
-		for (var i = 0; i < interleavedSteps.length; i++) {
-			let step = interleavedSteps[i];
+		for (var i = 0; i < goalSteps.length; i++) {
 
-			if(step.goal != "none" && !goals.includes(step.goal))
-			{
-				let lineNo = step.lineNo;
+            let step = goalSteps[i];
+            
+            console.log(step);
 
-				// console.info("step: " + step.goal + "   goalIndex: " + step.goalIndex + "  ic: " + step.indentCount + "  line: " + lineNo);
+                let lineNo = step.lineNo;
 
-				let buttonClass = "goal_button";
-				let buttonId = "goal_" + lineNo;
+                // console.info("step: " + step.goal + "   goalIndex: " + step.goalIndex + "  ic: " + step.indentCount + "  line: " + lineNo);
 
-				let indent = 8 * step.indentCount;
-				let width = 172 - indent;
+                let buttonClass = "goal_button";
+                let buttonId = "goal_" + lineNo;
 
-				//button
-				let html = "<div id='" + buttonId + "' class='" + buttonClass + "'>" +
-							"<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + step.goal + "</div>";
-							"</div>";
-				$( '#goal_outline' ).append(html);
+                let indent = 8 * step.indentCount;
+                let width = 172 - indent;
 
-				$('#' + buttonId).click(function() {
-					console.log("clicked " + buttonId);
+                //button
+                let html = "<div id='" + buttonId + "' class='" + buttonClass + "'>" +
+                            "<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + step.goal + "</div>";
+                            "</div>";
+                $( '#goal_outline' ).append(html);
 
-					let lines = G.quill.getLines(1, G.quill.getLength());
-					let line = lines[parseInt(step.goalLineNo)];
-					let index = G.quill.getIndex(line);
+                $('#' + buttonId).click(function() {
+                    console.log("clicked " + buttonId);
 
-					let nextline = lines[parseInt(step.goalLineNo) + 1];
-					let nextIndex = G.quill.getIndex(nextline);
+                    let lines = G.quill.getLines(1, G.quill.getLength());
+                    let line = lines[parseInt(step.goalLineNo)];
+                    let index = G.quill.getIndex(line);
 
-					let range = nextIndex - index;
+                    let nextline = lines[parseInt(step.goalLineNo) + 1];
+                    let nextIndex = G.quill.getIndex(nextline);
 
-					G.quill.setSelection(index, range);
-				});
+                    let range = nextIndex - index;
 
-				goals.push(step.goal);
-			}
+                    G.quill.setSelection(index, range);
+                });
+
 			
 
 		}

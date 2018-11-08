@@ -44,6 +44,7 @@ class GomsProcessor {
 
 		this.stateTable = []; //dictionary
 		this.goalTable = []; //dictionary
+		this.goalSteps = [];
 				
 		$( document ).on( "Model_Update_MultiLine", function() {
 			G.gomsProcessor.process();
@@ -340,8 +341,12 @@ class GomsProcessor {
 
 
 	removeGoalSteps() {
+		this.goalSteps = [];
 		for (var i = this.steps.length - 1; i > -1; i--) {
-			if (this.steps[i].operator == "goal" || this.steps[i].operator == "also") this.steps.splice(i, 1);
+			if (this.steps[i].operator == "goal" || this.steps[i].operator == "also") {
+				let goalStep = this.steps.splice(i, 1);
+				this.goalSteps.push(goalStep);
+			} 
 		}
 	}
 
