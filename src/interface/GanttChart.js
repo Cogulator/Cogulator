@@ -84,7 +84,7 @@ var ganttSketch = function(s) {
 	var wdth = $( '#gantt_chart' ).width();
 	var hght = $( '#gantt_chart' ).height();
 
-	var log = require("electron-log");
+	var hoverChunk = undefined;
 	
 	//screenshots
 	var screenShot;
@@ -153,8 +153,8 @@ var ganttSketch = function(s) {
 	let mouseOverGantt = false;
 	$( "#gantt_container" ).hover(
 		function() { //on over
-			//s.loop();
 			mouseOverGantt = true;
+			// s.loopOn();
 		}, function() {
 			mouseOverGantt = false;
 			s.loopOff //this can be on mouseout once we're sure it's working
@@ -224,10 +224,32 @@ var ganttSketch = function(s) {
 				
 				if (screenShot.ready) screenShot.save();
 				s.handleScreenShot();
+
+				s.drawMouseover();
 			}
 		} catch(err) {}
 	}
 	
+	s.drawMouseover = function () {
+
+		if(hoverChunk == undefined) {
+			return;
+		}
+		
+		let textSize = 15;
+		let recall = Number.parseFloat(hoverChunk.probabilityOfRecall).toPrecision(3);
+
+		//draw hovertext
+		s.noStroke();
+		s.fill(fontAndScaleClr);
+		s.textAlign(s.LEFT);
+		s.textSize(textSize);
+		s.text("Time: " + hoverChunk.time, s.mouseX, s.mouseY + 30);
+		s.text("Name: " + hoverChunk.chunkName, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 1));
+		s.text("Rehearsals: " + hoverChunk.rehearsals, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 2));
+		s.text("Activation: " + recall, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 3));
+	}
+
 	s.setScale = function() {
 		if (scale < scaleTarget) scale += 1000;
 		if (scale > scaleTarget) scale -= 1000;
@@ -454,13 +476,13 @@ var ganttSketch = function(s) {
 
 		s.stroke(backGroundClr);
 
-		// log.info("drawing memory: " + memory.length.toString() + " stacks");
 		G.memoryChunks = [];
 		
 		for (var i = 0; i < memory.length; i++) {
 			let stack = memory[i];
 			let stackTime = i * cycleTime;
 			let stackX = s.ganttTimeToX(stackTime, windowStartTime);
+			let time = i * 50;
 			
 			for (var j = 0; j < stack.length; j++) {
 				let chunk = stack[j];
@@ -469,6 +491,7 @@ var ganttSketch = function(s) {
 				s.fill(chunkClr);
 				s.rect(stackX, chunkY, chunkWidth, chunkHeight);
 
+				chunk.time = time;
 				G.memoryChunks.push(new ChunkRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
 			}
 		}
@@ -814,12 +837,11 @@ var ganttSketch = function(s) {
 	s.mouseReleased = function() {		  
 		dragging = false;	
 		
-		// log.info("mouse click: (" + s.mouseX + "," + s.mouseY + ")");
 		for(var i = 0; i < G.memoryChunks.length; i++)
 		{
 			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
 			{
-				// log.info("*** clicked: " + G.memoryChunks[i].id + " " + G.memoryChunks[i].chunk.chunkName + " line:" + G.memoryChunks[i].chunk.lineNumber);
+				// console.log("*** clicked: " + G.memoryChunks[i].id + " " + G.memoryChunks[i].chunk.chunkName + " line:" + G.memoryChunks[i].chunk.lineNumber + " recall: " + G.memoryChunks[i].chunk.probabilityOfRecall);
 
 				let lines = G.quill.getLines(1, G.quill.getLength());
 				var line = lines[G.memoryChunks[i].chunk.lineNumber];
@@ -835,8 +857,28 @@ var ganttSketch = function(s) {
 				//need to call this twice because another event gets thrown that
 				//sets the editor selection to null after the first call to setSelection() above
 				G.quill.setSelection(index, range);
+
+				break;
 			}
 		}
+	}
+
+	s.mouseMoved = function () {
+		// hoverText = "";
+		hoverChunk = undefined;
+		if(G.memoryChunks)
+		{
+			for(var i = 0; i < G.memoryChunks.length; i++)
+			{
+				if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+				{
+					hoverChunk = G.memoryChunks[i].chunk;
+					break;
+				}
+			}
+		}
+
+		s.draw();
 	}
 	
 	
