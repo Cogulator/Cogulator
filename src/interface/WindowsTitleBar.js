@@ -186,7 +186,7 @@ class WindowsTitleBar {
 		}
 		else
 		{
-			$('#sidebar_left').css('height','50%');
+			$('#sidebar_left').css('height','44%');
 			$('#goal_outline').css('display', 'block');
 			G.goalOutlineManager.updateGoalOutline();
 		}
