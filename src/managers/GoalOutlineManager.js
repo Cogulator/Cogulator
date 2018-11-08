@@ -29,40 +29,38 @@ class GoalOutlineManager
 
             let step = goalSteps[i];
             
-            console.log(step);
+            // console.log(step);
 
-                let lineNo = step.lineNo;
+            let lineNo = step.lineNo;
 
-                // console.info("step: " + step.goal + "   goalIndex: " + step.goalIndex + "  ic: " + step.indentCount + "  line: " + lineNo);
+            // console.info("step: " + step.goal + "   goalIndex: " + step.goalIndex + "  ic: " + step.indentCount + "  line: " + lineNo);
 
-                let buttonClass = "goal_button";
-                let buttonId = "goal_" + lineNo;
+            let buttonClass = "goal_button";
+            let buttonId = "goal_" + lineNo;
 
-                let indent = 8 * step.indentCount;
-                let width = 172 - indent;
+            let indent = 8 * step.indentCount;
+            let width = 172 - indent;
 
-                //button
-                let html = "<div id='" + buttonId + "' class='" + buttonClass + "'>" +
-                            "<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + step.goal + "</div>";
-                            "</div>";
-                $( '#goal_outline' ).append(html);
+            //button
+            let html = "<div id='" + buttonId + "' class='" + buttonClass + "'>" +
+                        "<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + step.goal + "</div>";
+                        "</div>";
+            $( '#goal_outline' ).append(html);
 
-                $('#' + buttonId).click(function() {
-                    console.log("clicked " + buttonId);
+            $('#' + buttonId).click(function() {
+                // console.log("clicked " + buttonId);
 
-                    let lines = G.quill.getLines(1, G.quill.getLength());
-                    let line = lines[parseInt(step.goalLineNo)];
-                    let index = G.quill.getIndex(line);
+                let lines = G.quill.getLines(1, G.quill.getLength());
+                let line = lines[parseInt(step.goalLineNo)];
+                let index = G.quill.getIndex(line);
 
-                    let nextline = lines[parseInt(step.goalLineNo) + 1];
-                    let nextIndex = G.quill.getIndex(nextline);
+                let nextline = lines[parseInt(step.goalLineNo) + 1];
+                let nextIndex = G.quill.getIndex(nextline);
 
-                    let range = nextIndex - index;
+                let range = nextIndex - index;
 
-                    G.quill.setSelection(index, range);
-                });
-
-			
+                G.quill.setSelection(index, range);
+            });
 
 		}
 	}
