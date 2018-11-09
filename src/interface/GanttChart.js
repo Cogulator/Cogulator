@@ -141,6 +141,12 @@ var ganttSketch = function(s) {
 	let flashWdth = (camWdth - camCrnrRadius * 2) / 3;
 	let camStartX = marginLeft - 10;
 	let camStartY = hght - marginBottom - 10;
+
+	//chunk info pane
+	let chunkInfoPaneX = marginLeft + 6;
+	let chunkInfoPaneY = timeLineY - (marginBottom/2) + 4;
+	let chunkInfoPaneWidth = 600;
+	let chunkInfoPaneHeight = 20;
 	
 	//colors
 	let style = getComputedStyle(document.body);
@@ -148,6 +154,7 @@ var ganttSketch = function(s) {
 	let	stripeClr = style.getPropertyValue('--gantt-stripe-color');
 	let	borderClr = '#CCC';
 	let fontAndScaleClr = '#363A3B';
+	let chunkInfoPaneBackground = style.getPropertyValue('--main-bg-color');
 	
 	//loop control: things get laggy while looping, so only loop when focus is on gantt container
 	let mouseOverGantt = false;
@@ -225,31 +232,11 @@ var ganttSketch = function(s) {
 				if (screenShot.ready) screenShot.save();
 				s.handleScreenShot();
 
-				s.drawMouseover();
+				s.drawChunkInfoPane();
 			}
 		} catch(err) {}
 	}
 	
-	s.drawMouseover = function () {
-
-		if(hoverChunk == undefined) {
-			return;
-		}
-		
-		let textSize = 15;
-		let recall = Number.parseFloat(hoverChunk.probabilityOfRecall).toPrecision(3);
-
-		//draw hovertext
-		s.noStroke();
-		s.fill(fontAndScaleClr);
-		s.textAlign(s.LEFT);
-		s.textSize(textSize);
-		s.text("Time: " + hoverChunk.time, s.mouseX, s.mouseY + 30);
-		s.text("Name: " + hoverChunk.chunkName, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 1));
-		s.text("Rehearsals: " + hoverChunk.rehearsals, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 2));
-		s.text("Activation: " + recall, s.mouseX, s.mouseY + 30 + (textSize * 1.2 * 3));
-	}
-
 	s.setScale = function() {
 		if (scale < scaleTarget) scale += 1000;
 		if (scale > scaleTarget) scale -= 1000;
@@ -333,7 +320,7 @@ var ganttSketch = function(s) {
 		
 		s.noStroke();
 		s.text("0", marginLeft - centerText, timeLineY + belowLine);
-		s.text(Math.round(totalTaskTime / 100) / 10, marginLeft + timeLineWidth - centerText, timeLineY + aboveLine);
+		s.text(Math.round(totalTaskTime / 100) / 10, marginLeft + timeLineWidth - centerText, timeLineY + belowLine);
 		
 	//methods & times
 		let methodsToAnnotate = G.gomsProcessor.intersteps.filter( function( step ) { //first pass
@@ -496,7 +483,7 @@ var ganttSketch = function(s) {
 		s.stroke(backGroundClr);
 
 		G.memoryChunks = [];
-		
+
 		for (var i = 0; i < memory.length; i++) {
 			let stack = memory[i];
 			let stackTime = i * cycleTime;
@@ -514,6 +501,7 @@ var ganttSketch = function(s) {
 				G.memoryChunks.push(new ChunkRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
 			}
 		}
+
 	}
 	
 	
@@ -879,21 +867,31 @@ var ganttSketch = function(s) {
 	}
 
 	s.mouseMoved = function () {
-		// hoverText = "";
-		hoverChunk = undefined;
-		if(G.memoryChunks)
-		{
-			for(var i = 0; i < G.memoryChunks.length; i++)
+
+		if(mouseOverGantt) {
+
+			hoverChunk = undefined;
+			if(G.memoryChunks)
 			{
-				if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+				for(var i = 0; i < G.memoryChunks.length; i++)
 				{
-					hoverChunk = G.memoryChunks[i].chunk;
-					break;
+					// console.log("checking chunk: " + G.memoryChunks[i].x + "," + G.memoryChunks[i].y);
+
+					if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+					{
+						hoverChunk = G.memoryChunks[i].chunk;
+						break;
+					}
+
+					if(G.memoryChunks[i].x > s.mouseX)
+					{
+						break;
+					}
 				}
 			}
-		}
+			s.drawChunkInfoPane();
 
-		s.draw();
+		}
 	}
 	
 	
@@ -937,6 +935,33 @@ var ganttSketch = function(s) {
 		if (screenShot.ready) {
 			scrollBarX = screenShotSavedX;
 		}
+	}
+
+	s.drawChunkInfoPane = function () {
+
+		//draw background
+		s.fill(chunkInfoPaneBackground);
+		s.rect(chunkInfoPaneX, chunkInfoPaneY, chunkInfoPaneWidth, chunkInfoPaneHeight);
+
+		if(hoverChunk == undefined) {
+			return;
+		}
+
+		let textSize = 15;
+		let recall = Number.parseFloat(hoverChunk.probabilityOfRecall).toPrecision(3);
+
+		let chunkTextY = chunkInfoPaneY + 16;
+
+		//draw hovertext
+		s.noStroke();
+		s.fill(hoverChunk.color);
+		s.textAlign(s.LEFT);
+		s.textSize(textSize);
+		s.text("Time: " + hoverChunk.time, chunkInfoPaneX + 2, chunkTextY);
+		s.text("Rehearsals: " + hoverChunk.rehearsals, chunkInfoPaneX + 2 + 100, chunkTextY);
+		s.text("Activation: " + recall, chunkInfoPaneX + 2 + 200, chunkTextY);
+		s.text("Name: " + hoverChunk.chunkName, chunkInfoPaneX + 2 + 320, chunkTextY);
+
 	}
 	
 	
