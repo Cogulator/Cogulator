@@ -843,6 +843,7 @@ var ganttSketch = function(s) {
 		
 	s.mouseReleased = function() {		  
 		dragging = false;
+		s.loopOff();
 
 		for(var i = 0; i < G.ganttChunks.length; i++)
 		{
@@ -897,11 +898,13 @@ var ganttSketch = function(s) {
 	
 	s.mouseWheel = function(evt) {
 		if (mouseOverGantt) {
-			s.loopOn();
-			timer = window.setTimeout(s.loopOff, 5000);
+			// s.loopOn();
+			// timer = window.setTimeout(s.loopOff, 5000);
 
 			if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
 			else 			   scaleTarget = Math.min(60000, scale + 5000);
+
+			s.draw();
 		}
 	}
 	
