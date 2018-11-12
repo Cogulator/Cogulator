@@ -944,7 +944,7 @@ var ganttSketch = function(s) {
 
 		//draw background
 		s.fill(chunkInfoPaneBackground);
-		s.rect(chunkInfoPaneX, chunkInfoPaneY, chunkInfoPaneWidth, chunkInfoPaneHeight);
+		s.rect(chunkInfoPaneX, chunkInfoPaneY - 26, chunkInfoPaneWidth, chunkInfoPaneHeight);
 
 		if(hoverChunk == undefined) {
 			return;
@@ -953,7 +953,7 @@ var ganttSketch = function(s) {
 		let textSize = 15;
 		let recall = Number.parseFloat(hoverChunk.probabilityOfRecall).toPrecision(3);
 
-		let chunkTextY = chunkInfoPaneY + 16;
+		let chunkTextY = chunkInfoPaneY - 10;
 
 		//draw hovertext
 		s.noStroke();
