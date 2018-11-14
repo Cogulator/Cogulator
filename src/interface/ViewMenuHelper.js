@@ -2,11 +2,11 @@ class ViewMenuHelper {
 	constructor(){
 
         ipcRenderer.on('Toggle Line Numbers', (sender, arg) => {
-			G.ViewMenuHelper.toggleLineNumbers();
+			G.viewMenuHelper.toggleLineNumbers();
         })
         
         ipcRenderer.on('Toggle Goal Outline', (sender, arg) => {
-			G.ViewMenuHelper.toggleGoalOutline();
+			G.viewMenuHelper.toggleGoalOutline();
 		})
 
     }
