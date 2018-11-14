@@ -165,6 +165,14 @@ const template = [
 			},
 			{
 				role: 'togglefullscreen'
+			},
+			{
+				label: 'Toggle Line Numbers',
+				click () { mainWindow.webContents.send('Toggle Line Numbers'); }
+			},
+			{
+				label: 'Toggle Goal Outline',
+				click () { mainWindow.webContents.send('Toggle Goal Outline'); }
 			}
 		]
 	},
