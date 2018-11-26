@@ -172,7 +172,7 @@ class Memory {
 		var indexForOldestChunk = -1
 		var earliestTime = 1000000000.0;
 
-		for (var i:int = 0; i < this.workingmemory[cycleIndex].length; i++) {
+		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
 			if (this.workingmemory[cycleIndex][i].addedAt < earliestTime) {
 				earliestTime = this.workingmemory[cycleIndex][i].addedAt;
 				indexForOldestChunk = i;
@@ -186,7 +186,7 @@ class Memory {
 	//Method to pop named chunk
 	popChunkWithName(chunkName, cycleIndex) {
 		cycleIndex--;
-		for (var i:int = 0; i < this.workingmemory[cycleIndex].length; i++) {
+		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
 			var chunk = this.workingmemory[cycleIndex][i];
 			if (chunk.chunkName == chunkName) {
 				this.longTermMemory[chunk.chunkName] = chunk;
@@ -225,7 +225,7 @@ class Memory {
 	//based on ACT-R & Workload Curve paper
 	getActivation(cogLoad, timeChunkInMemoryInSeconds, rehearsals) {
 		var m = Math.log(rehearsals/Math.sqrt(timeChunkInMemoryInSeconds)); //activation
-			m = (m + 1 / cogLoad) - 1; //activation divided among all chunks
+			m = m + (1 / cogLoad) - 1; //activation divided among all chunks
 		return m;
 	}
 
