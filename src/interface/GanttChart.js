@@ -483,10 +483,8 @@ var ganttSketch = function(s) {
 		s.stroke(backGroundClr);
 
 		//gantt chart edges
-		let srcX = marginLeft + 1;
-		let srcY = marginTop
-		let srcWidth = wdth - marginLeft - marginRight - 1; //get rid of border
-		let srcHeight = hght - marginTop - marginBottom;
+		let ganttLeftEdge = marginLeft + 1;
+		let ganttWidth = wdth - marginLeft - marginRight - 1; //get rid of border
 
 		G.memoryChunks = [];
 
@@ -495,9 +493,14 @@ var ganttSketch = function(s) {
 			let stackTime = i * cycleTime;
 			let stackX = s.ganttTimeToX(stackTime, windowStartTime);
 
-			if(stackX < srcX || stackX > (srcX + srcWidth))
+			if(stackX < (ganttLeftEdge - 10))
 			{
 				continue;
+			}
+
+			if(stackX > (ganttLeftEdge + ganttWidth))
+			{
+				break;
 			}
 
 			let time = i * 50;
