@@ -85,6 +85,7 @@ var ganttSketch = function(s) {
 	var hght = $( '#gantt_chart' ).height();
 
 	var hoverChunk = undefined;
+	var hoverWorkload = undefined;
 	
 	//screenshots
 	var screenShot;
@@ -482,6 +483,8 @@ var ganttSketch = function(s) {
 
 		s.stroke(backGroundClr);
 
+		G.workloadRects = [];
+
 		//gantt chart edges
 		let ganttLeftEdge = marginLeft + 1;
 		let ganttWidth = wdth - marginLeft - marginRight - 1; //get rid of border
@@ -520,6 +523,8 @@ var ganttSketch = function(s) {
 			let barClr = s.colorAlpha('#bbbbbb', 1.0);
 			s.fill(barClr);
 			s.rect(stackX, timeLineY + 4, chunkWidth, workload/2);
+
+			G.workloadRects.push(new ChunkRect(stack, time, stackX, timeLineY + 4, chunkWidth, workload/2));
 		}
 	}
 
@@ -936,6 +941,7 @@ var ganttSketch = function(s) {
 		if(mouseOverGantt) {
 
 			hoverChunk = undefined;
+			hoverWorkload = undefined;
 			if(G.memoryChunks)
 			{
 				for(var i = 0; i < G.memoryChunks.length; i++)
@@ -954,6 +960,19 @@ var ganttSketch = function(s) {
 					}
 				}
 			}
+
+			if(G.workloadRects)
+			{
+				for(var i = 0; i < G.workloadRects.length; i++)
+				{
+					if(G.workloadRects[i].contains(s.mouseX, s.mouseY))
+					{
+						hoverWorkload = G.workloadRects[i];
+						break;
+					}
+				}
+			}
+
 			s.drawChunkInfoPane();
 
 		}
@@ -1012,6 +1031,18 @@ var ganttSketch = function(s) {
 
 		//TODO: this should probably be moved when we reposition the bars
 		s.drawWorkload(G.windowStartTime);
+
+		if(hoverWorkload != undefined) {
+			let textSize = 15;
+			let chunkTextY = chunkInfoPaneY - 10;
+			s.noStroke();
+			s.fill('#444444');
+			s.textAlign(s.LEFT);
+			s.textSize(textSize);
+			s.text("Time: " + hoverWorkload.id, chunkInfoPaneX + 2, chunkTextY);
+			s.text("Workload: " + hoverWorkload.height, chunkInfoPaneX + 2 + 100, chunkTextY);
+		}
+
 
 		if(hoverChunk == undefined) {
 			return;
