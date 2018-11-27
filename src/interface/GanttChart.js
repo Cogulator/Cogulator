@@ -507,13 +507,17 @@ var ganttSketch = function(s) {
 			for (var j = 0; j < stack.length; j++) {
 				let chunk = stack[j];
 
-				let load = G.workload.getWorkload(chunk.activation);
-				workload = workload + parseFloat(load);
+				let load = parseFloat(G.workload.getWorkload(chunk.activation));
+
 				// console.log("time: " + time + "  load: " + load);
+				if(!isNaN(load))
+				{
+					workload = workload + load;
+				}
 			}
 
 			// console.log("time: " + time + "  workload: " + workload);
-			let barClr = s.colorAlpha('#555555', 1.0);
+			let barClr = s.colorAlpha('#bbbbbb', 1.0);
 			s.fill(barClr);
 			s.rect(stackX, timeLineY + 4, chunkWidth, workload/2);
 		}
