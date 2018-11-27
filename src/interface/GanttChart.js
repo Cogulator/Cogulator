@@ -482,12 +482,24 @@ var ganttSketch = function(s) {
 
 		s.stroke(backGroundClr);
 
+		//gantt chart edges
+		let srcX = marginLeft + 1;
+		let srcY = marginTop
+		let srcWidth = wdth - marginLeft - marginRight - 1; //get rid of border
+		let srcHeight = hght - marginTop - marginBottom;
+
 		G.memoryChunks = [];
 
 		for (var i = 0; i < memory.length; i++) {
 			let stack = memory[i];
 			let stackTime = i * cycleTime;
 			let stackX = s.ganttTimeToX(stackTime, windowStartTime);
+
+			if(stackX < srcX || stackX > (srcX + srcWidth))
+			{
+				continue;
+			}
+
 			let time = i * 50;
 			
 			for (var j = 0; j < stack.length; j++) {
