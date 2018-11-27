@@ -146,7 +146,7 @@ var ganttSketch = function(s) {
 	//chunk info pane
 	let chunkInfoPaneX = marginLeft + 6;
 	let chunkInfoPaneY = timeLineY - (marginBottom/2) + 4;
-	let chunkInfoPaneWidth = 600;
+	let chunkInfoPaneWidth = 770;
 	let chunkInfoPaneHeight = 20;
 	
 	//colors
@@ -511,20 +511,25 @@ var ganttSketch = function(s) {
 				let chunk = stack[j];
 
 				let load = parseFloat(G.workload.getWorkload(chunk.activation));
+				chunk.workload = load;
 
 				// console.log("time: " + time + "  load: " + load);
 				if(!isNaN(load))
 				{
-					workload = workload + load;
+					if(load > workload)
+					{
+						workload = load;
+					}
 				}
 			}
 
 			// console.log("time: " + time + "  workload: " + workload);
 			let barClr = s.colorAlpha('#bbbbbb', 1.0);
 			s.fill(barClr);
-			s.rect(stackX, timeLineY + 4, chunkWidth, workload/2);
+			s.rect(stackX, timeLineY + 4, chunkWidth, workload * 2);
 
-			G.workloadRects.push(new ChunkRect(stack, time, stackX, timeLineY + 4, chunkWidth, workload/2));
+			G.workloadRects.push(new ChunkRect(stack, time, stackX, timeLineY + 4, chunkWidth, workload));
+
 		}
 	}
 
@@ -1060,8 +1065,16 @@ var ganttSketch = function(s) {
 		s.textSize(textSize);
 		s.text("Time: " + hoverChunk.time, chunkInfoPaneX + 2, chunkTextY);
 		s.text("Rehearsals: " + hoverChunk.rehearsals, chunkInfoPaneX + 2 + 100, chunkTextY);
-		s.text("Activation: " + recall, chunkInfoPaneX + 2 + 200, chunkTextY);
-		s.text("Name: " + hoverChunk.chunkName, chunkInfoPaneX + 2 + 320, chunkTextY);
+		s.text("P(recall): " + recall, chunkInfoPaneX + 2 + 200, chunkTextY);
+		if(hoverChunk.activation != undefined)
+		{
+			s.text("Activation: " + hoverChunk.activation.toFixed(3), chunkInfoPaneX + 2 + 310, chunkTextY);
+		}
+		if(hoverChunk.workload != undefined)
+		{
+			s.text("Workload: " + hoverChunk.workload, chunkInfoPaneX + 2 + 440, chunkTextY);
+		}
+		s.text("Name: " + hoverChunk.chunkName, chunkInfoPaneX + 2 + 540, chunkTextY);
 
 	}
 	

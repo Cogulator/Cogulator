@@ -7,5 +7,6 @@
 		this.probabilityOfRecall = prbbltyOfRcll;
 		this.color = clr;
 		this.lineNumber = lineNumber;
+		this.activation = 0.0;
 	}
 }
