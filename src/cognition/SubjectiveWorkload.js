@@ -49,6 +49,8 @@ class SubjectiveMentalWorkload {
 
 	getWorkload(activation) {
 		//from model fit in Workload Curve paper
+		if (activation < 0) return 10;
+		
 		var load = -3.78 * Math.log(activation + 1) + 2.4793;
 		if (load > 10) return 10;
 		if (load < 1) return 1;
