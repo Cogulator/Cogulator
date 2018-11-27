@@ -361,11 +361,13 @@ var ganttSketch = function(s) {
 	
 	s.drawChart = function () {
 		let windowStartTime = s.scrollXtoTime(scrollBarX); //ms
+		G.windowStartTime = windowStartTime;
 		
 		s.drawGantt(windowStartTime);
 		s.drawMemory(windowStartTime);
 		s.msTimeline(windowStartTime); //millisecond timeline inside Gantt Chart
 		s.drawSubjectiveWorkload(windowStartTime);
+		// s.drawWorkload(windowStartTime);
 		//draw the millsecond timeline
 	}
 	
@@ -473,7 +475,50 @@ var ganttSketch = function(s) {
 		}
 	}
 	
-	
+	s.drawWorkload = function(windowStartTime) {
+		let memory = G.memory.workingmemory;
+		let timeLineY = marginTop + (rowHeight * 6);
+		let chunkWidth = cycleTime * (timeLineWidth / scale); //cycle time * pixelsPerMS
+
+		s.stroke(backGroundClr);
+
+		//gantt chart edges
+		let ganttLeftEdge = marginLeft + 1;
+		let ganttWidth = wdth - marginLeft - marginRight - 1; //get rid of border
+
+		for (var i = 0; i < memory.length; i++) {
+			let stack = memory[i];
+			let stackTime = i * cycleTime;
+			let stackX = s.ganttTimeToX(stackTime, windowStartTime);
+
+			if(stackX < (ganttLeftEdge - 10))
+			{
+				continue;
+			}
+
+			if(stackX > (ganttLeftEdge + ganttWidth))
+			{
+				break;
+			}
+
+			let time = i * 50;
+			let workload = 0.0;
+
+			for (var j = 0; j < stack.length; j++) {
+				let chunk = stack[j];
+
+				let load = G.workload.getWorkload(chunk.activation);
+				workload = workload + parseFloat(load);
+				// console.log("time: " + time + "  load: " + load);
+			}
+
+			// console.log("time: " + time + "  workload: " + workload);
+			let barClr = s.colorAlpha('#555555', 1.0);
+			s.fill(barClr);
+			s.rect(stackX, timeLineY + 4, chunkWidth, workload/2);
+		}
+	}
+
 	s.drawMemory = function(windowStartTime) {
 		let memory = G.memory.workingmemory;
 		let timeLineY = marginTop + (rowHeight * 6);
@@ -960,6 +1005,9 @@ var ganttSketch = function(s) {
 		//draw background
 		s.fill(chunkInfoPaneBackground);
 		s.rect(chunkInfoPaneX, chunkInfoPaneY - 26, chunkInfoPaneWidth, chunkInfoPaneHeight);
+
+		//TODO: this should probably be moved when we reposition the bars
+		s.drawWorkload(G.windowStartTime);
 
 		if(hoverChunk == undefined) {
 			return;

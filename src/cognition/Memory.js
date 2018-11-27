@@ -147,8 +147,10 @@ class Memory {
 					var recallProbability = this.getProbabilityOfRecall(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds, chunk.rehearsals);
 					if (recallProbability > 1) recallProbability = 0.999; //rounding time sometimes results in recall > 1
 
+					let activ = this.getActivation(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds, chunk.rehearsals);
 					if (recallProbability > this.recallThreshold) {
 						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color, chunk.lineNumber); //name, addTime, stackHeight, accessCount, recallProb, color
+						updatedChunk.activation = activ;
 						if (this.workingmemory[i] != undefined) this.workingmemory[i].push(updatedChunk); //occasionally getting undefined with last stack...
 					}
 				}
