@@ -113,6 +113,8 @@ class Memory {
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
 			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
 			chunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
+			chunk.goal = step.goal;
+			console.log("line: " + step.lineNo + "  chunk goal: " + chunk.goal);
 			if (this.workingmemory.length > chunkStack) {	
 				this.workingmemory[chunkStack].push(chunk);
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
@@ -151,6 +153,7 @@ class Memory {
 					if (recallProbability > this.recallThreshold) {
 						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color, chunk.lineNumber); //name, addTime, stackHeight, accessCount, recallProb, color
 						updatedChunk.activation = this.getActivation(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds, chunk.rehearsals);
+						updatedChunk.goal = chunk.goal;
 						if (this.workingmemory[i] != undefined) this.workingmemory[i].push(updatedChunk); //occasionally getting undefined with last stack...
 					}
 				}

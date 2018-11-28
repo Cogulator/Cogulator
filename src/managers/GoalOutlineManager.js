@@ -28,6 +28,36 @@ class GoalOutlineManager
 		for (var i = 0; i < goalSteps.length; i++) {
 
             let step = goalSteps[i];
+
+            console.log("finding workload for goal " + step.goal);
+
+            //iterate through the chunks to find the activation and load of this goal
+            let memory = G.memory.workingmemory;
+            let workload = 0.0;
+            for (var k = 0; k < memory.length; k++) {
+                let stack = memory[k];
+                for (var j = 0; j < stack.length; j++) {
+                    let chunk = stack[j];
+                    // console.log(chunk);
+
+                    if(chunk.goal == step.goal)
+                    {
+                        // console.log(chunk);
+                        let load = parseFloat(G.workload.getWorkload(chunk.activation));
+                        if(load > workload)
+                        {
+                            workload = load;
+                        }
+
+                        if(workload >= 10.0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            console.log("workload for step: " + step.goal + "  is " + workload);
             
             // console.log(step);
 
@@ -43,7 +73,7 @@ class GoalOutlineManager
 
             //button
             let html = "<div id='" + buttonId + "' class='" + buttonClass + "'>" +
-                        "<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + step.goal + "</div>";
+                        "<div class='goal_label' style='left:"+ indent + "px; width:" + width + "px;'>" + "<span style='color: rgba(0, 0, 0, 1.0)'>(" + workload + ")</span>" + step.goal + "</div>";
                         "</div>";
             $( '#goal_outline' ).append(html);
 
