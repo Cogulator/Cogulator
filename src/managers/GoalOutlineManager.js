@@ -28,8 +28,7 @@ class GoalOutlineManager
 		for (var i = 0; i < goalSteps.length; i++) {
 
             let step = goalSteps[i];
-
-            console.log("finding workload for goal " + step.goal);
+            // console.log("finding workload for goal " + step.goal);
 
             //iterate through the chunks to find the activation and load of this goal
             let memory = G.memory.workingmemory;
@@ -39,10 +38,8 @@ class GoalOutlineManager
                 for (var j = 0; j < stack.length; j++) {
                     let chunk = stack[j];
                     // console.log(chunk);
-
-                    if(chunk.goal == step.goal)
+                    if(step.goal in chunk.goalMap)
                     {
-                        // console.log(chunk);
                         let load = parseFloat(G.workload.getWorkload(chunk.activation));
                         if(load > workload)
                         {
@@ -57,8 +54,7 @@ class GoalOutlineManager
                 }
             }
 
-            console.log("workload for step: " + step.goal + "  is " + workload);
-            
+            // console.log("workload for step: " + step.goal + "  is " + workload);
             // console.log(step);
 
             let lineNo = step.lineNo;
