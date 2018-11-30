@@ -48,6 +48,18 @@ class GanttManager {
 			}
 		});
 	}
+
+	openChart() {
+		if( $('#gantt_container').css('bottom') == '-450px'){
+			//show
+			if ( $( window ).height() < 950 ) G.magicModels.hide();
+			$('#gantt_container').animate({bottom:'0px'},"slow", function() {
+				$('#not_gantt_container').addClass('partial_height').removeClass('full_height');
+				$( '#gantt_button_text' ).addClass('rotate_180').removeClass('rotate_0');
+			 });
+			$('#gantt_button').animate({bottom:'450px'}, "slow");
+		}
+	}
 	
 	//used by MagicModels to close Gantt if not enough room
 	close() {
@@ -178,6 +190,14 @@ var ganttSketch = function(s) {
 		timer = window.setTimeout(s.loopOff, 5000);
 	});
 	
+	$( document ).on( "GANTT_OPEN", function(evt, time) {
+		
+		console.log("show gantt with time: " + time);
+		G.ganttManager.openChart();
+		scrollBarX = s.scrollTimeToX(time);
+		s.draw();
+	});
+
 	//loop control: one loop to update chart, in case not already looping
 	$( document ).on( "Subjective_Workload_Processed", function(evt, taskTimeMS) {
 		s.draw();

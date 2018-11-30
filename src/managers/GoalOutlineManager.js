@@ -33,6 +33,7 @@ class GoalOutlineManager
             //iterate through the chunks to find the activation and load of this goal
             let memory = G.memory.workingmemory;
             let workload = 0.0;
+            let timeForGoal = undefined;
             for (var k = 0; k < memory.length; k++) {
                 let stack = memory[k];
                 for (var j = 0; j < stack.length; j++) {
@@ -46,10 +47,14 @@ class GoalOutlineManager
                             workload = load;
                         }
 
-                        if(workload >= 10.0)
-                        {
-                            break;
-                        }
+                        if(timeForGoal == undefined || chunk.addedAt < timeForGoal) {
+                            timeForGoal = chunk.addedAt;
+                        } 
+
+                        // if(workload >= 10.0)
+                        // {
+                        //     break;
+                        // }
                     }
                 }
             }
@@ -85,7 +90,11 @@ class GoalOutlineManager
 
                 let range = nextIndex - index;
 
+                //show the line in the editor
                 G.quill.setSelection(index, range);
+
+                //scroll the gantt chart to the right spot
+                $( document ).trigger( "GANTT_OPEN", [timeForGoal] );
             });
 
 		}
