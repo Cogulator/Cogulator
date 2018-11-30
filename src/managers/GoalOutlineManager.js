@@ -93,6 +93,11 @@ class GoalOutlineManager
                 //show the line in the editor
                 G.quill.setSelection(index, range);
 
+                if(timeForGoal > 50)
+                {
+                    timeForGoal = timeForGoal - 50;
+                }
+
                 //scroll the gantt chart to the right spot
                 $( document ).trigger( "GANTT_OPEN", [timeForGoal] );
             });
