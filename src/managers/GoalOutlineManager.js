@@ -51,36 +51,42 @@ class GoalOutlineManager
                 let goalInfo = goalInfos[i];
                 let goal = goalInfo.goal;
 
-                let workload = 0.0;
-
                 let startTime = goalInfo.startTime;
                 let endTime = goalInfo.endTime;
+
+                let workload = 0.0;
 
                 // get the workload from the chunks
                 let memory = G.memory.workingmemory;
                 for (var j = 0; j < memory.length; j++) {
                     let stack = memory[j];
-                    let time = j* 50;
+                    
+                    let time = j * 50;
+                    
+                    if(startTime > time) {
+                        continue;
+                    }
+                    
+                    //stop looping once we're past the goal time
+                    if(endTime < time)
+                    {
+                        break;
+                    }
+                    
                     for (var k = 0; k < stack.length; k++) {
                         let chunk = stack[k];
-                        if(chunk == null) {
-                            continue;
-                        }
-                        
-                        //stop looping once we're past the goal time
-                        if(startTime > time || endTime < time)
-                        {
-                            break;
-                        }
                         
                         //update this goal's workload if there's a chunk that is associated with it
                         let stepGoal = goal.goal + "_" + (goal.lineNo - 1);
+                        let load = parseFloat(G.workload.getWorkload(chunk.activation));
                         if(stepGoal in chunk.goalMap)
                         {
-                            let load = parseFloat(G.workload.getWorkload(chunk.activation));
-                            if(load > workload)
-                            {
-                                workload = load;
+                            if(!isNaN(load))
+            				{   
+                                if(load > workload)
+                                {
+                                    workload = load;
+                                }
                             }
                         }
 
