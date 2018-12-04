@@ -543,13 +543,11 @@ var ganttSketch = function(s) {
 				}
 			}
 
-			// console.log("time: " + time + "  workload: " + workload);
-			let barClr = s.colorAlpha('#bbbbbb', 1.0);
-			s.fill(barClr);
-			s.rect(stackX, timeLineY + 4, chunkWidth, workload * 2);
+			// let barClr = s.colorAlpha('#bbbbbb', 1.0);
+			// s.fill(barClr);
+			// s.rect(stackX, timeLineY + 4, chunkWidth, workload * 2);
 
 			G.workloadRects.push(new ChunkRect(stack, time, stackX, timeLineY + 4, chunkWidth, workload));
-
 		}
 	}
 
@@ -1055,7 +1053,7 @@ var ganttSketch = function(s) {
 		s.rect(chunkInfoPaneX, chunkInfoPaneY - 26, chunkInfoPaneWidth, chunkInfoPaneHeight);
 
 		//TODO: this should probably be moved when we reposition the bars
-		// s.drawWorkload(G.windowStartTime);
+		s.drawWorkload(G.windowStartTime);
 
 		if(hoverWorkload != undefined) {
 			let textSize = 15;
