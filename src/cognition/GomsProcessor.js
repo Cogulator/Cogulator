@@ -306,14 +306,6 @@ class GomsProcessor {
 		var methodThread = "";
 		var methodIndex = 0;
 
-		if (stepOperator == "goal" || stepOperator == "also") {
-			this.currentGoalLine = lineIndex;
-
-			//add the goal to the stack when you see it
-			this.currentGoals.push(stepLabel);
-			console.log("adding goal: " + stepLabel);
-		}
-
 		if (stepOperator != "goal" && stepOperator != "also") {
 			var goalAndThread = this.findGoalAndThread(indentCount); //determine the operator and thread
 			methodGoal = goalAndThread[0];
@@ -329,13 +321,19 @@ class GomsProcessor {
 			}
 		}
 
+		if (stepOperator == "goal" || stepOperator == "also") {
+			this.currentGoalLine = lineIndex;
+
+			//add the goal to the stack when you see it
+			this.currentGoals.push(stepLabel + "_" + lineIndex);
+		}
+
 		//remove the top goal from the stack if we come back from its body
 		if(indentCount < this.currentIndent)
 		{
 			for(var i = 0; i < (this.currentIndent - indentCount); i++)
 			{
 				var removedGoal = this.currentGoals.pop();
-				console.log("removing goal: " + removedGoal);
 			}
 		}
 

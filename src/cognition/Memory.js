@@ -114,7 +114,7 @@ class Memory {
 			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
 			chunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
 			chunk.goal = step.goal;
-			chunk.goalMap = step.goalMap
+			chunk.goalMap = step.goalMap;
 			// console.log("line: " + step.lineNo + "  chunk goal: " + chunk.goal);
 			if (this.workingmemory.length > chunkStack) {	
 				this.workingmemory[chunkStack].push(chunk);

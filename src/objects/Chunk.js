@@ -9,6 +9,6 @@
 		this.lineNumber = lineNumber;
 		this.activation = 0.0;
 		this.goal = "";
-		this.workload = 0.0;
+		this.workload = 1.0;
 	}
 }
