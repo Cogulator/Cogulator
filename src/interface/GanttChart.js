@@ -1055,7 +1055,7 @@ var ganttSketch = function(s) {
 		s.rect(chunkInfoPaneX, chunkInfoPaneY - 26, chunkInfoPaneWidth, chunkInfoPaneHeight);
 
 		//TODO: this should probably be moved when we reposition the bars
-		s.drawWorkload(G.windowStartTime);
+		// s.drawWorkload(G.windowStartTime);
 
 		if(hoverWorkload != undefined) {
 			let textSize = 15;
