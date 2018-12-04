@@ -60,6 +60,7 @@ class GoalOutlineManager
                 let memory = G.memory.workingmemory;
                 for (var j = 0; j < memory.length; j++) {
                     let stack = memory[j];
+                    let time = j* 50;
                     for (var k = 0; k < stack.length; k++) {
                         let chunk = stack[k];
                         if(chunk == null) {
@@ -67,7 +68,7 @@ class GoalOutlineManager
                         }
                         
                         //stop looping once we're past the goal time
-                        if(startTime > chunk.addedAt || endTime < chunk.addedAt)
+                        if(startTime > time || endTime < time)
                         {
                             break;
                         }
