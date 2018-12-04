@@ -108,7 +108,9 @@ class Memory {
 		var atTime = step.endTime;
 
 		var existingChunk = null;
-		if (chunkName != "") existingChunk = this.getExistingChunk(chunkName, chunkStack);
+		if (chunkName != "") {
+			existingChunk = this.getExistingChunk(chunkName, chunkStack);
+		}
 
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
 			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
@@ -128,6 +130,7 @@ class Memory {
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
 			this.pushRehearsals(chunkName, activation, chunkStack); //used by SubjectiveMentalWorkload
 			chunkAction = "pushed_rehearsals";
+			existingChunk.goalMap = step.goalMap;
 		} else if (!existingChunk) {
 			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName));
 		}
