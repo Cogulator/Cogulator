@@ -16,9 +16,10 @@ class GoalOutlineManager
 		let titleHtml = "<div class='goal_outline_label'>GOAL OUTLINE</div>";
         $( '#goal_outline' ).append(titleHtml);
 
+        //loop through each thread
         for (var key in G.gomsProcessor.thrdOrdr) {
 			if (parseInt(key) > 2) continue; // right now only handle 3 threads, indexed at 0
-			
+            
 			let threadSteps = G.gomsProcessor.intersteps.filter( function( step ) {
 				let thread = G.gomsProcessor.thrdOrdr[key]
 				return step.thread == thread; 
@@ -29,20 +30,43 @@ class GoalOutlineManager
             var outlineMap = [];
             var outlineList = [];
 
-            //get each goal step and put it in the goalInfos array
+            var goalTimeMap = [];
+
+            //loop through each step
+            //
+            //get each goal step and put it in the goalInfos array, goals are unique by goalIndex
+            //
             //also calculate the length of the goal by using the start of the next goal as the end time of the current goal
-			for (var i = 0; i < threadSteps.length; i++) { //second, remove methods that aren't unique
-				let method = threadSteps[i]; //this is actually a step, but all we care about is the method
-				if (!indexes.includes(method.goalIndex) && method.goalIndex != 0) {
+			for (var i = 0; i < threadSteps.length; i++) { //second, remove steps that aren't unique
+                
+                let step = threadSteps[i];
+                //this is a goal step that isn't in the goalInfos list yet
+				if (!indexes.includes(step.goalIndex) && step.goalIndex != 0) {
 
-                    if(goalInfos.length > 0) {
-                        //set the previous goalInfo's endTime to the start of this goal
-                        goalInfos[goalInfos.length-1].endTime = method.startTime;
-                    }                   
+                    // if(goalInfos.length > 0) {
+                    //     //set the previous goalInfo's endTime to the start of this goal
+                    //     goalInfos[goalInfos.length-1].endTime = step.startTime;
+                    // }                   
 
-					goalInfos.push({goal:method, startTime:method.startTime, endTime:0, threadNum: parseInt(key)});
-                    indexes.push(method.goalIndex);
-				}
+                    //save this step as a goalInfo
+                    goalInfos.push({goal:step, startTime:step.startTime, endTime:0, threadNum: parseInt(key)});
+                    
+                    //mark this goalIndex as found so we don't add it again
+                    indexes.push(step.goalIndex);
+
+                    //add this goal to the map for tracking how long a goal actually is
+                    goalTimeMap[step.goal + "_" + (step.lineNo -1)] = {start:step.startTime, end:step.endTime};
+
+				} else { //this is a step that isn't a goal
+                    //update the end time for each goal of this step
+                    // console.log(goalTimeMap);
+                    Object.keys(step.goalMap).forEach(function(key) {
+                        // console.log("updating goal: " + key);
+                        if(key in goalTimeMap) {
+                            goalTimeMap[key].end = step.endTime;
+                        }
+                    });
+                }
             }
 
             //iterate over each goal and display it in the outline
@@ -51,8 +75,12 @@ class GoalOutlineManager
                 let goalInfo = goalInfos[i];
                 let goal = goalInfo.goal;
 
-                let startTime = goalInfo.startTime;
-                let endTime = goalInfo.endTime;
+                // let startTime = goalInfo.startTime;
+                // let endTime = goalInfo.endTime;
+                let startTime = goalTimeMap[goal.goal + "_" + (goal.lineNo -1)].start;
+                let endTime = goalTimeMap[goal.goal + "_" + (goal.lineNo -1)].end;
+
+                // console.log(goal.goal + "  start: " + startTime + "  end: " + endTime);
 
                 let workload = 0.0;
 
