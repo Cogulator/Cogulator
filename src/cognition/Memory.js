@@ -117,7 +117,6 @@ class Memory {
 			chunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
 			chunk.goal = step.goal;
 			chunk.goalMap = step.goalMap;
-			// console.log("line: " + step.lineNo + "  chunk goal: " + chunk.goal);
 			if (this.workingmemory.length > chunkStack) {	
 				this.workingmemory[chunkStack].push(chunk);
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
@@ -125,8 +124,7 @@ class Memory {
 			}
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
 			this.addRehearsalToChunk(chunkName, chunkStack);
-			//update the activation of the chunk and adjust it's addedAt time and chunkStack since we just remembered it
-			existingChunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
+			//update the chunk's addedAt time and chunkStack since we just remembered it. the activation gets updated elsewhere
 			existingChunk.addedAt = atTime;
 			existingChunk.stackDepthAtPush = chunkStack;
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
