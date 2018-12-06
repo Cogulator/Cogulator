@@ -125,6 +125,10 @@ class Memory {
 			}
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
 			this.addRehearsalToChunk(chunkName, chunkStack);
+			//update the activation of the chunk and adjust it's addedAt time and chunkStack since we just remembered it
+			existingChunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
+			existingChunk.addedAt = atTime;
+			existingChunk.stackDepthAtPush = chunkStack;
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
