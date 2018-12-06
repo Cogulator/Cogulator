@@ -16,6 +16,32 @@ class GoalOutlineManager
 		let titleHtml = "<div class='goal_outline_label'>GOAL OUTLINE</div>";
         $( '#goal_outline' ).append(titleHtml);
 
+        ///////
+        // doing this block finds some goals that are skipped by the threadSteps list below 
+        // like the first goal of the forgetting file and goals that have an immediate subgoal
+        var goalTimeMap = [];
+        var goalsIdsOrdered = [];
+
+        //copy the goals to a new array for re-ordering
+        var goalSteps = [];
+        for (var i = 0; i < G.gomsProcessor.goalSteps.length; i++) {
+            goalSteps.push(G.gomsProcessor.goalSteps[i][0]);
+        }
+
+        //reverse the array to put goals in correct order
+        goalSteps.reverse();
+
+        for (var i = 0; i < goalSteps.length; i++) {
+            let step = goalSteps[i];
+
+            //save the step order
+            goalsIdsOrdered.push(step.goal + "_" + (step.lineNo));
+
+            //add this goal to the map for tracking how long a goal actually is
+            goalTimeMap[step.goal + "_" + (step.lineNo)] = {goal:step, start:step.startTime, end:step.endTime};
+        }
+        ///////
+
         //loop through each thread
         for (var key in G.gomsProcessor.thrdOrdr) {
 			if (parseInt(key) > 2) continue; // right now only handle 3 threads, indexed at 0
@@ -24,44 +50,30 @@ class GoalOutlineManager
 				let thread = G.gomsProcessor.thrdOrdr[key]
 				return step.thread == thread; 
 			});
-            
-			var goalInfos = [];
+			
             var indexes = [];
             var outlineMap = [];
             var outlineList = [];
 
-            var goalTimeMap = [];
-
             //loop through each step
             //
             //get each goal step and put it in the goalInfos array, goals are unique by goalIndex
-            //
-            //also calculate the length of the goal by using the start of the next goal as the end time of the current goal
 			for (var i = 0; i < threadSteps.length; i++) { //second, remove steps that aren't unique
                 
                 let step = threadSteps[i];
+                // console.log(step);
                 //this is a goal step that isn't in the goalInfos list yet
 				if (!indexes.includes(step.goalIndex) && step.goalIndex != 0) {
 
-                    // if(goalInfos.length > 0) {
-                    //     //set the previous goalInfo's endTime to the start of this goal
-                    //     goalInfos[goalInfos.length-1].endTime = step.startTime;
-                    // }                   
-
-                    //save this step as a goalInfo
-                    goalInfos.push({goal:step, startTime:step.startTime, endTime:0, threadNum: parseInt(key)});
-                    
                     //mark this goalIndex as found so we don't add it again
                     indexes.push(step.goalIndex);
 
                     //add this goal to the map for tracking how long a goal actually is
-                    goalTimeMap[step.goal + "_" + (step.lineNo -1)] = {start:step.startTime, end:step.endTime};
+                    goalTimeMap[step.goal + "_" + (step.lineNo - 1)] = {goal:step, start:step.startTime, end:step.endTime};
 
 				} else { //this is a step that isn't a goal
                     //update the end time for each goal of this step
-                    // console.log(goalTimeMap);
                     Object.keys(step.goalMap).forEach(function(key) {
-                        // console.log("updating goal: " + key);
                         if(key in goalTimeMap) {
                             goalTimeMap[key].end = step.endTime;
                         }
@@ -70,17 +82,13 @@ class GoalOutlineManager
             }
 
             //iterate over each goal and display it in the outline
-            for(var i = 0; i < goalInfos.length; i++)
+            for(var i = 0; i < goalsIdsOrdered.length; i++)
             {
-                let goalInfo = goalInfos[i];
-                let goal = goalInfo.goal;
+                let goalId = goalsIdsOrdered[i];
+                let goal = goalTimeMap[goalId].goal;
 
-                // let startTime = goalInfo.startTime;
-                // let endTime = goalInfo.endTime;
-                let startTime = goalTimeMap[goal.goal + "_" + (goal.lineNo -1)].start;
-                let endTime = goalTimeMap[goal.goal + "_" + (goal.lineNo -1)].end;
-
-                // console.log(goal.goal + "  start: " + startTime + "  end: " + endTime);
+                let startTime = goalTimeMap[goalId].start;
+                let endTime = goalTimeMap[goalId].end;
 
                 let workload = 0.0;
 
@@ -105,7 +113,7 @@ class GoalOutlineManager
                         let chunk = stack[k];
                         
                         //update this goal's workload if there's a chunk that is associated with it
-                        let stepGoal = goal.goal + "_" + (goal.lineNo - 1);
+                        let stepGoal = goalId;
                         let load = parseFloat(G.workload.getWorkload(chunk.activation));
                         if(stepGoal in chunk.goalMap)
                         {
@@ -122,7 +130,7 @@ class GoalOutlineManager
                 }
 
                 //build a list of the outline order and a map of the outline data for later display
-                let stepGoalID = goal.goal + "_" + (goal.lineNo - 1);
+                let stepGoalID = goalId;
                 outlineList.push(stepGoalID);  //ordered list of the outline
                 outlineMap[stepGoalID] = {goal:goal, workload:workload, startTime:startTime, endTime:endTime};
                 // console.log(goal);
@@ -177,8 +185,12 @@ class GoalOutlineManager
                     G.quill.setSelection(index, range);
         
                     let timeForGoal = startTime;
-                    if(timeForGoal > 150)
-                    {
+                    if(timeForGoal == undefined) { 
+                        //TODO: there is a bug in the code that interleaves the steps and calculates their start and end times.
+                        //      this check is here to make sure any steps with undefined times don't break displaying the gantt chart
+                        timeForGoal = 0;
+                    }
+                    else if(timeForGoal > 150) {
                         timeForGoal = timeForGoal - 150;
                     }
         
