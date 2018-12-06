@@ -57,8 +57,6 @@ class SubjectiveMentalWorkload {
 		//from model fit in Workload Curve paper
 		var load = -3.78 * Math.log(activation + 1) + 2.4793;
 
-		// console.log("real load: " + load.toFixed(1));
-
 		if (load > 10) return 10.0;
 		if (load < 1) return 1.0;
 		// return Math.round(load);

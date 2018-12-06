@@ -191,8 +191,6 @@ var ganttSketch = function(s) {
 	});
 	
 	$( document ).on( "GANTT_OPEN", function(evt, time) {
-		
-		console.log("show gantt with time: " + time);
 		G.ganttManager.openChart();
 		scrollBarX = s.scrollTimeToX(time);
 		s.draw();
@@ -388,7 +386,6 @@ var ganttSketch = function(s) {
 		s.drawMemory(windowStartTime);
 		s.msTimeline(windowStartTime); //millisecond timeline inside Gantt Chart
 		s.drawSubjectiveWorkload(windowStartTime);
-		// s.drawWorkload(windowStartTime);
 		//draw the millsecond timeline
 	}
 	
@@ -533,7 +530,6 @@ var ganttSketch = function(s) {
 				let load = parseFloat(G.workload.getWorkload(chunk.activation));
 				chunk.workload = load;
 
-				// console.log("time: " + time + "  load: " + load);
 				if(!isNaN(load))
 				{
 					if(load > workload)
@@ -939,7 +935,6 @@ var ganttSketch = function(s) {
 
 		for(var i = 0; i < G.ganttChunks.length; i++)
 		{
-			// console.log("gantt chunk: (" + G.ganttChunks[i].x + "," + G.ganttChunks[i].y + ")  w: " + G.ganttChunks[i].width + "  h: " + G.ganttChunks[i].height );
 			if(G.ganttChunks[i].contains(s.mouseX, s.mouseY))
 			{
 				//the step is stored in the chunk member here
@@ -952,7 +947,6 @@ var ganttSketch = function(s) {
 		{
 			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
 			{
-				// console.log("*** clicked: " + G.memoryChunks[i].id + " " + G.memoryChunks[i].chunk.chunkName + " line:" + G.memoryChunks[i].chunk.lineNumber + " recall: " + G.memoryChunks[i].chunk.probabilityOfRecall);
 				G.quillManager.selectLine(G.memoryChunks[i].chunk.lineNumber);
 				break;
 			}
@@ -969,8 +963,6 @@ var ganttSketch = function(s) {
 			{
 				for(var i = 0; i < G.memoryChunks.length; i++)
 				{
-					// console.log("checking chunk: " + G.memoryChunks[i].x + "," + G.memoryChunks[i].y);
-
 					if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
 					{
 						hoverChunk = G.memoryChunks[i].chunk;
