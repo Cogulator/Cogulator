@@ -35,7 +35,7 @@ class ModelsSidebar {
 				}
 				
 				//button
-				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "'>" +
+				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "' title='" + file.file + "'>" +
 								"<div class='model_button_delete' data-marked='x'> </div>" +
 								"<div class='model_label'>" + file.file + "</div>" +
 								"<div class='model_pointer_container'>" + pointerDiv + "</div>";
