@@ -63,13 +63,22 @@ class GoalOutlineManager
                 let step = threadSteps[i];
                 // console.log(step);
                 //this is a goal step that isn't in the goalInfos list yet
-				if (!indexes.includes(step.goalIndex) && step.goalIndex != 0) {
+				if (!indexes.includes(step.goalIndex)) {
 
                     //mark this goalIndex as found so we don't add it again
                     indexes.push(step.goalIndex);
 
                     //add this goal to the map for tracking how long a goal actually is
-                    goalTimeMap[step.goal + "_" + (step.lineNo - 1)] = {goal:step, start:step.startTime, end:step.endTime};
+                    //since the step is not the goal, but the first step inside the goal, 
+                    //the line number of goal may be any number of lines back (comments etc).
+                    //check back using decrementing line number values to try and find the goal key in the map.
+                    for(var lineNum = step.lineNo - 1; lineNum > 0; lineNum = lineNum - 1) {
+                        let goalId = step.goal + "_" + lineNum;
+                        if(goalId in goalTimeMap) {
+                            goalTimeMap[goalId] = {goal:step, start:step.startTime, end:step.endTime};
+                            break;
+                        }
+                    }
 
 				} else { //this is a step that isn't a goal
                     //update the end time for each goal of this step
