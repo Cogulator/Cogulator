@@ -321,13 +321,6 @@ class GomsProcessor {
 			}
 		}
 
-		if (stepOperator == "goal" || stepOperator == "also") {
-			this.currentGoalLine = lineIndex;
-
-			//add the goal to the stack when you see it
-			this.currentGoals.push(stepLabel + "_" + lineIndex);
-		}
-
 		//remove the top goal from the stack if we come back from its body
 		if(indentCount < this.currentIndent)
 		{
@@ -336,10 +329,17 @@ class GomsProcessor {
 				var removedGoal = this.currentGoals.pop();
 			}
 		}
-
 		//update the current indent for next time
 		this.currentIndent = indentCount;
 
+		if (stepOperator == "goal" || stepOperator == "also") {
+			this.currentGoalLine = lineIndex;
+
+			//add the goal to the stack when you see it
+			this.currentGoals.push(stepLabel + "_" + lineIndex);
+		}
+
+		
 		if (stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
 			var s = new Step(indentCount, 
 								   methodGoal, 
@@ -357,7 +357,6 @@ class GomsProcessor {
 			//add the set of current goals to this step for use later in the ui
 			s.goalMap = [];
 			for(var i = 0; i < this.currentGoals.length; i++) {
-				// s.goals.push(this.currentGoals[i]);
 				s.goalMap[this.currentGoals[i]] = this.currentGoals[i];
 			}
 			
