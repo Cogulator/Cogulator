@@ -1,11 +1,16 @@
+
 class QutterManager { //Quill gutter
 	
 	constructor() {
-		this.lineHeight = 22; //dependent on set font size
+		this.lineHeight = 26; //dependent on set font size
 		
 		//Sync Qutter scroll to Quill scroll
 		$( G.quill.scrollingContainer ).scroll(function(){
 			$('#gutter').scrollTop(this.scrollTop);
+		})
+
+		$( G.quill.scrollingContainer ).scroll(function(){
+			$('#line_numbers_gutter').scrollTop(this.scrollTop);
 		})
 		
 		
@@ -65,6 +70,11 @@ class QutterManager { //Quill gutter
 			G.errorPopOver.hide();
 			G.fixPopOver.hide();
 		});
+
+		//number the lines when the editor changes
+		G.quill.on('editor-change', function(eventName) {
+			G.qutterManager.numberLines();
+        });
 		
 	} 
 	
@@ -72,14 +82,19 @@ class QutterManager { //Quill gutter
 	numberLines() {
 		var txt = "";
 		let lines = G.quill.getLines(1, G.quill.getLength());
+		let lineNumberLines = G.quillLineNumbers.getLines(1, G.quillLineNumbers.getLength());
+
+		var fontSize = $('#code').css('font-size');
+		var calculatedLineHeight = Math.floor(parseInt(fontSize.replace('px','')) * 1.5);
+
 		for (var i = 0; i < lines.length; i++) {
 			
 			txt += i.toString();
-			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
+			let wrappedLines = lines[i].domNode.clientHeight / calculatedLineHeight;
 			for (var j = 0; j < wrappedLines; j++) txt += "\n";
  		}
 		
-		$('#gutter').text(txt);
+		$('#line_numbers_gutter').text(txt);
 	}
 	
 	

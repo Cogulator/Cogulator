@@ -284,7 +284,7 @@ class InsertionCHI {
 //		
 //		if (scrollbarWidth > 0) return $("#gutter").width() + $("#code").width() + 4;
 //		return ($("#gutter").width() + $("#code").width() + 18);
-		return ($("#gutter").width() + $("#code").width() + 23);
+		return ($("#gutter").width() + $("#line_numbers_gutter").width() + $("#code").width() + 23);
 	}
 	
 	

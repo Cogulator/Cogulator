@@ -48,6 +48,18 @@ class GanttManager {
 			}
 		});
 	}
+
+	openChart() {
+		if( $('#gantt_container').css('bottom') == '-450px'){
+			//show
+			if ( $( window ).height() < 950 ) G.magicModels.hide();
+			$('#gantt_container').animate({bottom:'0px'},"slow", function() {
+				$('#not_gantt_container').addClass('partial_height').removeClass('full_height');
+				$( '#gantt_button_text' ).addClass('rotate_180').removeClass('rotate_0');
+			 });
+			$('#gantt_button').animate({bottom:'450px'}, "slow");
+		}
+	}
 	
 	//used by MagicModels to close Gantt if not enough room
 	close() {
@@ -63,11 +75,28 @@ class GanttManager {
 }
 G.ganttManager = new GanttManager();
 
+function ChunkRect (chunk, id, x, y, w, h) {
+
+	this.chunk = chunk;
+	this.id = id;
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+
+    this.contains = function (x, y) {
+        return this.x <= x && x <= this.x + this.width &&
+               this.y <= y && y <= this.y + this.height;
+    }
+}
+
 
 
 var ganttSketch = function(s) {
 	var wdth = $( '#gantt_chart' ).width();
 	var hght = $( '#gantt_chart' ).height();
+
+	var hoverChunk = undefined;
 	
 	//screenshots
 	var screenShot;
@@ -124,6 +153,12 @@ var ganttSketch = function(s) {
 	let flashWdth = (camWdth - camCrnrRadius * 2) / 3;
 	let camStartX = marginLeft - 10;
 	let camStartY = hght - marginBottom - 10;
+
+	//chunk info pane
+	let chunkInfoPaneX = marginLeft + 6;
+	let chunkInfoPaneY = timeLineY - (marginBottom/2) + 4;
+	let chunkInfoPaneWidth = 770;
+	let chunkInfoPaneHeight = 20;
 	
 	//colors
 	let style = getComputedStyle(document.body);
@@ -131,13 +166,14 @@ var ganttSketch = function(s) {
 	let	stripeClr = style.getPropertyValue('--gantt-stripe-color');
 	let	borderClr = '#CCC';
 	let fontAndScaleClr = '#363A3B';
+	let chunkInfoPaneBackground = style.getPropertyValue('--main-bg-color');
 	
 	//loop control: things get laggy while looping, so only loop when focus is on gantt container
 	let mouseOverGantt = false;
 	$( "#gantt_container" ).hover(
 		function() { //on over
-			//s.loop();
 			mouseOverGantt = true;
+			// s.loopOn();
 		}, function() {
 			mouseOverGantt = false;
 			s.loopOff //this can be on mouseout once we're sure it's working
@@ -153,6 +189,12 @@ var ganttSketch = function(s) {
 		timer = window.setTimeout(s.loopOff, 5000);
 	});
 	
+	$( document ).on( "GANTT_OPEN", function(evt, time) {
+		G.ganttManager.openChart();
+		scrollBarX = s.scrollTimeToX(time);
+		s.draw();
+	});
+
 	//loop control: one loop to update chart, in case not already looping
 	$( document ).on( "Subjective_Workload_Processed", function(evt, taskTimeMS) {
 		s.draw();
@@ -207,6 +249,8 @@ var ganttSketch = function(s) {
 				
 				if (screenShot.ready) screenShot.save();
 				s.handleScreenShot();
+
+				s.drawChunkInfoPane();
 			}
 		} catch(err) {}
 	}
@@ -294,7 +338,7 @@ var ganttSketch = function(s) {
 		
 		s.noStroke();
 		s.text("0", marginLeft - centerText, timeLineY + belowLine);
-		s.text(Math.round(totalTaskTime / 100) / 10, marginLeft + timeLineWidth - centerText, timeLineY + aboveLine);
+		s.text(Math.round(totalTaskTime / 100) / 10, marginLeft + timeLineWidth - centerText, timeLineY + belowLine);
 		
 	//methods & times
 		let methodsToAnnotate = G.gomsProcessor.intersteps.filter( function( step ) { //first pass
@@ -335,7 +379,9 @@ var ganttSketch = function(s) {
 	
 	s.drawChart = function () {
 		let windowStartTime = s.scrollXtoTime(scrollBarX); //ms
+		G.windowStartTime = windowStartTime;
 		
+		s.calculateWorkload();
 		s.drawGantt(windowStartTime);
 		s.drawMemory(windowStartTime);
 		s.msTimeline(windowStartTime); //millisecond timeline inside Gantt Chart
@@ -370,6 +416,8 @@ var ganttSketch = function(s) {
 	
 	s.drawGantt = function(windowStartTime) {
 		s.textAlign(s.LEFT);
+
+		G.ganttChunks = [];
 		
 		//loop through each thread
 		var colorIndex = 0;
@@ -415,11 +463,28 @@ var ganttSketch = function(s) {
 					s.line(stepX2, stepY - tickHeight, stepX2, stepY + tickHeight);
 				}
 				
+				let ganttRect = undefined;
+
 				//add the label
 				s.noStroke();
-				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) s.text(step.time, stepX1 + tickHeight, stepY - 3);
+				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) {
+					s.text(step.time, stepX1 + tickHeight, stepY - 3);
+					ganttRect = new ChunkRect(step, "", 0, 0, 0, 0);
+					ganttRect.x = stepX1 + tickHeight;
+					ganttRect.y = stepY - 18;
+				} 
 				let operatorLabel = s.fitTextToSpace(step.operator, stepX2 - stepX1 - 15)
-				if (operatorLabel != "") s.text(operatorLabel, stepX1 + tickHeight, stepY + 15);
+				if (operatorLabel != "") {
+					s.text(operatorLabel, stepX1 + tickHeight, stepY + 15);
+					
+					if(ganttRect != undefined)
+					{
+						let gWidth = step.time;
+						ganttRect.width = s.textWidth(gWidth.toString());
+						ganttRect.height = (stepY + 15) - ganttRect.y;
+						G.ganttChunks.push(ganttRect);
+					}
+				}
 				
 			}
 			
@@ -428,19 +493,63 @@ var ganttSketch = function(s) {
 		}
 	}
 	
-	
+	s.calculateWorkload = function() {
+
+		let memory = G.memory.workingmemory;
+
+		for (var i = 0; i < memory.length; i++) {
+
+			let stack = memory[i];
+			let workload = 0.0;
+
+			for (var j = 0; j < stack.length; j++) {
+				let chunk = stack[j];
+
+				let load = parseFloat(G.workload.getWorkload(chunk.activation));
+				chunk.workload = load;
+
+				if(!isNaN(load))
+				{
+					if(load > workload)
+					{
+						workload = load;
+					}
+				}
+			}
+
+		}
+	}
+
 	s.drawMemory = function(windowStartTime) {
 		let memory = G.memory.workingmemory;
 		let timeLineY = marginTop + (rowHeight * 6);
 		let chunkHeight = tickHeight;
 		let chunkWidth = cycleTime * (timeLineWidth / scale); //cycle time * pixelsPerMS
-		
+
 		s.stroke(backGroundClr);
-		
+
+		//gantt chart edges
+		let ganttLeftEdge = marginLeft + 1;
+		let ganttWidth = wdth - marginLeft - marginRight - 1; //get rid of border
+
+		G.memoryChunks = [];
+
 		for (var i = 0; i < memory.length; i++) {
 			let stack = memory[i];
 			let stackTime = i * cycleTime;
 			let stackX = s.ganttTimeToX(stackTime, windowStartTime);
+
+			if(stackX < (ganttLeftEdge - 10))
+			{
+				continue;
+			}
+
+			if(stackX > (ganttLeftEdge + ganttWidth))
+			{
+				break;
+			}
+
+			let time = i * 50;
 			
 			for (var j = 0; j < stack.length; j++) {
 				let chunk = stack[j];
@@ -448,8 +557,12 @@ var ganttSketch = function(s) {
 				let chunkClr = s.colorAlpha(chunk.color, s.map(chunk.probabilityOfRecall,0.5,1,0,1));
 				s.fill(chunkClr);
 				s.rect(stackX, chunkY, chunkWidth, chunkHeight);
+
+				chunk.time = time;
+				G.memoryChunks.push(new ChunkRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
 			}
 		}
+
 	}
 	
 	
@@ -790,17 +903,67 @@ var ganttSketch = function(s) {
 
 		
 	s.mouseReleased = function() {		  
-		dragging = false;		
+		dragging = false;
+		s.loopOff();
+
+		for(var i = 0; i < G.ganttChunks.length; i++)
+		{
+			if(G.ganttChunks[i].contains(s.mouseX, s.mouseY))
+			{
+				//the step is stored in the chunk member here
+				G.quillManager.selectLine(G.ganttChunks[i].chunk.lineNo);
+				break;
+			}
+		}
+		
+		for(var i = 0; i < G.memoryChunks.length; i++)
+		{
+			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+			{
+				G.quillManager.selectLine(G.memoryChunks[i].chunk.lineNumber);
+				break;
+			}
+		}
+	}
+
+	s.mouseMoved = function () {
+
+		if(mouseOverGantt) {
+
+			hoverChunk = undefined;
+			if(G.memoryChunks)
+			{
+				for(var i = 0; i < G.memoryChunks.length; i++)
+				{
+					if(G.memoryChunks[i].contains(s.mouseX, s.mouseY))
+					{
+						hoverChunk = G.memoryChunks[i].chunk;
+						break;
+					}
+
+					if(G.memoryChunks[i].x > s.mouseX)
+					{
+						break;
+					}
+				}
+			}
+
+
+			s.drawChunkInfoPane();
+
+		}
 	}
 	
 	
 	s.mouseWheel = function(evt) {
 		if (mouseOverGantt) {
-			s.loopOn();
-			timer = window.setTimeout(s.loopOff, 5000);
+			// s.loopOn();
+			// timer = window.setTimeout(s.loopOff, 5000);
 
 			if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
 			else 			   scaleTarget = Math.min(60000, scale + 5000);
+
+			s.draw();
 		}
 	}
 	
@@ -834,6 +997,41 @@ var ganttSketch = function(s) {
 		if (screenShot.ready) {
 			scrollBarX = screenShotSavedX;
 		}
+	}
+
+	s.drawChunkInfoPane = function () {
+
+		//draw background
+		s.fill(chunkInfoPaneBackground);
+		s.rect(chunkInfoPaneX, chunkInfoPaneY - 26, chunkInfoPaneWidth, chunkInfoPaneHeight);
+
+		if(hoverChunk == undefined) {
+			return;
+		}
+
+		let textSize = 15;
+		let recall = Number.parseFloat(hoverChunk.probabilityOfRecall).toPrecision(3);
+
+		let chunkTextY = chunkInfoPaneY - 10;
+
+		//draw hovertext
+		s.noStroke();
+		s.fill(hoverChunk.color);
+		s.textAlign(s.LEFT);
+		s.textSize(textSize);
+		s.text("Time: " + hoverChunk.time, chunkInfoPaneX + 2, chunkTextY);
+		s.text("Rehearsals: " + hoverChunk.rehearsals, chunkInfoPaneX + 2 + 100, chunkTextY);
+		s.text("P(recall): " + recall, chunkInfoPaneX + 2 + 200, chunkTextY);
+		if(hoverChunk.activation != undefined)
+		{
+			s.text("Activation: " + hoverChunk.activation.toFixed(3), chunkInfoPaneX + 2 + 310, chunkTextY);
+		}
+		if(hoverChunk.workload != undefined)
+		{
+			s.text("Workload: " + hoverChunk.workload, chunkInfoPaneX + 2 + 440, chunkTextY);
+		}
+		s.text("Name: " + hoverChunk.chunkName, chunkInfoPaneX + 2 + 540, chunkTextY);
+
 	}
 	
 	

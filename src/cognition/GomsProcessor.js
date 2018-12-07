@@ -26,6 +26,10 @@ class GomsProcessor {
 	
 	constructor() {
 		this.parser = new LineParser();
+
+		this.currentGoalLine = 0;
+		this.currentIndent = -1;
+		this.currentGoals = [];
 		
 		this.steps = [];
 		this.intersteps = []; //interleaved steps
@@ -42,6 +46,7 @@ class GomsProcessor {
 
 		this.stateTable = []; //dictionary
 		this.goalTable = []; //dictionary
+		this.goalSteps = [];
 				
 		$( document ).on( "Model_Update_MultiLine", function() {
 			G.gomsProcessor.process();
@@ -300,6 +305,7 @@ class GomsProcessor {
 		var methodGoal = "";
 		var methodThread = "";
 		var methodIndex = 0;
+
 		if (stepOperator != "goal" && stepOperator != "also") {
 			var goalAndThread = this.findGoalAndThread(indentCount); //determine the operator and thread
 			methodGoal = goalAndThread[0];
@@ -315,6 +321,25 @@ class GomsProcessor {
 			}
 		}
 
+		if (stepOperator == "goal" || stepOperator == "also") {
+			this.currentGoalLine = lineIndex;
+
+			//add the goal to the stack when you see it
+			this.currentGoals.push(stepLabel + "_" + lineIndex);
+		}
+
+		//remove the top goal from the stack if we come back from its body
+		if(indentCount < this.currentIndent)
+		{
+			for(var i = 0; i < (this.currentIndent - indentCount); i++)
+			{
+				var removedGoal = this.currentGoals.pop();
+			}
+		}
+
+		//update the current indent for next time
+		this.currentIndent = indentCount;
+
 		if (stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
 			var s = new Step(indentCount, 
 								   methodGoal, 
@@ -324,17 +349,30 @@ class GomsProcessor {
 								   this.getOperatorTime(stepOperator, stepTime, stepLabel), 
 								   this.getOperatorResource(stepOperator), 
 								   stepLabel, 
-								   lineIndex, 
+								   lineIndex,
 								   0, 
+								   this.currentGoalLine,
 								   chunkNames);
+
+			//add the set of current goals to this step for use later in the ui
+			s.goalMap = [];
+			for(var i = 0; i < this.currentGoals.length; i++) {
+				// s.goals.push(this.currentGoals[i]);
+				s.goalMap[this.currentGoals[i]] = this.currentGoals[i];
+			}
+			
 			this.steps.push(s);
 		}
 	}
 
 
 	removeGoalSteps() {
+		this.goalSteps = [];
 		for (var i = this.steps.length - 1; i > -1; i--) {
-			if (this.steps[i].operator == "goal" || this.steps[i].operator == "also") this.steps.splice(i, 1);
+			if (this.steps[i].operator == "goal" || this.steps[i].operator == "also") {
+				let goalStep = this.steps.splice(i, 1);
+				this.goalSteps.push(goalStep);
+			} 
 		}
 	}
 

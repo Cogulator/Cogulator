@@ -123,6 +123,24 @@ class QuillManager {
 		
 		G.quill.insertText(index, text);
 	}
+
+	selectLine(lineNo)
+	{
+		let lines = G.quill.getLines(1, G.quill.getLength());
+		var line = lines[lineNo];
+		var index = G.quill.getIndex(line);
+
+		var nextline = lines[lineNo + 1];
+		var nextIndex = G.quill.getIndex(nextline);
+
+		var range = nextIndex - index;
+
+		G.quill.setSelection(index, range);
+
+		//need to call this twice because another event gets thrown that
+		//sets the editor selection to null after the first call to setSelection() above
+		G.quill.setSelection(index, range);
+	}
 	
 }
 

@@ -6,6 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="./style/quill.core.css">
 		<link rel="stylesheet" type="text/css" href="./style/main.css">
 		<link rel="stylesheet" type="text/css" href="./style/sidebar.css">
+		<link rel="stylesheet" type="text/css" href="./style/goal_outline.css">
 		<link rel="stylesheet" type="text/css" href="./style/buttons.css">
 		<link rel="stylesheet" type="text/css" href="./style/newfilechi.css">
 		<link rel="stylesheet" type="text/css" href="./style/insertion_chi.css">
@@ -25,6 +26,7 @@
 			<div id='not_gantt_container'>
 				<div id='not_gantt_not_magic'>
 					<div id='sidebar_left'></div>
+					<div id='goal_outline'></div>
 
 					<div id='main_nav'>
 
@@ -78,6 +80,7 @@
 					</div>
 
 					<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
+					<div id='line_numbers_gutter' class='ql-editor'></div>
 					<div id='code'></div>
 
 				<!-- Containers for popovers that occur with various interactions -->
@@ -158,6 +161,7 @@
         <script type='text/javascript' src='./interface/WindowsTitleBar.js'></script>
 		<script type='text/javascript' src='./managers/StartUpManager.js'></script>
 		<script type='text/javascript' src='./interface/HelpScreen.js'></script>
+		<script type='text/javascript' src='./interface/ViewMenuHelper.js'></script>
 		<script type='text/javascript' src='./managers/FirstRunManager.js'></script>
 	</body>
 </html>

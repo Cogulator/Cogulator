@@ -24,7 +24,7 @@
 
 class Step {
 		
-	constructor (ic, gl, thrd, indx, oprtr, tm, rsrce, lbl, ln, pln, cn) {
+	constructor (ic, gl, thrd, indx, oprtr, tm, rsrce, lbl, ln, pln, gln, cn) {
 		// constructor code
 		this.indentCount = ic;
 		this.goal = gl;
@@ -36,6 +36,7 @@ class Step {
 		this.label = lbl;
 		this.lineNo = ln;
 		this.prevLineNo = pln;
+		this.goalLineNo = gln;
 		this.chunkNames = [];
 		
 		if (cn == null) return;

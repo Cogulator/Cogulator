@@ -37,7 +37,9 @@ class StartUpManager {
 				    "./interface/NewFileCHI.js",
 				  	"./interface/InsertionCHI.js",
 				    "./interface/MagicModels.js",
-				  	"./managers/DragAndDropManager.js"];
+					"./managers/DragAndDropManager.js",
+					"./managers/GoalOutlineManager.js"
+				];
 		
 		$.getScript( this.js[this.index], function(){
 			G.startUp.getNext();

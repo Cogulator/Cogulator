@@ -25,3 +25,5 @@ G.quill = new Quill('#code', {
 
 
 G.quillet = new Quill('#insertion_details_container');
+
+G.quillLineNumbers = new Quill('#line_numbers_gutter');

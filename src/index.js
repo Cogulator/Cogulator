@@ -28,7 +28,6 @@ const createWindow = () => {
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
 
-
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
@@ -166,6 +165,14 @@ const template = [
 			},
 			{
 				role: 'togglefullscreen'
+			},
+			{
+				label: 'Toggle Line Numbers',
+				click () { mainWindow.webContents.send('Toggle Line Numbers'); }
+			},
+			{
+				label: 'Toggle Goal Outline',
+				click () { mainWindow.webContents.send('Toggle Goal Outline'); }
 			}
 		]
 	},

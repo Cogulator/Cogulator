@@ -17,7 +17,12 @@ class ModelsSidebar {
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
-			$( '#sidebar_left' ).append("<div class='directory_label'>" + models.directory + "</div>");
+
+			//don't shot the initial empty heading
+			if(models.directory != "")
+			{
+				$( '#sidebar_left' ).append("<div class='directory_label'>" + models.directory + "</div>");
+			}
 			
 			for (var j = 0; j < models.files.length; j++) {
 				let file = models.files[j];
@@ -30,7 +35,7 @@ class ModelsSidebar {
 				}
 				
 				//button
-				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "'>" +
+				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "' title='" + file.file + "'>" +
 								"<div class='model_button_delete' data-marked='x'> </div>" +
 								"<div class='model_label'>" + file.file + "</div>" +
 								"<div class='model_pointer_container'>" + pointerDiv + "</div>";

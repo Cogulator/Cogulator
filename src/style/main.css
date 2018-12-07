@@ -3,6 +3,7 @@
 	--main-bg-color: #F8F8F8;
 	--sidebar-left-bg-color: #EFEFEF;
 	--sidebar-right-bg-color: #EFEFEF;
+	--goal-outline-bg-color: #788181;
 	--model-select-bg-color: #4CBD99;
 	--model-button-select-txt-color: white;
 	--model-button-txt-color: black;
@@ -87,7 +88,7 @@
 
 #sidebar_left {
 	position:absolute;
-	top:0px;
+	top:32px;
 	left:0px;
 	width:192px;
 	height:100%;
@@ -156,13 +157,25 @@
 	overflow: hidden;
 } 
 
+#line_numbers_gutter {
+	font-family: 'Cogulato';
+	font-size: 16px;
+	position:absolute;
+	top:70px;
+	left:232px;
+	width: 60px;
+	height:calc(100% - 70px);
+/*	background-color:var(--main-bg-color);*/
+	overflow: hidden;
+} 
+
 #code {
 	font-family: 'Cogulato';
 	font-size: 16px;
 	position:absolute;
 	top:60px;
-	left:232px;
-	width: calc(100% - 190px - 30px - 40px - 5px); /*5px for custom scroll bar width*/
+	left:292px;
+	width: calc(100% - 190px - 30px - 40px - 60px - 5px); /*5px for custom scroll bar width*/
 	height:calc(100% - 60px);
 	background-color:var(--main-bg-color);
 }

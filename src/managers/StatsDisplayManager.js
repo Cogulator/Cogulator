@@ -55,7 +55,8 @@ class StatsDisplayManager {
 		} else {
 			this.showWorkload();
 			//$('#stat_workload').html(maxWorkload + " <span id='stat_workload_units' class='stat_units'>(1-10)</span>");
-			$('#stat_workload').html(this.fuzzyishWorkoad(maxWorkload));
+			// $('#stat_workload').html(this.fuzzyishWorkoad(maxWorkload));
+			$('#stat_workload').html(maxWorkload);
 		}
 	}
 	
