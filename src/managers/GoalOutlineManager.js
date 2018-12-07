@@ -90,7 +90,8 @@ class GoalOutlineManager
                 }
             }
 
-            //iterate over each goal and display it in the outline
+
+            //iterate over each goal and build up a goal outlineMap with the data to diaplay
             for(var i = 0; i < goalsIdsOrdered.length; i++)
             {
                 let goalId = goalsIdsOrdered[i];
@@ -101,58 +102,53 @@ class GoalOutlineManager
 
                 let workload = 0.0;
 
-                // get the workload from the chunks
-                let memory = G.memory.workingmemory;
-                for (var j = 0; j < memory.length; j++) {
-                    let stack = memory[j];
-                    
-                    let time = j * 50;
-                    
-                    if(startTime > time) {
-                        continue;
-                    }
-                    
-                    //stop looping once we're past the goal time
-                    if(endTime < time)
-                    {
-                        break;
-                    }
-                    
-                    for (var k = 0; k < stack.length; k++) {
-                        let chunk = stack[k];
-                        
-                        //update this goal's workload if there's a chunk that is associated with it
-                        let stepGoal = goalId;
-                        let load = parseFloat(G.workload.getWorkload(chunk.activation));
-                        if(stepGoal in chunk.goalMap)
-                        {
-                            if(!isNaN(load))
-            				{   
-                                if(load > workload)
-                                {
-                                    workload = load;
-                                }
-                            }
-                        }
-
-                    }
-                }
-
                 //build a list of the outline order and a map of the outline data for later display
                 let stepGoalID = goalId;
                 outlineList.push(stepGoalID);  //ordered list of the outline
                 outlineMap[stepGoalID] = {goal:goal, workload:workload, startTime:startTime, endTime:endTime};
-                // console.log(goal);
 
                 //update the workloads of the parent goals in the outline data map
                 Object.keys(goal.goalMap).forEach(function(key) {
-                    let value = goal.goalMap[key];
                     if(key in outlineMap && outlineMap[key].workload < workload) {
                         let newInfo = {goal:outlineMap[key].goal, workload:workload, startTime:outlineMap[key].startTime, endTime:outlineMap[key].endTime};
                         outlineMap[key] = newInfo;
                     }
                 });
             }
+
+            //update the goal outlineMap with proper workloads for each step
+            for (var key in G.gomsProcessor.thrdOrdr) {
+                let threadSteps = G.gomsProcessor.intersteps.filter( function( step ) {
+                    let thread = G.gomsProcessor.thrdOrdr[key]
+                    return step.thread == thread; 
+                });
+                
+                //loop through each non-goal step
+                for (var i = 0; i < threadSteps.length; i++) {
+                    let step = threadSteps[i];
+                    var startTime = step.startTime;
+                    var endTime = step.endTime + 50;
+                    
+                    let stack = G.memory.findChunkStackAtTime(endTime);
+
+                    for(var j = 0; j < step.chunkNames.length; j++) {
+                        var chunkName = step.chunkNames[j];
+                        
+                        let existingChunk = G.memory.getExistingChunk(chunkName, stack);
+                        if(existingChunk) {
+                            //for every goal in this chunk's goal map, update the workload
+                            Object.keys(existingChunk.goalMap).forEach(function(key) {
+                                if(key in outlineMap && outlineMap[key].workload < existingChunk.workload) {
+                                    // console.log("*** setting: " + key + " workload: " + existingChunk.workload);
+                                    let newInfo = {goal:outlineMap[key].goal, workload:existingChunk.workload, startTime:outlineMap[key].startTime, endTime:outlineMap[key].endTime};
+                                    outlineMap[key] = newInfo;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
 
             //itearte the outline data list to display the outline 
             for(var i = 0; i < outlineList.length; i++) {
