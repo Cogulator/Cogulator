@@ -17,7 +17,6 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 - trash with the command "npm install trash --save"
 - electron-titlebar with the command "npm install electron-titlebar --save"
 - update.electron.org service with the command "npm install update-electron-app --save"
-- electron-log with the command "npm install electron-log --save"
 
 Then call "npm install" to install the project dependencies.
 

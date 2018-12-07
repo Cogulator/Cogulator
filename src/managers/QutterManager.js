@@ -1,4 +1,3 @@
-var log = require("electron-log");
 
 class QutterManager { //Quill gutter
 	
