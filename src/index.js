@@ -32,7 +32,7 @@ const createWindow = () => {
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+//   mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -173,6 +173,15 @@ const template = [
 			{
 				label: 'Toggle Goal Outline',
 				click () { mainWindow.webContents.send('Toggle Goal Outline'); }
+			},
+			{
+				label: 'Find in Editor',
+				accelerator: 'CmdOrCtrl+F',
+				click () { mainWindow.webContents.send('Find in Editor'); }
+			},
+			{
+				accelerator: 'Escape',
+				click () { mainWindow.webContents.send('Close find'); }
 			}
 		]
 	},
