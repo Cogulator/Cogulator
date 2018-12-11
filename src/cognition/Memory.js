@@ -111,7 +111,10 @@ class Memory {
 		if (chunkName != "") existingChunk = this.getExistingChunk(chunkName, chunkStack);
 
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
-			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0]); //name, addTime, stackHeight, rehearsals, recallProb, color
+			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
+			chunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
+			chunk.goal = step.goal;
+			chunk.goalMap = step.goalMap;
 			if (this.workingmemory.length > chunkStack) {	
 				this.workingmemory[chunkStack].push(chunk);
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
@@ -119,11 +122,15 @@ class Memory {
 			}
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
 			this.addRehearsalToChunk(chunkName, chunkStack);
+			//update the chunk's addedAt time and chunkStack since we just remembered it. the activation gets updated elsewhere
+			existingChunk.addedAt = atTime;
+			existingChunk.stackDepthAtPush = chunkStack;
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
 			this.pushRehearsals(chunkName, activation, chunkStack); //used by SubjectiveMentalWorkload
 			chunkAction = "pushed_rehearsals";
+			existingChunk.goalMap = step.goalMap;
 		} else if (!existingChunk) {
 			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName));
 		}
@@ -148,7 +155,10 @@ class Memory {
 					if (recallProbability > 1) recallProbability = 0.999; //rounding time sometimes results in recall > 1
 
 					if (recallProbability > this.recallThreshold) {
-						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color); //name, addTime, stackHeight, accessCount, recallProb, color
+						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color, chunk.lineNumber); //name, addTime, stackHeight, accessCount, recallProb, color
+						updatedChunk.activation = this.getActivation(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds, chunk.rehearsals);
+						updatedChunk.goal = chunk.goal;
+						updatedChunk.goalMap = chunk.goalMap
 						if (this.workingmemory[i] != undefined) this.workingmemory[i].push(updatedChunk); //occasionally getting undefined with last stack...
 					}
 				}
@@ -172,7 +182,7 @@ class Memory {
 		var indexForOldestChunk = -1
 		var earliestTime = 1000000000.0;
 
-		for (var i:int = 0; i < this.workingmemory[cycleIndex].length; i++) {
+		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
 			if (this.workingmemory[cycleIndex][i].addedAt < earliestTime) {
 				earliestTime = this.workingmemory[cycleIndex][i].addedAt;
 				indexForOldestChunk = i;
@@ -186,7 +196,7 @@ class Memory {
 	//Method to pop named chunk
 	popChunkWithName(chunkName, cycleIndex) {
 		cycleIndex--;
-		for (var i:int = 0; i < this.workingmemory[cycleIndex].length; i++) {
+		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
 			var chunk = this.workingmemory[cycleIndex][i];
 			if (chunk.chunkName == chunkName) {
 				this.longTermMemory[chunk.chunkName] = chunk;
@@ -225,7 +235,8 @@ class Memory {
 	//based on ACT-R & Workload Curve paper
 	getActivation(cogLoad, timeChunkInMemoryInSeconds, rehearsals) {
 		var m = Math.log(rehearsals/Math.sqrt(timeChunkInMemoryInSeconds)); //activation
-			m = (m + 1 / cogLoad) - 1; //activation divided among all chunks
+            //was: m = (m + 1 / cogLoad) - 1
+			m = m + (1 / cogLoad) - 1; //activation divided among all chunks
 		return m;
 	}
 
@@ -317,3 +328,4 @@ class Memory {
 	}
 
 }
+
