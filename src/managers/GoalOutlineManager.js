@@ -134,7 +134,7 @@ class GoalOutlineManager
                     for(var j = 0; j < step.chunkNames.length; j++) {
                         var chunkName = step.chunkNames[j];
                         
-                        let existingChunk = G.memory.getExistingChunk(chunkName, stack);
+                        let existingChunk = G.goalOutlineManager.getExistingChunk(chunkName, stack);
                         if(existingChunk) {
                             //for every goal in this chunk's goal map, update the workload
                             Object.keys(existingChunk.goalMap).forEach(function(key) {
@@ -205,6 +205,21 @@ class GoalOutlineManager
             }
         }
     }
+
+    getExistingChunk(chunkName, stack) {			
+		//first check to see if the chunk exists in WM
+		for (var i = 0; i < G.memory.workingmemory[stack - 1].length; i++) {
+			var chunk = G.memory.workingmemory[stack - 1][i];
+			if (chunk.chunkName == chunkName) return chunk;
+        }
+
+		//if not in WM, check to see if LTM
+		if (G.memory.longTermMemory[chunkName] != undefined) {
+			return(G.memory.longTermMemory[chunkName]);
+		}
+
+		return null;
+	}
 
 }
 
