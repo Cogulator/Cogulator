@@ -1,5 +1,5 @@
 ﻿class Chunk {
-	constructor(chnkNm, addTime, stckHght, rhrsls, prbbltyOfRcll, lineNo) {
+	constructor(chnkNm, addTime, stckHght, rhrsls, prbbltyOfRcll, clr, lineNo) {
 		this.chunkName = chnkNm;
 		this.addedAt = addTime;
 		this.stackDepthAtPush = stckHght;
