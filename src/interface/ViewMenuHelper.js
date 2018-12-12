@@ -13,6 +13,10 @@ class ViewMenuHelper {
 			G.viewMenuHelper.toggleGoalOutline();
 		})
 
+		ipcRenderer.on('Toggle WM Operator Workloads', (sender, arg) => {
+			G.viewMenuHelper.toggleWMWorkloads();
+		})
+
 		ipcRenderer.on('Find in Editor', (sender, arg) => {
 			G.viewMenuHelper.showFindControls();
 		})
@@ -71,6 +75,11 @@ class ViewMenuHelper {
 			$('#goal_outline').css('display', 'block');
 			G.goalOutlineManager.updateGoalOutline();
 		}
+	}
+
+	toggleWMWorkloads()
+	{
+		$( document ).trigger( "WM_OPERATOR_WORKLOADS" );
 	}
 
 	showFindControls()

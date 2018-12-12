@@ -42,10 +42,21 @@ class Memory {
 		this.rehearsals = []; //used by SubjectiveMentalWorkload
 		this.averageLoad = 0.0
 		this.overloadedStacks = [];
+
+		this.showWorkloadForWmOperators = false;
 		
 		$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) {
 		  G.memory.fire(taskTimeMS);
 		});
+
+		$( document ).on( "WM_OPERATOR_WORKLOADS", function(evt, taskTimeMS) {
+			if(G.memory.showWorkloadForWmOperators) {
+				G.memory.showWorkloadForWmOperators = false;
+			} else {
+				G.memory.showWorkloadForWmOperators = true;
+			}
+			G.memory.fire(G.gomsProcessor.totalTaskTime);
+		  });
 	}
 
 
@@ -127,6 +138,14 @@ class Memory {
 			//update the chunk's addedAt time and chunkStack since we just remembered it. the activation gets updated elsewhere
 			existingChunk.addedAt = atTime;
 			existingChunk.stackDepthAtPush = chunkStack;
+
+			if(this.showWorkloadForWmOperators)
+			{
+				//this code shows dots for wm operators
+				let activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), existingChunk.rehearsals)
+				this.pushRehearsals(chunkName, activation, chunkStack); //used by SubjectiveMentalWorkload
+				chunkAction = "pushed_rehearsals";
+			}
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
