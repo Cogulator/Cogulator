@@ -166,7 +166,11 @@ const template = [
 			},
 			{
 				role: 'togglefullscreen'
-			}
+			},
+            {
+                label: 'Toggle Line Numbers',
+				click () { mainWindow.webContents.send('View->Toggle Line Numbers'); }
+            }
 		]
 	},
 	{

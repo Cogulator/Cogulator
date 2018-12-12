@@ -2,12 +2,18 @@ class QutterManager { //Quill gutter
 	
 	constructor() {
 		this.lineHeight = 22; //dependent on set font size
-		
+		this.showLineNumbers = false
+        
+        //Handle line number toggle
+        ipcRenderer.on('View->Toggle Line Numbers', (sender, arg) => {
+            G.qutterManager.showLineNumbers = !G.qutterManager.showLineNumbers;
+            G.qutterManager.updateMarkers();
+		})
+        
 		//Sync Qutter scroll to Quill scroll
 		$( G.quill.scrollingContainer ).scroll(function(){
 			$('#gutter').scrollTop(this.scrollTop);
 		})
-		
 		
 		//recalculate as needed
 		$( window ).resize(function() {
@@ -69,25 +75,12 @@ class QutterManager { //Quill gutter
 	} 
 	
 	
-	numberLines() {
-		var txt = "";
-		let lines = G.quill.getLines(1, G.quill.getLength());
-		for (var i = 0; i < lines.length; i++) {
-			
-			txt += i.toString();
-			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
-			for (var j = 0; j < wrappedLines; j++) txt += "\n";
- 		}
-		
-		$('#gutter').text(txt);
-	}
-	
-	
 	updateMarkers() { 
 		let errors = G.errorManager.errors;
 		let tips = G.tipManager.tips;
 		let insertionLine = G.qutterManager.getInsertionLine();
 		var html = "";
+        var lineNumber = 1;
 		
 		//for each line, see if an error exists
 		let lines = G.quill.getLines(1, G.quill.getLength());
@@ -97,7 +90,7 @@ class QutterManager { //Quill gutter
 			for (var j = 0; j < errors.length; j++) {
 				let error = errors[j];
 				if (error.lineNo == i) {
-					html += "<div class='error_and_tip_marker_container'><div class='error_and_tip_marker red_background' data-type='error' data-hint='" + error.hint + "'>!</div></div>"
+					html += "<center><div class='error_and_tip_marker_container'><div class='error_and_tip_marker red_background' data-type='error' data-hint='" + error.hint + "'>!</div></div></center>"
 					foundErrorOrTip = true;
 					break;
 				}
@@ -109,9 +102,9 @@ class QutterManager { //Quill gutter
 					let tip = tips[j];
 					if (tip.lineNo == i) {
 						if (tip.fix != "") {
-							html += "<div class='error_and_tip_marker_container'><div class='fixable_tip_marker orange_background' data-type='tip' data-fix='" + tip.fix + "' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line='" + tip.lineNo + "'>?</div></div>"
+							html += "<center><div class='error_and_tip_marker_container'><div class='fixable_tip_marker orange_background' data-type='tip' data-fix='" + tip.fix + "' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line='" + tip.lineNo + "'>?</div></div></center>"
 						} else {
-							html += "<div class='error_and_tip_marker_container'><div class='error_and_tip_marker orange_background' data-type='tip' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line>?</div></div>"
+							html += "<center><div class='error_and_tip_marker_container'><div class='error_and_tip_marker orange_background' data-type='tip' data-id='" + tip.id + "' data-hint='" + tip.hint + "' data-line>?</div></div></center>"
 						}
 						
 						foundErrorOrTip = true;
@@ -123,23 +116,31 @@ class QutterManager { //Quill gutter
 			//if there are no errors or tips on the line, and it's the selected line, check to see if the line is blank. If so, add insertion marker
 			if (!foundErrorOrTip && insertionLine != null) {
 				if (insertionLine == i) {
-					html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
+					html += "<center><div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div></center>"
 					foundErrorOrTip = true;
 				}
 			}
 			
-			if (!foundErrorOrTip) { html += "<br>" };
+            if (!foundErrorOrTip) {
+                if (this.showLineNumbers) html += "<span class='line_number'>" + lineNumber + "</span><br>";
+                else                      html += "<br>";
+            }
+			
 			
 			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
 			for (var j = 0; j < wrappedLines - 1; j++) html += "<br>"; 
+            
+            lineNumber++;
 		}
 			
 		//Finish off side bar
 		if (insertionLine != null && insertionLine == lines.length) {
 			html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
+		} else if (this.showLineNumbers) {
+			html += "<span class='line_number'>" + lineNumber + "</span><br>";
 		} else {
-			html += "<br>"; 
-		}
+            html += "<br>"; 
+        }
 		
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);

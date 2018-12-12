@@ -1,3 +1,7 @@
+.line_number{
+    color:lightgrey;
+}
+
 .error_and_tip_marker_container {
 	width: 22px;
 	height: 22px;

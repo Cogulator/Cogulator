@@ -91,7 +91,7 @@ class InsertionCHI {
 
 			//method to find image you're adding and get its height (and change its height)
 			let insertedImage = $("img[src$='//:0']");
-			insertedImage.animate({height: "176px"}, 'fast');
+			insertedImage.animate({height: "176px", width: "1px"}, 'fast');
 		} else {
 			 top = top - height - 24; //place this above the line
 		}
@@ -284,7 +284,7 @@ class InsertionCHI {
 //		
 //		if (scrollbarWidth > 0) return $("#gutter").width() + $("#code").width() + 4;
 //		return ($("#gutter").width() + $("#code").width() + 18);
-		return ($("#gutter").width() + $("#code").width() + 23);
+		return ($("#gutter").width() + $("#code").width() + 12);
 	}
 	
 	
