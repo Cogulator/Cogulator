@@ -97,7 +97,8 @@ class WindowsTitleBar {
 					   {text: "Zoom Out", shortcut: "Ctrl+-"},
 					   {text: "Toggle Full Screen", shortcut: "F11"},
 					   {text: "Toggle Line Numbers", shortcut: ""},
-					   {text: "Toggle Goal Outline", shortcut: ""}
+					   {text: "Toggle Goal Outline", shortcut: ""},
+					   {text: "Find in Editor", shortcut: "Ctrl+F"}
 					  ];
 		let offset = $( '#windows_view_btn' ).offset();
 		G.windowsTitleBar.showMenuOptions(offset, options);
@@ -157,6 +158,7 @@ class WindowsTitleBar {
 		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
 		else if (rowTxt == "Toggle Line Numbers") G.viewMenuHelper.toggleLineNumbers();
 		else if (rowTxt == "Toggle Goal Outline") G.viewMenuHelper.toggleGoalOutline();
+		else if (rowTxt == "Find in EditorCtrl+F") G.viewMenuHelper.showFindControls();
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
 		else if (rowTxt == "Learn More") require('electron').shell.openExternal('http://cogulator.io');
