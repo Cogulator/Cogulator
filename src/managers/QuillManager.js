@@ -135,6 +135,16 @@ class QuillManager {
 
 		G.quill.setSelection(index, range);
 	}
+
+	selectText(lineNo, indexInLine, range)
+	{
+		let index = this.getLineIndex(lineNo);
+		if (index == null){
+			return;
+		} 
+
+		G.quill.setSelection(index + indexInLine, range);
+	}
 	
 }
 

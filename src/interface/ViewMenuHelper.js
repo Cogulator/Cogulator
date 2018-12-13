@@ -129,20 +129,7 @@ class ViewMenuHelper {
 		//save to check for changes later when using the next and prev buttons
 		this.currentTextToMatch = text;
 
-		let regexText = text;
-
-		//if match whole selected
-		if(this.findTextMatchWhole) {
-			regexText = "\\b" + text + "\\b";
-		}
-
-		//default: case insensitive
-		var regex = new RegExp(regexText, 'ig');
-
-		//if match case selected
-		if(this.findTextMatchCase) {
-			regex = new RegExp(regexText, 'g');
-		}
+		var regex = this.buildRegex(text, true);
 
 		this.lineNumberMatches = [];
 		this.currentShowingMatch = 0;
@@ -158,9 +145,19 @@ class ViewMenuHelper {
 			}
 
 			//find matches on each line
-			let match = line.match(regex);
-			if(match != null) {
-				this.lineNumberMatches.push(lineIndex);
+			let matches = line.match(regex);
+			if(matches != null) {
+				let offset = 0;
+				for(var i = 0; i < matches.length; i++) {
+
+					let linePart = line.substring(offset);
+					let regexForLine = this.buildRegex(text, false);
+					let match = linePart.match(regexForLine);
+
+					this.lineNumberMatches.push({text:text, lineIndex:lineIndex, index:(match.index + offset)});
+
+					offset += match.index + text.length;
+				}
 			}
 		}
 
@@ -171,13 +168,47 @@ class ViewMenuHelper {
 			$('#find_text_results').text((this.currentShowingMatch + 1) + " of " + this.lineNumberMatches.length);
 
 			//show the first match
-			G.quillManager.selectLine(this.lineNumberMatches[0]);
+			let lineNumberMatch = this.lineNumberMatches[0];
+
+			G.quillManager.selectText(lineNumberMatch.lineIndex, lineNumberMatch.index, lineNumberMatch.text.length); //TODO: change this to highlight the text instead of select it
 		}
 		else
 		{
 			//update the results text
 			$('#find_text_results').text("0 of 0");
 		}
+	}
+
+	buildRegex(text, global) {
+
+		let regexText = text;
+		//if match whole selected
+		if(this.findTextMatchWhole) {
+			regexText = "\\b" + text + "\\b";
+		}
+
+		if(global) {
+			//default: case insensitive
+			var regex = new RegExp(regexText, 'ig');
+
+			//if match case selected
+			if(this.findTextMatchCase) {
+				regex = new RegExp(regexText, 'g');
+			}
+
+			return regex;
+		} else {
+			//default: case insensitive
+			var regex = new RegExp(regexText, 'i');
+
+			//if match case selected
+			if(this.findTextMatchCase) {
+				regex = new RegExp(regexText);
+			}
+
+			return regex;
+		}
+		
 	}
 
 	showNextMatch()
@@ -195,7 +226,8 @@ class ViewMenuHelper {
 				matchToShow = 0;
 			}
 
-			G.quillManager.selectLine(this.lineNumberMatches[matchToShow]);
+			let match = this.lineNumberMatches[matchToShow];
+			G.quillManager.selectText(match.lineIndex, match.index, match.text.length); //TODO: change this to highlight the text instead of select it
 			this.currentShowingMatch = matchToShow;
 
 			//update the results text
@@ -219,7 +251,8 @@ class ViewMenuHelper {
 				matchToShow = this.lineNumberMatches.length - 1;
 			}
 
-			G.quillManager.selectLine(this.lineNumberMatches[matchToShow]);
+			let match = this.lineNumberMatches[matchToShow];
+			G.quillManager.selectText(match.lineIndex, match.index, match.text.length); //TODO: change this to highlight the text instead of select it
 			this.currentShowingMatch = matchToShow;
 		
 			//update the results text
