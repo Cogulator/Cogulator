@@ -4,6 +4,10 @@ class ViewMenuHelper {
 
 		this.lineNumberMatches = [];
 		this.currentShowingMatch = 0;
+		this.currentTextToMatch = "";
+
+		this.findTextMatchCase = false;
+		this.findTextMatchWhole = false;
 
         ipcRenderer.on('Toggle Line Numbers', (sender, arg) => {
 			G.viewMenuHelper.toggleLineNumbers();
@@ -31,6 +35,28 @@ class ViewMenuHelper {
 			{
 				G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
 			}
+		});
+
+		$('#find_text_match_case').click(function() {
+			if(!$('#find_text_match_case').hasClass('selected_border')) {
+				$('#find_text_match_case').addClass('selected_border');
+				G.viewMenuHelper.findTextMatchCase = true;
+			} else {
+				$('#find_text_match_case').removeClass('selected_border');
+				G.viewMenuHelper.findTextMatchCase = false;
+			}
+			G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
+		});
+
+		$('#find_text_match_whole').click(function() {
+			if(!$('#find_text_match_whole').hasClass('selected_border')) {
+				$('#find_text_match_whole').addClass('selected_border');
+				G.viewMenuHelper.findTextMatchWhole = true;
+			} else {
+				$('#find_text_match_whole').removeClass('selected_border');
+				G.viewMenuHelper.findTextMatchWhole = false;
+			}
+			G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
 		});
 
 		$('#find_text_prev').click(function() {
@@ -100,11 +126,28 @@ class ViewMenuHelper {
 			return;
 		}
 
-		var regex = new RegExp(text, 'g');
+		//save to check for changes later when using the next and prev buttons
+		this.currentTextToMatch = text;
+
+		let regexText = text;
+
+		//if match whole selected
+		if(this.findTextMatchWhole) {
+			regexText = "\\b" + text + "\\b";
+		}
+
+		//default: case insensitive
+		var regex = new RegExp(regexText, 'ig');
+
+		//if match case selected
+		if(this.findTextMatchCase) {
+			regex = new RegExp(regexText, 'g');
+		}
 
 		this.lineNumberMatches = [];
 		this.currentShowingMatch = 0;
 
+		//try to match each line of code
 		var codeLines = G.quill.getText().split("\n");
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			let line = codeLines[lineIndex];
@@ -139,6 +182,13 @@ class ViewMenuHelper {
 
 	showNextMatch()
 	{
+		//if someone types in the input, then clicks next, this will find that value
+		if($('#find_text_input').val() != this.currentTextToMatch) {
+			this.findTextInEditor($('#find_text_input').val());
+			return;
+		}
+
+		//find the next match
 		if(this.lineNumberMatches.length > 0) {
 			let matchToShow = this.currentShowingMatch + 1;
 			if(matchToShow >= this.lineNumberMatches.length) {
@@ -155,6 +205,13 @@ class ViewMenuHelper {
 
 	showPreviousMatch()
 	{
+		//if someone types in the input, then clicks next, this will find that value
+		if($('#find_text_input').val() != this.currentTextToMatch) {
+			this.findTextInEditor($('#find_text_input').val());
+			return;
+		}
+
+		//find the previous match
 		if(this.lineNumberMatches.length > 0) {
 
 			let matchToShow = this.currentShowingMatch - 1;
