@@ -50,11 +50,18 @@ class Memory {
 
 
 	fire(taskTimeMS) {
-		this.workingmemory.length = 0;
-		this.overloadedStacks.length = 0;
-		this.rehearsals.length = 0;
+        //reset everything
+		this.interleavedSteps.length = 0;
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
-		
+		this.fromStack = 0;
+		this.longTermMemory.length = 0;
+
+		this.workingmemory.length = 0;
+		this.rehearsals.length = 0;
+		this.averageLoad = 0.0
+		this.overloadedStacks.length = 0;
+        
+		//start processing
 		var intersteps = G.gomsProcessor.intersteps;
 
 		var totalCycles = (Math.round(taskTimeMS / 50) * 50) / 50;
