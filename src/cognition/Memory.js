@@ -122,9 +122,7 @@ class Memory {
 			}
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
 			this.addRehearsalToChunk(chunkName, chunkStack);
-			//update the chunk's addedAt time and chunkStack since we just remembered it. the activation gets updated elsewhere
-			existingChunk.addedAt = atTime;
-			existingChunk.stackDepthAtPush = chunkStack;
+			//existingChunk.stackDepthAtPush = chunkStack; //update with activation available at time chunk is rehearsed
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
@@ -235,14 +233,14 @@ class Memory {
 	//based on ACT-R & Workload Curve paper
 	getActivation(cogLoad, timeChunkInMemoryInSeconds, rehearsals) {
 		var m = Math.log(rehearsals/Math.sqrt(timeChunkInMemoryInSeconds)); //activation
-            //was: m = (m + 1 / cogLoad) - 1
-			m = m + (1 / cogLoad) - 1; //activation divided among all chunks
+            m = (m + 1 / cogLoad) - 1
+			//m = m + (1 / cogLoad) - 1; //activation divided among all chunks
 		return m;
 	}
 
 
 	addRehearsalToChunk(chunkName, stack) {
-		for (var i; i < this.workingmemory[stack - 1].length; i++) {
+		for (var i = 0; i < this.workingmemory[stack - 1].length; i++) {
 			var chunk = this.workingmemory[stack - 1][i];
 			if (chunk.chunkName == chunkName) {
 				chunk.rehearsals++;
@@ -299,14 +297,14 @@ class Memory {
 			if ((resource == "see" || resource == "hear" || resource == "cognitive") && operator != "saccade" && operator != "verify") {
 				return true;
 			}
-		} else {
-			if (operator == "store" || operator == "recall") {
-				return true;
-			}
-		}
+		} 
+			
+        if (operator == "store" || operator == "recall") {
+            return true;
+        }
+        
 		return false;
 	}
-
 
 	
 	getExistingChunk(chunkName, stack) {			
