@@ -260,7 +260,9 @@ var ganttSketch = function(s) {
 	s.setScale = function() {
 		if (scale < scaleTarget) scale += 1000;
 		if (scale > scaleTarget) scale -= 1000;
-		
+        
+        if (scale != scaleTarget) s.loop();
+        else                      s.noLoop();
 	}
 	
 	s.drawBackground = function() {
@@ -919,7 +921,6 @@ var ganttSketch = function(s) {
 
 	s.mouseMoved = function () {
 		if (mouseOverGantt) {
-            
 			hoverChunk = undefined;
 			if (G.memoryChunks) {
 				for (var i = 0; i < G.memoryChunks.length; i++) {
@@ -942,8 +943,8 @@ var ganttSketch = function(s) {
 		if (mouseOverGantt) {
 			if (evt.delta < 0) scaleTarget = Math.max(1000, scale - 5000);
 			else 			   scaleTarget = Math.min(60000, scale + 5000);
-
-			s.draw();
+            
+            s.draw();
 		}
 	}
 	

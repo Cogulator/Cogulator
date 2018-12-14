@@ -54,7 +54,7 @@ class Memory {
 		this.interleavedSteps.length = 0;
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
 		this.fromStack = 0;
-		this.longTermMemory.length = 0;
+		this.longTermMemory = [];
 
 		this.workingmemory.length = 0;
 		this.rehearsals.length = 0;
@@ -72,15 +72,14 @@ class Memory {
 		
 		//populate a working memory array with empty arrays
 		for (var i = 0; i < totalCycles + 1; i++) this.workingmemory.push([]); ; //initialize the stacks within memory (one for each 50ms cycle)
-
+        
 		this.interleavedSteps.length = 0;
 		for (var i = 0; i < intersteps.length; i++) this.interleavedSteps.push(intersteps[i]);
 
-		//this.interleavedSteps.sortOn("endTime", Array.NUMERIC);
 		this.interleavedSteps.sort(function(a, b){
 			return a.endTime-b.endTime;
 		});
-
+        
 		for (var i = 0; i < this.interleavedSteps.length; i++) {
 			var step = this.interleavedSteps[i];
 			var stackToAddChunk = this.findChunkStackAtTime(step.endTime);
@@ -110,7 +109,7 @@ class Memory {
 	pushChunk(isWmOperator, operator, chunkName, chunkStack, step) {
 		var rehearsals = this.initialRehearsal;
 		if (operator == "recall") rehearsals = 10; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsals that's fairly high
-
+        
 		var chunkAction = ""
 		var atTime = step.endTime;
 
@@ -127,7 +126,9 @@ class Memory {
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
 				this.colorPalette.shift(); // remove the current color from begninning of list
 			}
+            this.longTermMemory[chunk.chunkName] = chunk;
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
+            this.longTermMemory[chunkName] = existingChunk;
 			this.addRehearsalToChunk(chunkName, chunkStack);
 			//existingChunk.stackDepthAtPush = chunkStack; //update with activation available at time chunk is rehearsed
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
@@ -182,19 +183,19 @@ class Memory {
 	}		
 
 
-	//Method to pop oldest chunk
+	//Method to pop weakest chunk.  Used to be the oldest chunk.
 	popChunk(cycleIndex) {
-		var indexForOldestChunk = -1
-		var earliestTime = 1000000000.0;
+        var indexForWeakestChunk = -1
+		var weakestActivation = 1000000000.0;
 
 		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
-			if (this.workingmemory[cycleIndex][i].addedAt < earliestTime) {
-				earliestTime = this.workingmemory[cycleIndex][i].addedAt;
-				indexForOldestChunk = i;
+			if (this.workingmemory[cycleIndex][i].activation < weakestActivation) {
+				weakestActivation = this.workingmemory[cycleIndex][i].activation;
+				indexForWeakestChunk = i;
 			}
 		}
 
-		this.workingmemory[cycleIndex].splice(indexForOldestChunk, 1);
+		this.workingmemory[cycleIndex].splice(indexForWeakestChunk, 1);
 	}
 
 
@@ -251,7 +252,7 @@ class Memory {
 			var chunk = this.workingmemory[stack - 1][i];
 			if (chunk.chunkName == chunkName) {
 				chunk.rehearsals++;
-				break;
+				return;
 			}
 		}
 	}
@@ -323,12 +324,13 @@ class Memory {
 
 		//if not in WM, check to see if LTM
 		if (this.longTermMemory[chunkName] != undefined) {
-			var stck = stack
-			if (stck >= this.workingmemory.length) stck = this.workingmemory.length - 1;
-			this.workingmemory[stck].push(this.longTermMemory[chunkName]);
-			return(this.longTermMemory[chunkName]);
+            if (this.workingmemory[stack - 1].length >= 7) {
+                this.popChunk(stack - 1);
+            }
+            this.workingmemory[stack - 1].push(this.longTermMemory[chunkName]);
+            return this.longTermMemory[chunkName]
 		}
-
+        
 		return null;
 	}
 
