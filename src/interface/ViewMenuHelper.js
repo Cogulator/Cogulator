@@ -4,6 +4,10 @@ class ViewMenuHelper {
 
 		this.lineNumberMatches = [];
 		this.currentShowingMatch = 0;
+		this.currentTextToMatch = "";
+
+		this.findTextMatchCase = false;
+		this.findTextMatchWhole = false;
 
         ipcRenderer.on('Toggle Line Numbers', (sender, arg) => {
 			G.viewMenuHelper.toggleLineNumbers();
@@ -11,6 +15,10 @@ class ViewMenuHelper {
         
         ipcRenderer.on('Toggle Goal Outline', (sender, arg) => {
 			G.viewMenuHelper.toggleGoalOutline();
+		})
+
+		ipcRenderer.on('Toggle WM Operator Workloads', (sender, arg) => {
+			G.viewMenuHelper.toggleWMWorkloads();
 		})
 
 		ipcRenderer.on('Find in Editor', (sender, arg) => {
@@ -27,6 +35,28 @@ class ViewMenuHelper {
 			{
 				G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
 			}
+		});
+
+		$('#find_text_match_case').click(function() {
+			if(!$('#find_text_match_case').hasClass('selected_border')) {
+				$('#find_text_match_case').addClass('selected_border');
+				G.viewMenuHelper.findTextMatchCase = true;
+			} else {
+				$('#find_text_match_case').removeClass('selected_border');
+				G.viewMenuHelper.findTextMatchCase = false;
+			}
+			G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
+		});
+
+		$('#find_text_match_whole').click(function() {
+			if(!$('#find_text_match_whole').hasClass('selected_border')) {
+				$('#find_text_match_whole').addClass('selected_border');
+				G.viewMenuHelper.findTextMatchWhole = true;
+			} else {
+				$('#find_text_match_whole').removeClass('selected_border');
+				G.viewMenuHelper.findTextMatchWhole = false;
+			}
+			G.viewMenuHelper.findTextInEditor($('#find_text_input').val());
 		});
 
 		$('#find_text_prev').click(function() {
@@ -73,6 +103,11 @@ class ViewMenuHelper {
 		}
 	}
 
+	toggleWMWorkloads()
+	{
+		$( document ).trigger( "WM_OPERATOR_WORKLOADS" );
+	}
+
 	showFindControls()
 	{
 		$( "#find_text_container" ).slideDown( "fast" );
@@ -91,11 +126,15 @@ class ViewMenuHelper {
 			return;
 		}
 
-		var regex = new RegExp(text, 'g');
+		//save to check for changes later when using the next and prev buttons
+		this.currentTextToMatch = text;
+
+		var regex = this.buildRegex(text, true);
 
 		this.lineNumberMatches = [];
 		this.currentShowingMatch = 0;
 
+		//try to match each line of code
 		var codeLines = G.quill.getText().split("\n");
 		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			let line = codeLines[lineIndex];
@@ -106,9 +145,19 @@ class ViewMenuHelper {
 			}
 
 			//find matches on each line
-			let match = line.match(regex);
-			if(match != null) {
-				this.lineNumberMatches.push(lineIndex);
+			let matches = line.match(regex);
+			if(matches != null) {
+				let offset = 0;
+				for(var i = 0; i < matches.length; i++) {
+
+					let linePart = line.substring(offset);
+					let regexForLine = this.buildRegex(text, false);
+					let match = linePart.match(regexForLine);
+
+					this.lineNumberMatches.push({text:text, lineIndex:lineIndex, index:(match.index + offset)});
+
+					offset += match.index + text.length;
+				}
 			}
 		}
 
@@ -119,7 +168,9 @@ class ViewMenuHelper {
 			$('#find_text_results').text((this.currentShowingMatch + 1) + " of " + this.lineNumberMatches.length);
 
 			//show the first match
-			G.quillManager.selectLine(this.lineNumberMatches[0]);
+			let lineNumberMatch = this.lineNumberMatches[0];
+
+			G.quillManager.selectText(lineNumberMatch.lineIndex, lineNumberMatch.index, lineNumberMatch.text.length); //TODO: change this to highlight the text instead of select it
 		}
 		else
 		{
@@ -128,15 +179,55 @@ class ViewMenuHelper {
 		}
 	}
 
+	buildRegex(text, global) {
+
+		let regexText = text;
+		//if match whole selected
+		if(this.findTextMatchWhole) {
+			regexText = "\\b" + text + "\\b";
+		}
+
+		if(global) {
+			//default: case insensitive
+			var regex = new RegExp(regexText, 'ig');
+
+			//if match case selected
+			if(this.findTextMatchCase) {
+				regex = new RegExp(regexText, 'g');
+			}
+
+			return regex;
+		} else {
+			//default: case insensitive
+			var regex = new RegExp(regexText, 'i');
+
+			//if match case selected
+			if(this.findTextMatchCase) {
+				regex = new RegExp(regexText);
+			}
+
+			return regex;
+		}
+		
+	}
+
 	showNextMatch()
 	{
+		//if someone types in the input, then clicks next, this will find that value
+		if($('#find_text_input').val() != this.currentTextToMatch) {
+			this.findTextInEditor($('#find_text_input').val());
+			return;
+		}
+
+		//find the next match
 		if(this.lineNumberMatches.length > 0) {
 			let matchToShow = this.currentShowingMatch + 1;
 			if(matchToShow >= this.lineNumberMatches.length) {
 				matchToShow = 0;
 			}
 
-			G.quillManager.selectLine(this.lineNumberMatches[matchToShow]);
+			let match = this.lineNumberMatches[matchToShow];
+			G.quillManager.selectText(match.lineIndex, match.index, match.text.length); //TODO: change this to highlight the text instead of select it
 			this.currentShowingMatch = matchToShow;
 
 			//update the results text
@@ -146,6 +237,13 @@ class ViewMenuHelper {
 
 	showPreviousMatch()
 	{
+		//if someone types in the input, then clicks next, this will find that value
+		if($('#find_text_input').val() != this.currentTextToMatch) {
+			this.findTextInEditor($('#find_text_input').val());
+			return;
+		}
+
+		//find the previous match
 		if(this.lineNumberMatches.length > 0) {
 
 			let matchToShow = this.currentShowingMatch - 1;
@@ -153,7 +251,8 @@ class ViewMenuHelper {
 				matchToShow = this.lineNumberMatches.length - 1;
 			}
 
-			G.quillManager.selectLine(this.lineNumberMatches[matchToShow]);
+			let match = this.lineNumberMatches[matchToShow];
+			G.quillManager.selectText(match.lineIndex, match.index, match.text.length); //TODO: change this to highlight the text instead of select it
 			this.currentShowingMatch = matchToShow;
 		
 			//update the results text

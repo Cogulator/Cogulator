@@ -175,6 +175,10 @@ const template = [
 				click () { mainWindow.webContents.send('Toggle Goal Outline'); }
 			},
 			{
+				label: 'Toggle WM Operator Workloads',
+				click () { mainWindow.webContents.send('Toggle WM Operator Workloads'); }
+			},
+			{
 				label: 'Find in Editor',
 				accelerator: 'CmdOrCtrl+F',
 				click () { mainWindow.webContents.send('Find in Editor'); }

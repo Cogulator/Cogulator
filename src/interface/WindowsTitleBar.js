@@ -98,6 +98,7 @@ class WindowsTitleBar {
 					   {text: "Toggle Full Screen", shortcut: "F11"},
 					   {text: "Toggle Line Numbers", shortcut: ""},
 					   {text: "Toggle Goal Outline", shortcut: ""},
+					   {text: "Toggle WM Operator Workloads", shortcut: ""},
 					   {text: "Find in Editor", shortcut: "Ctrl+F"}
 					  ];
 		let offset = $( '#windows_view_btn' ).offset();
@@ -158,6 +159,7 @@ class WindowsTitleBar {
 		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
 		else if (rowTxt == "Toggle Line Numbers") G.viewMenuHelper.toggleLineNumbers();
 		else if (rowTxt == "Toggle Goal Outline") G.viewMenuHelper.toggleGoalOutline();
+		else if (rowTxt == "Toggle WM Operator Workloads") G.viewMenuHelper.toggleWMWorkloads();
 		else if (rowTxt == "Find in EditorCtrl+F") G.viewMenuHelper.showFindControls();
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
