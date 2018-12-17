@@ -3,6 +3,7 @@ class SolarizeManager {
 	constructor() {
 		this.selected = "";
 		this.goalClr = '#D33682'; //magenta
+        this.referenceClr = '#6C71C4'; //violet
 		this.operatorClr = '#268BD2'; //blue
 		this.chunkClr = '#2BA198'; //cyan
 		this.timeClr = '#859900'; //green
@@ -31,7 +32,8 @@ class SolarizeManager {
 	
 	setRegexs() {
 		this.regexs = [];
-		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also|@goal|@also)\b/gmi, clr: this.goalClr }); //goals 
+        this.regexs.push({ exp: /^[\.| ]{0,15}(@goal|@also)\b/gmi, clr: this.referenceClr }); //references 
+		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>]+>/gmi, clr: this.chunkClr }); //working memory

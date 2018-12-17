@@ -119,12 +119,7 @@ class GomsProcessor {
                 for (var j = 0; j < i; j++) {
                     let testLine = referencedLines[j];
                     
-                    if (testLine.toLowerCase().includes("@goal") || testLine.toLowerCase().includes("@also")) {
-                        //we don't allow nested references... can lead to an infinite loop
-                        G.errorManager.errors.push(new GomsError("nested_reference", i));
-                        break;
-                    }
-                                                        
+                    //This might be the referenced goal.  Will test further if "if" is true
                     if ( testLine.toLowerCase().includes(referenceGoalInfo.goal.toLowerCase()) ) {
                         let fullKeyword = keyword.replace("@", "")
                         let fullGoalInfo = this.pullGoalAndChunks(testLine, fullKeyword);
@@ -137,7 +132,8 @@ class GomsProcessor {
                         
                         //Copy the goal steps for the goal the reference points to
                         for (var k = j + 1; k < i; k++) {
-                            let goms = referencedLines[k];
+                            let line = referencedLines[k];
+                            var goms = line;
                             let lineIndents = this.indentCount(goms);
                             
                             //find and replace chunk names as necessary
@@ -148,6 +144,11 @@ class GomsProcessor {
                             this.lineTracker.push(i);
                             
                             if (lineIndents > goalIndents) {
+                                // Make sure this isn't a nested reference
+                                if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) {
+                                    G.errorManager.errors.push(new GomsError("nested_reference", i));
+                                    break;
+                                }
                                 codeLines.push(goms);
                             } else  {
                                 break;
