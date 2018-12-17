@@ -35,6 +35,10 @@ class GomsError {
 				return "Goal does not exist!"
 			case "infinite_loop":
 				return "I ran into an infinite loop!"
+            case "reference_not_found":
+				return "Couldn&#39;t find a goal that matched this reference."
+            case "nested_reference":
+				return "Currently don&#39;t allow a reference inside a reference."
 			default:
 				text = "";
 		}

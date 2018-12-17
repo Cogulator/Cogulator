@@ -42,6 +42,8 @@ class GomsProcessor {
 
 		this.stateTable = []; //dictionary
 		this.goalTable = []; //dictionary
+        
+        this.lineTracker = []; //array, where index is the actual line and the value is the line in the nonreferenced GOMS
 				
 		$( document ).on( "Model_Update_MultiLine", function() {
 			G.gomsProcessor.process();
@@ -73,6 +75,8 @@ class GomsProcessor {
 		this.threadTracker = []; //dictionary //hashmap that tracks that active goal for each thread
 		this.resourceAvailability = []; //dictionary
 		this.threadAvailability = []; //dictionary
+        
+        this.lineTracker.length = 0;
 
 		//(<resource name>, <time resource comes available>)
 		var to = new TimeObject(0, 0);
@@ -84,17 +88,124 @@ class GomsProcessor {
 		this.resourceAvailability["see"] = seeArray;
 		this.resourceAvailability["cognitive"] = cognitiveArray;
 		this.resourceAvailability["hands"] = handsArray;
-
-		//for (var errorKey: Object in $.errors) delete $.errors[errorKey]; //clear out all $.errors
-		//for (var stateKey: Object in stateTable) delete stateTable[stateKey]; //clear out all $.errors
-		//for (var goalKey: Object in goalTable) delete goalTable[goalKey]; //clear out all $.errors
-
-		this.generateStepsArray();
+        
+        let codeLines = this.generateReferencelessGOMS(); //takes references (functions) and puts into full code.  Calls generate
+		this.generateStepsArray(codeLines);
 		if (this.steps.length > 0) this.processStepsArray(); //processes and then interleaves steps
 		
 		this.totalTaskTime = Math.max.apply(Math, this.intersteps.map(function(o){ return o.endTime; }));
 		$( document ).trigger( "GOMS_Processed", [this.totalTaskTime] );
 	}
+    
+    
+    //@References refer to Goals earlier in the code
+    //This function replaces @References with the full GOMS code
+    generateReferencelessGOMS(){
+        var currentLine = 0;
+        
+        var referencedLines = G.quill.getText().split("\n");
+        var codeLines = [];
+        for (var i = 0; i < referencedLines.length; i++) {
+            let line = referencedLines[i];
+            
+            //If this is a @Reference, find it's match earlier in the code and replace with full code
+            if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) { //this is a reference line
+                var keyword = "@goal"
+                if (line.toLowerCase().includes("@also")) keyword = "@also";
+                let referenceGoalInfo = this.pullGoalAndChunks(line, keyword);
+                
+                //look for the goal that the reference points to
+                var found = false
+                for (var j = 0; j < i; j++) {
+                    let testLine = referencedLines[j];
+                    
+                    if (testLine.toLowerCase().includes("@goal") || testLine.toLowerCase().includes("@also")) {
+                        //we don't allow nested references... can lead to an infinite loop
+                        G.errorManager.errors.push(new GomsError("nested_reference", i));
+                        break;
+                    }
+                                                        
+                    if ( testLine.toLowerCase().includes(referenceGoalInfo.goal.toLowerCase()) ) {
+                        let fullKeyword = keyword.replace("@", "")
+                        let fullGoalInfo = this.pullGoalAndChunks(testLine, fullKeyword);
+                        
+                        if (referenceGoalInfo.goal.toLowerCase() != fullGoalInfo.goal.toLowerCase()) continue;
+                        found = true;
+                    
+                        let goalIndents = this.indentCount(testLine);
+                        codeLines.push(testLine);
+                        
+                        //Copy the goal steps for the goal the reference points to
+                        for (var k = j + 1; k < i; k++) {
+                            let goms = referencedLines[k];
+                            let lineIndents = this.indentCount(goms);
+                            
+                            //find and replace chunk names as necessary
+                            for (var index = 0; index < fullGoalInfo.chunks.length; index++) {
+                                goms = goms.replace(fullGoalInfo.chunks[index], referenceGoalInfo.chunks[index]);
+                            }
+                            
+                            this.lineTracker.push(i);
+                            
+                            if (lineIndents > goalIndents) {
+                                codeLines.push(goms);
+                            } else  {
+                                break;
+                            }                  
+                        }
+
+                        break;
+                    }
+                }
+            
+                
+                if (!found) G.errorManager.errors.push(new GomsError("reference_not_found", i));
+                
+            } else {
+                codeLines.push(line);
+                this.lineTracker.push(i);
+            }
+        }
+        
+//        console.log("🤷‍ HERE's WHAT I GOT", codeLines.length);
+//        for (var i = 0; i < codeLines.length; i++) {
+//            console.log(codeLines[i]);
+//        }
+
+        
+//        for (var i = 0; i < this.lineTracker.length; i++) {
+//            console.log("LINE", i, this.lineTracker[i]);
+//        }
+        
+        return codeLines;
+    }
+    
+    
+    pullGoalAndChunks(line, keyword) {
+        var goal = line;
+        
+        //identify chunkNames, if any
+        var matches = [];
+        var match;
+        let regex = /<[^>]+>/g;
+        while( (match = regex.exec(goal)) != null ) matches.push( match[0] );
+        for (var i = 0; i < matches.length; i++) goal = goal.replace(matches[i], "");
+
+        goal = goal.toLowerCase().replace(keyword, "");
+        goal = goal.replace(":", "");
+        goal = goal.replace(/\./g, "");
+
+        return {goal: goal.trim(), chunks: matches};
+    }
+    
+    
+    indentCount(line) {
+        let regex = /^[\.| ]{0,15}/
+        let match = regex.exec(line);
+        if (match.length == 1) return line.split(".").length-1;
+        
+        return 0;
+    }
 
 
 	// Purpose: Iterates through the model error check, and create the "Step" object.
@@ -102,26 +213,25 @@ class GomsProcessor {
 	// Output: None
 	//
 	// Notes: Cog+ modifies this method heavily.  New operators modify the line pointer during execution
-	generateStepsArray() {
+	generateStepsArray(codeLines) {
 		this.stateTable = []; //dictionary
 		this.goalTable = []; //dictionary
 
-		var codeLines = G.quill.getText().split("\n");
+		//var codeLines = G.quill.getText().split("\n");
 		var beginIndex = 0;
 		var endIndex = codeLines[0].length;
 		var jumps = 0;
-		//G.solarize.solarizeAll();
-		for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
+
+        for (var lineIndex = 0; lineIndex < codeLines.length; lineIndex++) {
 			var line = codeLines[lineIndex];
 			var parsed = this.parser.parseControl(line);
 			if (parsed.components != null && parsed.error == null) {
 				var components = parsed.components;
-				// console.log(parsed.components);
-				// this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
-				var tokens = components.label.split(' ').filter(String);
+
+                var tokens = components.label.split(' ').filter(String);
 				tokens.unshift(components.operator)
-				// tokens = tokens.filter(noEmpty);
-				if(tokens.length > 0){
+
+                if(tokens.length > 0){
 					switch (tokens[0].toLowerCase()) {
 						case "createstate":
 							if (!this.hasError(tokens, lineIndex)) this.createState(tokens[1], tokens[2]);
@@ -151,6 +261,7 @@ class GomsProcessor {
 				this.processBaseCogulatorLine(this.parser.parse(line), lineIndex);
 			}
 		}
+        
 		this.removeGoalSteps();
 		this.setPrevLineNo();
 	}
@@ -171,27 +282,23 @@ class GomsProcessor {
 	//		  Empty (whitespace) tokens are removed before processing so that no field will be empty
 	hasError(tokens, lineNum, jumps = 0) {
 		var lines = G.quill.getText().split("\n");
-		// tokens = tokens.filter(noEmpty);
-		var operator = this.trimColon(tokens[0].toLowerCase());
-		if (operator == "createstate") {
+        var operator = this.trimColon(tokens[0].toLowerCase());
+		
+        if (operator == "createstate") {
 			// Expected: CreateState name value
 			if (tokens.length != 3) {
-				// console.log("I was expecting 2 arguments.")
 				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
 				return true;
 			} else if (this.stateTable[tokens[1]] != undefined) {
 				G.errorManager.errors.push(new GomsError("invalid_var_create", lineNum));
-				// console.log("'"+tokens[1]+"' already exists.");
 				return true;
 			}
 		} else if (operator == "setstate") {
 			// Expected: SetState name value
 			if(tokens.length != 3){
 				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
-				// console.log("I was expecting 2 arguments.")
 				return true;
 			} else if(this.stateTable[tokens[1]] == undefined){
-				// console.log("'"+tokens[1]+"' does not exist.")
 				G.errorManager.errors.push(new GomsError("invalid_var_dne", lineNum));
 				return true;
 			} 
@@ -250,20 +357,12 @@ class GomsProcessor {
 	// noEmpty(item: * , index: int, array: Array) {
 	// 	return item != "";
 	// }
-
-
 	// Purpose: removes all colons from a string to make it be optional for parsing
 	// Input: String: operator string
 	//	Example: "CreateState: goal_name value"
 	//  Output: String: trimmed operator 
 	//	Example: "CreateState goal_name value"
 	trimColon(string) { //return String
-		// var trimmed = string;
-		// var colon = trimmed.indexOf(':');
-		// while (colon != -1) {
-		// 	trimmed = trimmed.substring(0, colon) + trimmed.substring(colon + 1, trimmed.length);
-		// 	colon = trimmed.indexOf(':');
-		// }
 		return string.replace(":","").toLowerCase();
 	}
 
@@ -324,7 +423,7 @@ class GomsProcessor {
 								   this.getOperatorTime(stepOperator, stepTime, stepLabel), 
 								   this.getOperatorResource(stepOperator), 
 								   stepLabel, 
-								   lineIndex, 
+								   this.lineTracker[lineIndex], //lineIndex is in reference free version of the GOMS... This'll point back to the actual text in the code
 								   0, 
 								   chunkNames);
 			this.steps.push(s);

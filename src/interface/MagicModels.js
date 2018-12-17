@@ -772,6 +772,8 @@ var magicModelsSketch = function(s) {
 
 	
 	s.mouseReleased = function() {
+        if (G.magicModels.visible == false) return;
+        
 		mouseUpXY = new Point(s.mouseX, s.mouseY);
 		let d = new Date();
 		let elapsedTime = d.getTime() - clickStartTime;

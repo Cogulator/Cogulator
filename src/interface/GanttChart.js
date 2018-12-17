@@ -77,8 +77,8 @@ G.ganttManager = new GanttManager();
 
 
 
-function ChunkRect (chunk, id, x, y, w, h) {
-	this.chunk = chunk;
+function GanttRect (name, id, x, y, w, h) {
+	this.name = name;
 	this.id = id;
     this.x = x;
     this.y = y;
@@ -418,7 +418,7 @@ var ganttSketch = function(s) {
 	s.drawGantt = function(windowStartTime) {
 		s.textAlign(s.LEFT);
 
-		G.ganttChunks = [];
+		G.ganttLines = [];
 		
 		//loop through each thread
 		var colorIndex = 0;
@@ -470,20 +470,20 @@ var ganttSketch = function(s) {
 				s.noStroke();
 				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) {
 					s.text(step.time, stepX1 + tickHeight, stepY - 3);
-					ganttRect = new ChunkRect(step, "", 0, 0, 0, 0);
+					ganttRect = new GanttRect(step, "", 0, 0, 0, 0);
 					ganttRect.x = stepX1 + tickHeight;
 					ganttRect.y = stepY - 18;
 				} 
-				let operatorLabel = s.fitTextToSpace(step.operator, stepX2 - stepX1 - 15)
+				
+                let operatorLabel = s.fitTextToSpace(step.operator, stepX2 - stepX1 - 15)
 				if (operatorLabel != "") {
 					s.text(operatorLabel, stepX1 + tickHeight, stepY + 15);
 					
-					if(ganttRect != undefined)
-					{
+					if (ganttRect != undefined) {
 						let gWidth = step.time;
 						ganttRect.width = s.textWidth(gWidth.toString());
 						ganttRect.height = (stepY + 15) - ganttRect.y;
-						G.ganttChunks.push(ganttRect);
+						G.ganttLines.push(ganttRect);
 					}
 				}
 				
@@ -553,7 +553,7 @@ var ganttSketch = function(s) {
 				s.rect(stackX, chunkY, chunkWidth, chunkHeight);
 
 				chunk.time = time;
-				G.memoryChunks.push(new ChunkRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
+				G.memoryChunks.push(new GanttRect(chunk, i + "-" + j, stackX, chunkY, chunkWidth, chunkHeight));
 			}
 		}
 
@@ -900,17 +900,17 @@ var ganttSketch = function(s) {
 		dragging = false;
 		s.loopOff();
 
-		for (var i = 0; i < G.ganttChunks.length; i++) {
-			if (G.ganttChunks[i].contains(s.mouseX, s.mouseY)) {
+		for (var i = 0; i < G.ganttLines.length; i++) {
+			if (G.ganttLines[i].contains(s.mouseX, s.mouseY)) {
 				//the step is stored in the chunk member here
-				G.quillManager.selectLine(G.ganttChunks[i].chunk.lineNo);
+				G.quillManager.selectLine(G.ganttLines[i].name.lineNo);
 				break;
 			}
 		}
 		
 		for (var i = 0; i < G.memoryChunks.length; i++) {
 			if(G.memoryChunks[i].contains(s.mouseX, s.mouseY)) {
-				G.quillManager.selectLine(G.memoryChunks[i].chunk.lineNumber);
+				G.quillManager.selectLine(G.memoryChunks[i].name.lineNumber);
 				break;
 			}
 		}
@@ -989,7 +989,7 @@ var ganttSketch = function(s) {
         //draw connecting line
         var ex = hoverChunk.x + hoverChunk.width / 2;
         var why = hoverChunk.y + hoverChunk.height / 2;
-        s.stroke(hoverChunk.chunk.color);
+        s.stroke(hoverChunk.name.color);
         s.line(ex, why, ex, infoY);
         
         
@@ -1001,7 +1001,7 @@ var ganttSketch = function(s) {
         //draw background
             s.fill(backGroundClr);
             s.rect(0, 0, infoWidth, infoHeight, 3);
-            s.fill( s.colorAlpha(hoverChunk.chunk.color, 0.03) ); //shade background
+            s.fill( s.colorAlpha(hoverChunk.name.color, 0.03) ); //shade background
             s.rect(0, 0, infoWidth, infoHeight, 3);
         
         //draw labels
@@ -1029,9 +1029,9 @@ var ganttSketch = function(s) {
             s.text("rehearsals", rightX, rowThreeY);
         
         //draw values
-            let recall = Number.parseInt(Number.parseFloat(hoverChunk.chunk.probabilityOfRecall).toPrecision(3) * 100)
-            let rehearsals = hoverChunk.chunk.rehearsals
-            let timeInMemory = hoverChunk.chunk.time - hoverChunk.chunk.addedAt; //milliseconds
+            let recall = Number.parseInt(Number.parseFloat(hoverChunk.name.probabilityOfRecall).toPrecision(3) * 100)
+            let rehearsals = hoverChunk.name.rehearsals
+            let timeInMemory = hoverChunk.name.time - hoverChunk.name.addedAt; //milliseconds
             let activation = Math.log(rehearsals/Math.sqrt(timeInMemory / 1000)); //activation 
         
             s.textSize(13);
@@ -1039,9 +1039,9 @@ var ganttSketch = function(s) {
             //left side
             //- chunk name
             s.textAlign(s.LEFT);
-            s.fill(hoverChunk.chunk.color);
+            s.fill(hoverChunk.name.color);
             s.textFont(fontBold);
-            s.text(hoverChunk.chunk.chunkName, leftX, rowOneY - 10); 
+            s.text(hoverChunk.name.chunkName, leftX, rowOneY - 10); 
             
             //- activation
             s.fill(fontAndScaleClr);
@@ -1056,11 +1056,11 @@ var ganttSketch = function(s) {
             //right side
             s.textAlign(s.RIGHT);
             s.text(recall + "%", rightX, rowTwoY - 10);
-            s.text(hoverChunk.chunk.rehearsals, rightX, rowThreeY - 10);
+            s.text(hoverChunk.name.rehearsals, rightX, rowThreeY - 10);
             
         //draw pie chart
-            s.fill(hoverChunk.chunk.color);
-            s.arc(infoWidth - 20, 15, 20, 20, s.radians(1), s.radians(hoverChunk.chunk.probabilityOfRecall * 360));
+            s.fill(hoverChunk.name.color);
+            s.arc(infoWidth - 20, 15, 20, 20, s.radians(1), s.radians(hoverChunk.name.probabilityOfRecall * 360));
             
         s.pop();
 	}

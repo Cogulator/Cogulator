@@ -52,9 +52,10 @@ class LineParser {
 		components.indents = indentCountAndRemove.indents;
 		line = indentCountAndRemove.line;
 		
-		//look to see if this is a control line
+		//look to see if this is a control or reference line
 		let cntrlRegex = this.controlRegEx();
 		if (line.match(cntrlRegex) != null) return {components: null, error: null}; // if it's a control line, pack up your bags
+        if (line.toLowerCase().match(/^(@goal|@also)/) != null) return {components: null, error: null}; // if it's a reference line, pack up your bags
 		
 		//look for an operator
 		let regex = this.operatorRegEx();

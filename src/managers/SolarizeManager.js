@@ -23,7 +23,7 @@ class SolarizeManager {
 		$( document ).on( "Line_Update", function() {
 			G.solarize.all();
 			//if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
-			//else 													 G.solarize.line();
+			//else 													   G.solarize.line();
 		});
 		
 	}
@@ -31,7 +31,7 @@ class SolarizeManager {
 	
 	setRegexs() {
 		this.regexs = [];
-		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
+		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also|@goal|@also)\b/gmi, clr: this.goalClr }); //goals 
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>]+>/gmi, clr: this.chunkClr }); //working memory
