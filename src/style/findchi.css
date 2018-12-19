@@ -20,6 +20,10 @@
     float:left;
 }
 
+#finder_text_field{
+  transition: all 0.5s ease;
+}
+
 /*previous next container*/
 #finder_previous_next_container {
     position: relative;
@@ -39,3 +43,17 @@
     width:20px;
     user-select: none;
 }
+
+/*stats*/
+#finder_stats {
+    position: relative;
+    float:left;
+    width:200px;
+    height: 8px;
+    color: var(--stats-label-color);
+    font-size: 12px;
+    font-style: italic;
+    text-align: right;
+
+}
+

@@ -35,12 +35,18 @@ class FinderCHI {
         $(" #finder_text_field" ).val("");
         $( '#finder_container' ).slideToggle("fast");
         $( '#finder_text_field' ).focus();
+        $('#finder_text_field').css('border-color', '#C6C3C3');
     }
         
     onType(find) {
         this.matches.length = 0;
         this.unHighlight();
-        if (find == "") return;
+        if (find == "") {
+            $( '#finder_stats' ).text('');
+            //$( '#finder_text_field' ).css('background-color', 'transparent');
+            $( '#finder_text_field' ).css('border-color', '#C6C3C3');
+            return;
+        }
         
         let regex = new RegExp(find, "gi");
         let goms = G.quill.getText();
@@ -49,7 +55,7 @@ class FinderCHI {
         while( (match = regex.exec(goms)) != null ) {
             this.matches.push(match);
         }
-        
+                
         //build the highlight array
         var lastIndex = 0;
         var formatting = [];
@@ -71,7 +77,17 @@ class FinderCHI {
                 },
                 'silent'
             );
+            
+            $( '#finder_stats' ).text('1 of ' + this.matches.length);
+            //$( '#finder_text_field' ).css('background-color', '#E5F1ED'); //green
+            $( '#finder_text_field' ).css('border-color', '#4CBD99'); //green
+            G.quill.setSelection(this.matches[0].index, 0); //scroll to the first match
+            $( '#finder_text_field' ).focus(); //returns focus to find text field
+        } else {
+            $( '#finder_stats' ).text('no results');
+            $( '#finder_text_field' ).css('border-color', 'red');
         }
+        
         
     }
     
@@ -123,6 +139,9 @@ class FinderCHI {
             'silent'
         );
         
+        let num = this.focusIndex + 1
+        $( '#finder_stats').text(num + ' of ' + this.matches.length);
+        
         G.quill.setSelection(is.index, 0); //scrolls the code
         $( '#finder_text_field' ).focus();
     }
@@ -133,6 +152,9 @@ class FinderCHI {
             this.unHighlight();
             $( '#finder_container' ).slideToggle("fast");
         }
+        
+        $('#finder_stats').text('');
+        $('#finder_text_field').css('border-color', '#C6C3C3');
     }
     
     targetIsThis(target) {
