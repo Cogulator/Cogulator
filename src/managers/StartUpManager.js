@@ -35,6 +35,7 @@ class StartUpManager {
 				    "./interface/PopOverFix.js",
 				    "./managers/ReloadManager.js",
 				    "./interface/NewFileCHI.js",
+                    "./interface/FinderCHI.js",
 				  	"./interface/InsertionCHI.js",
 				    "./interface/MagicModels.js",
 				  	"./managers/DragAndDropManager.js"];

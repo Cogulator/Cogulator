@@ -155,18 +155,6 @@ class SolarizeManager {
 			}
 		}
 		
-		//change the color to red for any forgetting errors
-		// -- THIS NEVER GOT UP AND RUNNING
-//		let thisLineNo = G.quillManager.getLineNumber(cursorIndex);
-//		let forgettingError = G.errorManager.errors.filter(error => error.type == "forgetting_error" && error.lineNo == thisLineNo);
-//		if (forgettingError.length > 0) {
-//			let index = line.indexOf(forgettingError[0].chunkName);
-//			if (index >= 0) {
-//				G.quill.formatText(match.index + lineStart, match[0].length + 1, {'color': clr},  'silent');
-//				G.quill.formatText(match.index + lineStart + match[0].length + 1, 2, {'color': 'black'},  'silent');
-//			}
-//		}
-		
 		G.quill.format('color', 'black'); //color at current cursor index
 	}
 	

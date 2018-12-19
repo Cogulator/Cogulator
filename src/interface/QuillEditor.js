@@ -15,7 +15,7 @@ var bindings = {
 
 
 G.quill = new Quill('#code', {
-	formats: ['color','font','image'],  //whitelist of acceptable formats
+	formats: ['color','background-color','font','image'],  //whitelist of acceptable formats
 	modules: {
 		keyboard: {
 		  bindings: bindings

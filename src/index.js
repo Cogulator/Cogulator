@@ -129,6 +129,14 @@ const template = [
 			},
 			{
 				role: 'selectall'
+			},
+            {
+				type: 'separator'
+			},
+            {
+				label: 'Find',
+                accelerator: 'CmdOrCtrl+F',
+				click () { mainWindow.webContents.send('Edit->Find') } //FinderCHI.js
 			}
 		]
 	},
@@ -166,6 +174,9 @@ const template = [
 			},
 			{
 				role: 'togglefullscreen'
+			},
+            {
+				type: 'separator'
 			},
             {
                 label: 'Toggle Line Numbers',
