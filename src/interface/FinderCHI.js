@@ -17,8 +17,18 @@ class FinderCHI {
         
         //listen for typing in textfield
         $(document).on("keyup", "#finder_text_field", function(evt) {
-			G.finderCHI.onType( $(this).val() );
+            if (evt.key == "Enter")       G.finderCHI.onNextButton();
+            else if (evt.key == "Escape") G.finderCHI.hide();
+			else                          G.finderCHI.onType( $(this).val() );
     	});
+        
+        $(document).on("click", "#finder_previous_button", function() {
+			G.finderCHI.onPreviousButton();
+		});
+        
+        $(document).on("click", "#finder_next_button", function() {
+			G.finderCHI.onNextButton();
+		});
     }
     
     show() {
@@ -112,11 +122,11 @@ class FinderCHI {
             },
             'silent'
         );
+        
+        G.quill.setSelection(is.index, 0); //scrolls the code
+        $( '#finder_text_field' ).focus();
     }
     
-    onCloseButton() {
-        
-    }
     
     hide() {
         if ( $( '#finder_container' ).is(":visible") ) {

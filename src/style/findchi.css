@@ -4,8 +4,8 @@
     right:15px;
 	margin: 0 auto;
 	padding: 10px;
-	min-width: 305px;
-	max-width: 305px;
+	min-width: 260px;
+	max-width: 260px;
 	border-radius: 0px 0px 5px 5px;
 	background-color: var(--main-bg-color);
 	box-shadow: 0px 2px 5px grey;
@@ -14,12 +14,28 @@
 	display: none;
 }
 
-/*text entry*/
+/*text container*/
+#finder_text_container {
+    position: relative;
+    float:left;
+}
 
 /*previous next container*/
+#finder_previous_next_container {
+    position: relative;
+    float:left;
+    width:40px;
+    margin-left: 15px;
+    background-color: var(--sidebar-left-bg-color);
+    border: 1px solid;
+    border-radius: 30px;
+    border-color:var(--border-color);
+}
 
-/*previous*/
-
-/*previous*/
-
-/*close*/
+/*button*/
+.finder_previous_next_button {
+    position: relative;
+    float:left;
+    width:20px;
+    user-select: none;
+}
