@@ -3,8 +3,8 @@ class FinderCHI {
         this.matches = [];
         this.focusIndex = 0;
         
-        this.highlightColor = "#F8E71C"; //yellow
-        this.focusColor = "#F5A623"; //orange
+        this.highlightColor = "#D9D6D6"; //grey
+        this.focusColor = "#F8E71C"; //yellow
         
         ipcRenderer.on('Edit->Find', (sender, arg) => {
 			G.finderCHI.show();
@@ -36,6 +36,7 @@ class FinderCHI {
         $( '#finder_container' ).slideToggle("fast");
         $( '#finder_text_field' ).focus();
         $('#finder_text_field').css('border-color', '#C6C3C3');
+        this.focusIndex = 0;
     }
         
     onType(find) {
