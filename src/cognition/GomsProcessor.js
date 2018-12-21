@@ -284,6 +284,7 @@ class GomsProcessor {
 	hasError(tokens, lineNum, jumps = 0) {
 		var lines = G.quill.getText().split("\n");
         var operator = this.trimColon(tokens[0].toLowerCase());
+        lineNum = this.lineTracker[lineNum]
 		
         if (operator == "createstate") {
 			// Expected: CreateState name value
@@ -387,7 +388,7 @@ class GomsProcessor {
 	//Output: none
 	//Notes: created for Cog+ functionality.  Code was extracted from processStepArray.
 	processBaseCogulatorLine(lineCompoments, lineIndex) {
-		if (lineCompoments.error != null) G.errorManager.errors.push(new GomsError(lineCompoments.error, lineIndex));
+		if (lineCompoments.error != null) G.errorManager.errors.push(new GomsError(lineCompoments.error, this.lineTracker[lineIndex]));
 		if (lineCompoments.components == null || lineCompoments.error != null) return; 
 		
 		let components = lineCompoments.components;

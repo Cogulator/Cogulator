@@ -5,19 +5,22 @@
 .error_and_tip_marker_container {
 	width: 22px;
 	height: 22px;
-	vertical-align: middle;
+    cursor: default;
+    user-select: none;
 }
 
 .error_and_tip_marker, .insertion_marker, .fixable_tip_marker, .fixable_tip_marker_static {
 	display: block;
-	width: 16px;
-	height: 16px;
-	border-radius: 16px;
-	color:white;
+	width: 18px;
+	height: 18px;
+	border-radius: 18px;
+	color:var(--main-bg-color);
 	font-family: 'Lato';
+    font-weight:bold;
 	text-align: center;
-	font-size: 10px;
-	cursor: default;
+	font-size: 12px;
+    border: 2px solid;
+    border-color:var(--main-bg-color);
 }
 
 .fixable_tip_marker_static {
@@ -49,7 +52,7 @@
 	background: red;
 	color:white;
 	font-family: 'Lato';
-	font-size: 13px;
+	font-size: 14px;
 	z-index: 100;
 	visibility: hidden;
 }

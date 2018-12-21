@@ -154,6 +154,7 @@
 	height:calc(100% - 60px);
 /*	background-color:var(--main-bg-color);*/
 	overflow: hidden;
+    user-select: none;
 } 
 
 #code {
