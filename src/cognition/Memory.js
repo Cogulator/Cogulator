@@ -36,7 +36,7 @@ class Memory {
 		this.interleavedSteps = [];
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
 		this.fromStack = 0;
-		this.longTermMemory = []; // Dictionary();
+		//this.longTermMemory = []; // Dictionary();
 
 		this.workingmemory = [];
 		this.rehearsals = []; //used by SubjectiveMentalWorkload
@@ -54,7 +54,7 @@ class Memory {
 		this.interleavedSteps.length = 0;
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
 		this.fromStack = 0;
-		this.longTermMemory = [];
+		//this.longTermMemory = [];
 
 		this.workingmemory.length = 0;
 		this.rehearsals.length = 0;
@@ -108,7 +108,7 @@ class Memory {
 
 	pushChunk(isWmOperator, operator, chunkName, chunkStack, step) {
 		var rehearsals = this.initialRehearsal;
-		if (operator == "recall") rehearsals = 10; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsals that's fairly high
+		if (operator == "recall") rehearsals = 30; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsals that's fairly high
         
 		var chunkAction = ""
 		var atTime = step.endTime;
@@ -126,9 +126,9 @@ class Memory {
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
 				this.colorPalette.shift(); // remove the current color from begninning of list
 			}
-            this.longTermMemory[chunk.chunkName] = chunk;
+            //this.longTermMemory[chunk.chunkName] = chunk;
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
-            this.longTermMemory[chunkName] = existingChunk;
+            //this.longTermMemory[chunkName] = existingChunk;
 			this.addRehearsalToChunk(chunkName, chunkStack);
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
@@ -204,7 +204,7 @@ class Memory {
 		for (var i = 0; i < this.workingmemory[cycleIndex].length; i++) {
 			var chunk = this.workingmemory[cycleIndex][i];
 			if (chunk.chunkName == chunkName) {
-				this.longTermMemory[chunk.chunkName] = chunk;
+				//this.longTermMemory[chunk.chunkName] = chunk;
 				this.workingmemory[cycleIndex].splice(i, 1);
 				break;
 			}
@@ -326,15 +326,15 @@ class Memory {
         //         If you restore anything that was ever in LTM you essentially get infinite memory.
         //         For the time being, it'll only pull stuff out of LTM with cognitive operators.
         //         Otherwise, the chunk needs to be at > 50% probability of recall.
-        if (operator.resource == "cognitive") {
-            if (this.longTermMemory[chunkName] != undefined) {
-                if (this.workingmemory[stack - 1].length >= 7) {
-                    this.popChunk(stack - 1);
-                }
-                this.workingmemory[stack - 1].push(this.longTermMemory[chunkName]);
-                return this.longTermMemory[chunkName]
-            }
-        }
+//        if (operator.resource == "cognitive") {
+//            if (this.longTermMemory[chunkName] != undefined) {
+//                if (this.workingmemory[stack - 1].length >= 7) {
+//                    this.popChunk(stack - 1);
+//                }
+//                this.workingmemory[stack - 1].push(this.longTermMemory[chunkName]);
+//                return this.longTermMemory[chunkName]
+//            }
+//        }
         
 		return null;
 	}
