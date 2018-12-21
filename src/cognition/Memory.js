@@ -87,7 +87,7 @@ class Memory {
 
 			var isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, false); //set to false if you don't want to automate working memory
 			if (step.chunkNames.length > 0) {
-				isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, true); //count any operators that would count if set to automatic if chunk name is inserted
+				isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, true); //count any operators if chunk name is inserted
 				for (var j = 0; j < step.chunkNames.length; j++) {
 					var chunkName = step.chunkNames[j];
 					if (step.operator == "ignore") {
@@ -114,7 +114,7 @@ class Memory {
 		var atTime = step.endTime;
 
 		var existingChunk = null;
-		if (chunkName != "") existingChunk = this.getExistingChunk(chunkName, chunkStack);
+		if (chunkName != "") existingChunk = this.getExistingChunk(operator, chunkName, chunkStack);
 
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
 			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
@@ -130,7 +130,6 @@ class Memory {
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
             this.longTermMemory[chunkName] = existingChunk;
 			this.addRehearsalToChunk(chunkName, chunkStack);
-			//existingChunk.stackDepthAtPush = chunkStack; //update with activation available at time chunk is rehearsed
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
@@ -300,8 +299,8 @@ class Memory {
 	}
 
 
-	isWorkingMemoryOperator(operator, resource, automate) {
-		if (automate) { //if the user has the model set to automatic
+	isWorkingMemoryOperator(operator, resource, chunkNamed) {
+		if (chunkNamed) { //if this includes a named chunk
 			if ((resource == "see" || resource == "hear" || resource == "cognitive") && operator != "saccade" && operator != "verify") {
 				return true;
 			}
@@ -315,7 +314,7 @@ class Memory {
 	}
 
 	
-	getExistingChunk(chunkName, stack) {			
+	getExistingChunk(operator, chunkName, stack) {			
 		//first check to see if the chunk exists in WM
 		for (var i = 0; i < this.workingmemory[stack - 1].length; i++) {
 			var chunk = this.workingmemory[stack - 1][i];
@@ -323,13 +322,19 @@ class Memory {
 		}
 
 		//if not in WM, check to see if LTM
-		if (this.longTermMemory[chunkName] != undefined) {
-            if (this.workingmemory[stack - 1].length >= 7) {
-                this.popChunk(stack - 1);
+        //-- NOTE: Right now, I'm not sure about this at all
+        //         If you restore anything that was ever in LTM you essentially get infinite memory.
+        //         For the time being, it'll only pull stuff out of LTM with cognitive operators.
+        //         Otherwise, the chunk needs to be at > 50% probability of recall.
+        if (operator.resource == "cognitive") {
+            if (this.longTermMemory[chunkName] != undefined) {
+                if (this.workingmemory[stack - 1].length >= 7) {
+                    this.popChunk(stack - 1);
+                }
+                this.workingmemory[stack - 1].push(this.longTermMemory[chunkName]);
+                return this.longTermMemory[chunkName]
             }
-            this.workingmemory[stack - 1].push(this.longTermMemory[chunkName]);
-            return this.longTermMemory[chunkName]
-		}
+        }
         
 		return null;
 	}
