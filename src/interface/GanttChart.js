@@ -432,6 +432,8 @@ var ganttSketch = function(s) {
 
 			//loop through each step
 			for (var i = 0; i < threadSteps.length; i++) {
+                s.fill(0);
+                
 				let step = threadSteps[i];
 				var startTime = step.startTime;
 				var endTime = step.endTime;
@@ -471,7 +473,7 @@ var ganttSketch = function(s) {
 				if (s.textWidth(step.time) < stepX2 - stepX1 - 20) {
 					s.text(step.time, stepX1 + tickHeight, stepY - 3);
 					ganttRect = new GanttRect(step, "", 0, 0, 0, 0);
-					ganttRect.x = stepX1 + tickHeight;
+					ganttRect.x = stepX1;
 					ganttRect.y = stepY - 18;
 				} 
 				
@@ -481,9 +483,15 @@ var ganttSketch = function(s) {
 					
 					if (ganttRect != undefined) {
 						let gWidth = step.time;
-						ganttRect.width = s.textWidth(gWidth.toString());
-						ganttRect.height = (stepY + 15) - ganttRect.y;
+						ganttRect.width = stepX2 - stepX1;
+						ganttRect.height = (stepY + 15) - ganttRect.y + 5;
 						G.ganttLines.push(ganttRect);
+                        
+                        //highlight the rect if the user's mouse is currently over it
+                        if (ganttRect.contains(s.mouseX, s.mouseY)) {
+                            s.fill(0,0,0,25);
+                            s.rect(stepX1, ganttRect.y, ganttRect.width, ganttRect.height, 5);
+                        }
 					}
 				}
 				
@@ -495,7 +503,6 @@ var ganttSketch = function(s) {
 	}
 	
 	s.calculateWorkload = function() {
-
 		let memory = G.memory.workingmemory;
 
 		for (var i = 0; i < memory.length; i++) {
@@ -509,12 +516,8 @@ var ganttSketch = function(s) {
 				let load = parseFloat(G.workload.getWorkload(chunk.activation));
 				chunk.workload = load;
 
-				if(!isNaN(load))
-				{
-					if(load > workload)
-					{
-						workload = load;
-					}
+				if (!isNaN(load)) {
+					if(load > workload) workload = load;
 				}
 			}
 
