@@ -364,7 +364,7 @@ class FirstRunManager {
 						+ "\n" + "*. . . Say What was that first number again?"
 						+ "\n" + "*. . . Hear <3[354]> <5[354]> <4[354]>"
 						+ "\n" 
-						+ "\n" + ". . Say <3[354]> plus <4[412]> is 7 *3[354] is red because the it's been forgotten. Resolve by removing the *'s before the Ask for Forgetten Number method above."
+						+ "\n" + ". . Say <3[354]> plus <4[412]> is 7 *4[412] is red because the it's been forgotten. Resolve by removing the *'s before the Ask for Forgetten Number method above."
 						+ "\n" + ". . Recall <7_of766> (150 ms)"
 						+ "\n" 
 						+ "\n" + "Goal: Encode Answer"
