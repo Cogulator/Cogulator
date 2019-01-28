@@ -22,9 +22,9 @@ class SolarizeManager {
 		});
 										
 		$( document ).on( "Line_Update", function() {
-			//G.solarize.all();
-			if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
-			else 													 G.solarize.line();
+			G.solarize.all();
+			//if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
+			//else 													 G.solarize.line();
 		});
 		
 	}

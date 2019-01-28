@@ -108,7 +108,7 @@ class Memory {
 
 	pushChunk(isWmOperator, operator, chunkName, chunkStack, step) {
 		var rehearsals = this.initialRehearsal;
-		if (operator == "recall") rehearsals = 30; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsals that's fairly high
+		if (operator == "recall") rehearsals = 10; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsal that's fairly high
         
 		var chunkAction = ""
 		var atTime = step.endTime;
