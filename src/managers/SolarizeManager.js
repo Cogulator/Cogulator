@@ -22,9 +22,8 @@ class SolarizeManager {
 		});
 										
 		$( document ).on( "Line_Update", function() {
-			G.solarize.all();
-			//if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
-			//else 													 G.solarize.line();
+			if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
+			else 													 G.solarize.line();
 		});
 		
 	}
@@ -36,7 +35,7 @@ class SolarizeManager {
 		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
-		this.regexs.push({ exp: /<[^>]+>/gmi, clr: this.chunkClr }); //working memory
+		this.regexs.push({ exp: /<[^>\n]+>/gmi, clr: this.chunkClr }); //working memory
 		this.regexs.push({ exp: /\(\s{0,15}[0-9]{1,5}\s{1,5}(syllables|seconds|milliseconds|second|ms)\s{0,15}\)/gmi, clr: this.timeClr }); //time or syllables
 		this.regexs.push({ exp: /\*.*/gmi, clr: this.commentClr }); //comments must be last
 	}
@@ -100,7 +99,6 @@ class SolarizeManager {
 		var index = 0;
 		for (var i = 0; i < matches.length; i++) {
 			let match = matches[i];
-			//if (match.index < index) console.log("HOUSTON, WE HAVE A PROBLEM");
 			
 			//if there is space between text that needs to be solarized
 			if (match.index > index) {
@@ -124,14 +122,14 @@ class SolarizeManager {
 		if (G.quill.getSelection() == null) return;
 		if (G.quill.getSelection().length == 1) G.quill.format('color', 'black'); //color at current cursor index
 	}
-		
-	
-	line() {
-		if (G.quill.getSelection() == null) return;
-		if (cursorIndex == null) G.quill.getSelection();
-		
-		let text = G.quill.getText();
-		var cursorIndex = G.quill.getSelection().index - 1; 
+    
+    
+    line() {
+		var matches = [];
+		var retain = [];
+        
+        if (G.quill.getSelection() == null)  return;
+		var cursorIndex = G.quill.getSelection().index; 
 		if (cursorIndex < 0) cursorIndex = 0;
 		
 		var lineStart = G.quillManager.getLineStart(cursorIndex);
@@ -141,22 +139,63 @@ class SolarizeManager {
 		let lineLngth = lineEnd - lineStart;
 		if (lineLngth <= 0) return;
 		
-		let line = G.quill.getText(lineStart, lineLngth)
-		G.quill.formatText(lineStart, lineLngth, {'color': 'black'},  'silent');
-		
+        let text = G.quill.getText();
+        
 		for (var i = 0; i < this.regexs.length; i++) {
 			let regex = this.regexs[i].exp;
 			let clr = this.regexs[i].clr;
-						
+			
+			// push all the matches into an array that can then be reordered and processed for retain operations
 			var match;
-			while( (match = regex.exec(line)) != null ) {
-				G.quill.formatText(match.index + lineStart, match[0].length + 1, {'color': clr},  'silent');
-				G.quill.formatText(match.index + lineStart + match[0].length + 1, 2, {'color': 'black'},  'silent');
-			}
+			while( (match = regex.exec(text)) != null ) {
+                if (match.index >= lineStart && match.index + match[0].length <= lineEnd) {
+                    matches.push( {index: match.index, length: match[0].length, color: clr} );
+                }
+            }
 		}
-		
-		G.quill.format('color', 'black'); //color at current cursor index
+        
+		//sort the matches by index
+		matches.sort(function(a, b){
+			return a.index-b.index;
+		});
+        
+        
+        if (matches.length == 0) {
+            retain.push({ retain: lineStart});
+            retain.push({ retain: lineLngth, attributes: { color: this.blackClr } });
+        } else {
+            var index = 0;
+            for (var i = 0; i < matches.length; i++) {
+                let match = matches[i];
+                //if there is space between text that needs to be solarized
+                if (match.index > index) {
+                    let retainBlack = match.index - index;
+
+                    if (index < lineStart || index > lineEnd) {
+                        retain.push({ retain: retainBlack }); 
+                    } else {
+                        retain.push({ retain: retainBlack, attributes: { color: this.blackClr } }); 
+                    }
+
+                    index += retainBlack
+                }  
+
+                retain.push({ retain: match.length, attributes: { color: match.color } }); 
+                index += match.length;
+            }
+
+            //format everything at the end black
+            if (index < G.quill.getLength() && lineEnd > index && index > lineStart) {
+                let delta = lineEnd - index;
+                retain.push({ retain: delta, attributes: { color: this.blackClr } }); 
+            }
+        }
+        
+		//update
+		G.quill.updateContents(retain, 'silent');
+		G.quill.format('color', 'black'); //color at current cursor inde
 	}
+	
 	
 	
 	//Function for updating the quillet
@@ -199,8 +238,7 @@ class SolarizeManager {
 		var index = 0;
 		for (var i = 0; i < matches.length; i++) {
 			let match = matches[i];
-			//if (match.index < index) console.log("HOUSTON, WE HAVE A PROBLEM");
-			
+            
 			//if there is space between text that needs to be solarized
 			if (match.index > index) {
 				let retainBlack = match.index - index;
@@ -218,7 +256,6 @@ class SolarizeManager {
 	
 	
 	operatorRegEx() {
-		//^[\.| ]{0,15}(say|look)\b/gmi
 		let prefix = "^[\\.| ]{0,15}(";
 		let suffix = ")\\b";
 		var operatorsStr = "";
@@ -236,8 +273,6 @@ class SolarizeManager {
 		let prefix = "^[\\.| ]{0,15}(";
 		var operatorsStr = "if|endif|createstate:?|setstate:?|goto:?";
 		let suffix = ")\\b";
-
-		// console.log("regex "+operatorsStr);
 
 		let regex = new RegExp(prefix + operatorsStr + suffix, "gmi");
 		return regex;
