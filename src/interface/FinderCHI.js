@@ -12,7 +12,7 @@ class FinderCHI {
         
         //hide if click on anything other than find chi
 		$(document).bind('click', function(e) {
-			if (!G.finderCHI.targetIsThis(e.target)) G.finderCHI.hide();
+			if (!G.finderCHI.targetIsThis(e.target) && e.target.innerHTML != "Find" && e.target.id != "windows_edit_btn") G.finderCHI.hide();  
 		});
         
         //listen for typing in textfield
@@ -149,6 +149,7 @@ class FinderCHI {
     
     
     hide() {
+        console.log($( '#finder_container' ).is(":visible"));
         if ( $( '#finder_container' ).is(":visible") ) {
             this.unHighlight();
             $( '#finder_container' ).slideToggle("fast");

@@ -84,7 +84,8 @@ class WindowsTitleBar {
 					   {text: "Cut", shortcut: "Ctrl+X"},
 					   {text: "Copy", shortcut: "Ctrl+C"},
 					   {text: "Paste", shortcut: "Ctrl+V"},
-					   {text: "Select All", shortcut: "Ctrl+A"}
+					   {text: "Select All", shortcut: "Ctrl+A"},
+                       {text: "Find", shortcut: "Ctrl+F"}
 					  ];
 		let offset = $( '#windows_edit_btn' ).offset();
 		G.windowsTitleBar.showMenuOptions(offset, options);
@@ -95,7 +96,8 @@ class WindowsTitleBar {
 		let options = [{text: "Actual Size", shortcut: " Ctrl+O"},
 					   {text: "Zoom In", shortcut: "Ctrl+Shift+="},
 					   {text: "Zoom Out", shortcut: "Ctrl+-"},
-					   {text: "Toggle Full Screen", shortcut: "F11"}
+					   {text: "Toggle Full Screen", shortcut: "F11"},
+                       {text: "Toggle Line Numbers", shortcut: ""}
 					  ];
 		let offset = $( '#windows_view_btn' ).offset();
 		G.windowsTitleBar.showMenuOptions(offset, options);
@@ -148,11 +150,17 @@ class WindowsTitleBar {
 		else if (rowTxt == "CopyCtrl+C") G.windowsTitleBar.webContents.copy();
 		else if (rowTxt == "PasteCtrl+V") G.windowsTitleBar.webContents.paste();
 		else if (rowTxt == "Select AllCtrl+A") G.windowsTitleBar.webContents.selectAll();
+        else if (rowTxt == "FindCtrl+F") G.finderCHI.show();
+        
 		
 		else if (rowTxt == "Actual Size Ctrl+O") webFrame.setZoomFactor(1);
 		else if (rowTxt == "Zoom InCtrl+Shift+=") webFrame.setZoomFactor(currentZoomFactor + .2);
 		else if (rowTxt == "Zoom OutCtrl+-") webFrame.setZoomFactor(Math.max(0, currentZoomFactor - .2));
 		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
+        else if (rowTxt == "Toggle Line Numbers") {
+            G.qutterManager.showLineNumbers = !G.qutterManager.showLineNumbers;
+            G.qutterManager.updateMarkers();
+        }
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
 		else if (rowTxt == "Learn More") require('electron').shell.openExternal('http://cogulator.io');
