@@ -133,9 +133,9 @@ class InOutManager {
 	}
 	
 	
-	deleteFile(pth) {
+	deleteFile(pth, callback = 0) {
 		trash(pth).then(() => {
-			console.log('done');
+			if (typeof callback === 'function' && callback()) callback();
 		});
 	}
 	

@@ -2,14 +2,20 @@ class ModelsManager {
 	constructor() {
 		this.update();
 		this.selected = "";
-		
+        this.shutDownFunctions = [];
+                		
 		$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) {
 			G.modelsManager.saveModel();
+		});
+        
+        $( document ).on( "Win32_Close_Button_Pressed", function(evt) {
+			G.modelsManager.handleWindowsClose();
 		});
 		
 		window.addEventListener('unload', function(event) {
 			G.modelsManager.saveModel();
 			G.modelsManager.deleteModels();
+            console.log("TRY TO UNLOAD");
 		})
 		
 		ipcRenderer.on('File->Save', (sender, arg) => {
@@ -99,7 +105,36 @@ class ModelsManager {
 	setLastOpened() {
 		G.io.writeToFile(G.paths.configFile, this.selected);
 	}
-	
+    
+    
+    //creates an array of functions that need to complete before shutdown on Win32
+    //should be transferred over to a promise style setup at some point to prevent hangs if a file cannot be deleted
+    handleWindowsClose(){
+        G.modelsManager.shutDownFunctions.push(function() {G.io.writeToFile(G.modelsManager.selected, G.quill.getText(), G.modelsManager.shutDownProcessor)});
+        
+        $( ".model_button" ).each(function( index ) {
+			if ($( this ).children('.model_button_delete').data("marked") == "u") {
+                let p = $( this ).data("path");
+                G.modelsManager.shutDownFunctions.push(function() {G.io.deleteFile(p, G.modelsManager.shutDownProcessor)});
+            }
+		}); 
+        
+        this.shutDownProcessor()
+        //G.modelsManager.saveModel();
+        //G.modelsManager.deleteModels();
+        //window.close();
+    }
+    
+    //callback function sent to io manager in handleWindowsClose above
+    shutDownProcessor(){
+        G.modelsManager.shutDownFunctions.shift();
+        if (G.modelsManager.shutDownFunctions.length == 0) {
+            window.close();
+        } else {
+            G.modelsManager.shutDownFunctions[0]();
+        }
+    }
+    	
 }
 
 G.modelsManager = new ModelsManager();

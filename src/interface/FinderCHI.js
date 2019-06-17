@@ -149,7 +149,6 @@ class FinderCHI {
     
     
     hide() {
-        console.log($( '#finder_container' ).is(":visible"));
         if ( $( '#finder_container' ).is(":visible") ) {
             this.unHighlight();
             $( '#finder_container' ).slideToggle("fast");

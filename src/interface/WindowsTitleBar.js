@@ -9,7 +9,7 @@ class WindowsTitleBar {
 	
     build() {
 		require('electron-titlebar');
-		this.currentWindow = remote.getCurrentWindow()
+		this.currentWindow = remote.getCurrentWindow();
 		this.webContents = this.currentWindow.webContents;
 		
         let height = 20;
@@ -169,3 +169,29 @@ class WindowsTitleBar {
 
 G.windowsTitleBar = new WindowsTitleBar();
 if (require('os').type() == "Windows_NT") G.windowsTitleBar.build();
+
+$(document).ready(function() {
+    $('html[electron-titlebar-platform=win32] #electron-titlebar > .button').css('width', '30px');
+    $('html[electron-titlebar-platform=win32] #electron-titlebar > .button-maximize').css('right', '30px');
+    $('html[electron-titlebar-platform=win32] #electron-titlebar > .button-minimize').css('right', '60px');
+    $('html[electron-titlebar-platform=win32] #electron-titlebar > .button img').css('margin-left', '9px');
+    
+    //Override the existing electron-titlebar action for close.  It prevents deletions and saves to complete before 
+    //shutting down the app.  Clone effectively removes all eventlisteners attached to .button-close.
+    //Trigger sends message to ModelsManager.js to save active model, delete models marked for deletion, and close the app.
+    $( 'html[electron-titlebar-platform=win32] #electron-titlebar > .button-close' ).replaceWith($('#electron-titlebar > .button-close').clone());
+    $( 'html[electron-titlebar-platform=win32] #electron-titlebar > .button-close' ).on( 'click', function() {
+        $( document ).trigger( "Win32_Close_Button_Pressed");
+    });
+    
+    //Removing the event listeners screws up the hover on the close button somehow.  So, this addresses that issue
+    $( 'html[electron-titlebar-platform=win32] #electron-titlebar > .button-close' ).hover( 
+        function() {
+            $(this).children('img').css('-webkit-filter', 'invert(100%)');
+            $(this).css('background-color', '#e81123');
+        }, function() {
+            $(this).children('img').css('-webkit-filter', 'invert(0%)');
+            $(this).css('background-color', 'rgba(168,168,168, 0.0)');
+        }
+    );
+})
