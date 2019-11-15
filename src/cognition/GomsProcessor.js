@@ -110,6 +110,11 @@ class GomsProcessor {
             
             //If this is a @Reference, find it's match earlier in the code and replace with full code
             if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) { //this is a reference line
+                
+                let goalIndex = line.indexOf("@");
+                let commentIndex = line.indexOf("*");
+                if (commentIndex >- 1 && commentIndex < goalIndex) continue;
+                
                 var keyword = "@goal"
                 if (line.toLowerCase().includes("@also")) keyword = "@also";
                 let referenceGoalInfo = this.pullGoalAndChunks(line, keyword);
@@ -128,7 +133,8 @@ class GomsProcessor {
                         found = true;
                     
                         let goalIndents = this.indentCount(testLine);
-                        codeLines.push(testLine);
+                        //codeLines.push(testLine);
+                        codeLines.push(line.replace("@",""));
                         
                         //Copy the goal steps for the goal the reference points to
                         for (var k = j + 1; k < i; k++) {
