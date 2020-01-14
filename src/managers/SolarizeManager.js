@@ -33,6 +33,7 @@ class SolarizeManager {
 		this.regexs = [];
         this.regexs.push({ exp: /^[\.| ]{0,15}(@goal|@also)\b/gmi, clr: this.referenceClr }); //references 
 		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
+        this.regexs.push({ exp: / as /gmi, clr: this.goalClr }); //as for thread label);
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>\n]+>/gmi, clr: this.chunkClr }); //working memory
@@ -51,14 +52,22 @@ class SolarizeManager {
 		var retain = [];
 		let text = G.quill.getText();
 		
-		
 		for (var i = 0; i < this.regexs.length; i++) {
 			let regex = this.regexs[i].exp;
 			let clr = this.regexs[i].clr;
 			
 			// push all the matches into an array that can then be reordered and processed for retain operations
 			var match;
-			while( (match = regex.exec(text)) != null ) matches.push( {index: match.index, length: match[0].length, color: clr} );
+			while( (match = regex.exec(text)) != null ) {
+                if (regex.toString() === "/ as /gim") { //only include "as" matches if on a goal or also line
+                    let line = G.quillManager.getLine(match.index).toLowerCase();
+                    if (line.includes("also") || line.includes("goal")) {
+                        matches.push( {index: match.index, length: match[0].length, color: clr} );
+                    }
+                } else {
+                    matches.push( {index: match.index, length: match[0].length, color: clr} );
+                }
+            }
 		}
 		
 		//change the color to red for any forgetting errors

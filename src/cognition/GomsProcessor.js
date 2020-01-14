@@ -174,16 +174,6 @@ class GomsProcessor {
             }
         }
         
-//        console.log("🤷‍ HERE's WHAT I GOT", codeLines.length);
-//        for (var i = 0; i < codeLines.length; i++) {
-//            console.log(codeLines[i]);
-//        }
-
-        
-//        for (var i = 0; i < this.lineTracker.length; i++) {
-//            console.log("LINE", i, this.lineTracker[i]);
-//        }
-        
         return codeLines;
     }
     

@@ -70,13 +70,27 @@ class LineParser {
 		//save the operator and remove it from the line
 		components.operator = match[0].replace(":","").toLowerCase();
 		line = line.substring(match[0].length + 1, line.length); //remove the operator from the line
-		
+        
+        //get any working memory chunks out
+		let chunkMatch = line.match( /<[^>]+>/gmi);
+		if (chunkMatch != null) {
+			for (var c = 0; c < chunkMatch.length; c++) components.chunkNames.push(chunkMatch[c]);
+		}
+        
 		//get thread label if also
 		if (components.operator == 'also') {
+            //remove any chunks for references from the line
+            if (chunkMatch != null) {
+                for (var c = 0; c < chunkMatch.length; c++) {
+                    line = line.replace(chunkMatch[c], "");
+                }
+            }
+            
 			components.threadLabel = "!X!X!"; //default
-			let asMatch = line.match(/ as /mi);
+			var asMatch = line.match(/ as /mi);
 			if (asMatch != null) {
-				components.threadLabel = this.removeWhiteSpaceFromBeginningAndEnd(line.substring(asMatch.index + asMatch[0].length, line.length))
+                components.threadLabel = this.removeWhiteSpaceFromBeginningAndEnd(line.substring(asMatch.index + asMatch[0].length, line.length));
+                components.threadLabel = components.threadLabel.replace(/\s/g,''); //remove all whitespace from thread name
 				line = line.substring(0, asMatch.index);
 			}
 		}
@@ -90,16 +104,9 @@ class LineParser {
 			if (line.match(/\(\s{0,15}[0-9]{1,3}.{0,15}\)/mi) != null) return {components: null, error: "time_modifier_error"};
 		}
 		
-		
 		//get label
 		line = this.removeWhiteSpaceFromBeginningAndEnd(line);
 		components.label = line;
-		
-		//get any working memory chunks out
-		let chunkMatch = line.match( /<[^>]+>/gmi);
-		if (chunkMatch != null) {
-			for (var c = 0; c < chunkMatch.length; c++) components.chunkNames.push(chunkMatch[c]);
-		}
 		
 		return {components: components, error: null};
 	}

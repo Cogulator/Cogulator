@@ -27,10 +27,11 @@
 	float: left;
 	height:inherit;
 } #reload_model_button {
+    font-family: 'Times';
 	position: relative;
 	top: 50%;
 	transform: perspective(1px) translateY(-50%);
-	font-size: 20px;
+	font-size: 15px;
 	border: 1px solid;
 	border-color:var(--stats-label-color);
 }
