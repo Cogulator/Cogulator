@@ -128,13 +128,21 @@ class Memory {
 			}
             //this.longTermMemory[chunk.chunkName] = chunk;
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
-            //this.longTermMemory[chunkName] = existingChunk;
-			this.addRehearsalToChunk(chunkName, chunkStack);
+            if (operator == "attend") { //attend to item in memory.  setup this way to provide subjective workload estimate base on memory availabity.  all other cog ops presume rehearsal
+                var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
+                var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
+                this.pushRehearsals(chunkName, activation, chunkStack);
+                chunkAction = "pushed_rehearsals";
+                existingChunk.goalMap = step.goalMap;
+            } else {
+                this.addRehearsalToChunk(chunkName, chunkStack);
+            }
 		} else if (existingChunk) { //push to rehearsals so Mental Workload can be calculated
 			var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
 			var activation = this.getActivation(existingChunk.stackDepthAtPush, timeInMemory, existingChunk.rehearsals)
 			this.pushRehearsals(chunkName, activation, chunkStack); //used by SubjectiveMentalWorkload
-			chunkAction = "pushed_rehearsals";
+			
+            chunkAction = "pushed_rehearsals";
 			existingChunk.goalMap = step.goalMap;
 		} else if (!existingChunk) {
 			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName));

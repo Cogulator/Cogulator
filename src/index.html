@@ -86,8 +86,6 @@
 							</div>
 
 						</div>
-
-
 					</div>
 
 					<div id='gutter' class='ql-editor'></div> <!-- ql-editor is a Quill class -->
@@ -164,6 +162,20 @@
 			<div id='help_image'></div>
 			<div id='help_nav'>NAVIGATE</div>
 		</div>
+        
+        
+        <script>
+           function isWindows() {
+                var platform = window.navigator.platform;
+                var windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
+
+                if (windowsPlatforms.indexOf(platform) > -1) return true;
+                return false;
+            }
+            
+            //change reload button if is windows
+            if ( isWindows() ) document.getElementById("reload_model_button").innerHTML = "↻";
+        </script>
 				
 		<script type='text/javascript' src='./utilities/Globals.js'></script>
 		<script type='text/javascript' src='./managers/FilePathManager.js'></script>
