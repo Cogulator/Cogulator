@@ -48,6 +48,7 @@ class DarkLightManager {
         $(':root').css('--gantt-stripe-color', '#F0F0F0');
         $(':root').css('--gantt-text-shadow-color', '#FFF');
         $(':root').css('--gantt-border-color', '#CCC');
+        $(':root').css('--windows-menu-font-color', '#000');
         
         G.solarize.setLight();
         G.magicModels.setMagicModels();
@@ -71,6 +72,7 @@ class DarkLightManager {
         $(':root').css('--gantt-stripe-color', '#F0F0F0');
         $(':root').css('--gantt-text-shadow-color', '#FFF');
         $(':root').css('--gantt-border-color', '#CCC');
+        $(':root').css('--windows-menu-font-color', '#000');
         
         G.solarize.setDim();
         G.magicModels.setMagicModels();
@@ -94,7 +96,10 @@ class DarkLightManager {
         $(':root').css('--gantt-stripe-color', '#002B36');
         $(':root').css('--gantt-text-shadow-color', '#111');
         $(':root').css('--gantt-border-color', '#002730');
+        $(':root').css('--windows-menu-font-color', '#93A1A1');
         
+        $('html[electron-titlebar-platform=win32] #electron-titlebar > .button img').css('-webkit-filter', 'invert(50%)');
+    
         G.solarize.setDark();
         G.magicModels.setMagicModels();
         G.ganttManager.setGanttChart();
