@@ -93,12 +93,14 @@ class WindowsTitleBar {
 	
 	
 	handleViewClick() {
-		let options = [{text: "Actual Size", shortcut: " Ctrl+O"},
+		let options = [{text: "Dark", shortcut: ""},
+                       {text: "Light", shortcut: ""},
+                       {text: "Actual Size", shortcut: " Ctrl+O"},
 					   {text: "Zoom In", shortcut: "Ctrl+Shift+="},
 					   {text: "Zoom Out", shortcut: "Ctrl+-"},
 					   {text: "Toggle Full Screen", shortcut: "F11"},
                        {text: "Toggle Line Numbers", shortcut: ""}
-					  ];
+		];
 		let offset = $( '#windows_view_btn' ).offset();
 		G.windowsTitleBar.showMenuOptions(offset, options);
 	}
@@ -151,8 +153,9 @@ class WindowsTitleBar {
 		else if (rowTxt == "PasteCtrl+V") G.windowsTitleBar.webContents.paste();
 		else if (rowTxt == "Select AllCtrl+A") G.windowsTitleBar.webContents.selectAll();
         else if (rowTxt == "FindCtrl+F") G.finderCHI.show();
-        
-		
+
+        else if (rowTxt == "Dark") G.darkLightManager.youWantItDarker();
+        else if (rowTxt == "Light") G.darkLightManager.youWantItBright();
 		else if (rowTxt == "Actual Size Ctrl+O") webFrame.setZoomFactor(1);
 		else if (rowTxt == "Zoom InCtrl+Shift+=") webFrame.setZoomFactor(currentZoomFactor + .2);
 		else if (rowTxt == "Zoom OutCtrl+-") webFrame.setZoomFactor(Math.max(0, currentZoomFactor - .2));
