@@ -99,6 +99,18 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#93A1A1');
         
         $('html[electron-titlebar-platform=win32] #electron-titlebar > .button img').css('-webkit-filter', 'invert(50%)');
+            
+        //This same code is a duplicate from WindowsTitlebar.js. Has to be reapplied to keep the hover working correctly
+        $( 'html[electron-titlebar-platform=win32] #electron-titlebar > .button-close' ).hover ( 
+            function() {
+                $(this).children('img').css('-webkit-filter', 'invert(100%)');
+                $(this).css('background-color', '#e81123');
+            }, function() {
+                $(this).children('img').css('-webkit-filter', 'invert(50%)');
+                $(this).css('background-color', 'rgba(168,168,168, 0.0)');
+            }
+        );
+       
     
         G.solarize.setDark();
         G.magicModels.setMagicModels();
