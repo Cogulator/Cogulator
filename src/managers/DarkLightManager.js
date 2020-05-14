@@ -17,24 +17,23 @@ class DarkLightManager {
         this.isDark = false;
         
 		ipcRenderer.on('View->Light', (sender, arg) => {
-            this.isDark = false;
             this.youWantItBright();
 		})
         
         //Currently not in use
         ipcRenderer.on('View->Dim', (sender, arg) => {
-            this.isDark = false;
             this.youWantSomeLight();
 		})
         
         ipcRenderer.on('View->Dark', (sender, arg) => {
-            this.isDark = true;
             this.youWantItDarker();
             
 		})
 	}
     
     youWantItBright() {
+        this.isDark = false;
+        
         $(':root').css('--main-bg-color', '#F8F8F8');
         $(':root').css('--sidebar-left-bg-color', '#EFEFEF');
         $(':root').css('--sidebar-right-bg-color', '#EFEFEF');
@@ -56,6 +55,8 @@ class DarkLightManager {
     }
     
     youWantSomeLight() {
+        this.isDark = false;
+        
         $(':root').css('--main-bg-color', '#BFBFBF');
         $(':root').css('--sidebar-left-bg-color', '#EFEFEF');
         $(':root').css('--sidebar-right-bg-color', '#EFEFEF');
@@ -77,6 +78,8 @@ class DarkLightManager {
     }
     
     youWantItDarker() {
+        this.isDark = true;
+        
         $(':root').css('--main-bg-color', '#073642');
         $(':root').css('--sidebar-left-bg-color', '#002B36');
         $(':root').css('--sidebar-right-bg-color', '#002B36');
