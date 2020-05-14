@@ -27,6 +27,28 @@ class SolarizeManager {
 		});
 		
 	}
+    
+    
+    setLight() {
+		this.commentClr = '#999999'; //grey
+		this.blackClr = '#000000'; //grey
+        this.setRegexs();
+        G.solarize.all();
+    }
+    
+    setDim() {
+		this.commentClr = '#777'; //grey
+		this.blackClr = '#000000'; //grey
+        this.setRegexs();
+        G.solarize.all();
+    }
+    
+    setDark() {
+        this.commentClr = '#586E75'; //grey
+		this.blackClr = '#93A1A1'; //grey
+        this.setRegexs();
+        G.solarize.all();
+    }
 	
 	
 	setRegexs() {

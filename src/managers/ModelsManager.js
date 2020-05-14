@@ -88,6 +88,7 @@ class ModelsManager {
 	} displayModel(code) {
 		$( document ).trigger( "Model_Loaded" );
 		G.quill.setText(code); //setting text will be picked up on in customeventmanager and cause the model to process
+        G.quill.history.clear();
 		G.quill.focus();
 		G.modelsSidebar.showSelected(G.modelsManager.selected, false);
 		G.modelsManager.setLastOpened();

@@ -27,6 +27,7 @@ class StartUpManager {
 					"./managers/MethodsManager.js",
 					"./managers/SolarizeManager.js",
 					"./managers/AutocompleteManager.js",
+                    "./managers/DarkLightManager.js",
 					"./interface/ModelsSidebar.js",
 					"./managers/StatsDisplayManager.js",
 				    "./managers/ScreenShotManager.js",

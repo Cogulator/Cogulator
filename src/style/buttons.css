@@ -1,7 +1,12 @@
+:root {
+	--button-icon-color: #000;
+}
+
 .circle_button {
 	width: 22px;
 	height: 22px;
 	line-height: 22px;
+    color: var(--button-icon-color);
 	text-align:center;
 	border-radius: 20px;
 	user-select: none;
@@ -48,7 +53,7 @@
 	transform: perspective(1px) translateY(-50%);
 	font-size: 20px;
 	border: 1px solid;
-	border-color:var(--stats-label-color);
+	border-color: #7F4366;
 }
 
 .edit_button_container {

@@ -56,6 +56,8 @@ class MagicModelsManager {
 			$('#mm_iphone_selected').html("<img src='images/mm_selector.png'>");
 			G.magicModels.selected = "iphone";
 		});
+        
+        this.setMagicModels();
 	}
 	
 	
@@ -291,579 +293,591 @@ class MagicModelsManager {
 		G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
 		//probably remove the sketch too...
 	}
+    
+    setMagicModels() {
+        magicModelsSketch = undefined;
+        magicModels = undefined;
+        
+        this.setMagicModelSketch();
+        $('#magic_box').html(""); //empty out existing html
+        magicModels = new p5(magicModelsSketch, 'magic_box');
+    }
+    
+    setMagicModelSketch() {
+        magicModelsSketch = function(s) {
+            var wdth = $( '#magic_box' ).width();
+            var hght = $( '#magic_box' ).height();
+
+            //selected CHI
+            var selectedCHI = "desktop";
+
+            //fonts
+            var fontItalic;
+
+            //images
+            var desktop;
+            var iphone;
+            var currentImage;
+
+            //image width/height
+            let desktopWidth = 320;
+            let desktopHeight = 246;
+            let iphoneWidth = 154;
+            let iphoneHeight = 256;
+            var currentWidth = desktopWidth;
+            var currentHeight = desktopHeight;
+
+            //image screen width/height
+            let desktopScreenWidth = 290;
+            let desktopScreenHeight = 169;
+            let iphoneScreenWidth = 134;
+            let iphoneScreenHeight = 212;
+            var currentScreenWidth = desktopScreenWidth;
+            var currentScreenHeight = desktopScreenHeight;
+
+            //image screen x/y
+            let desktopScreenX = 15; //if image was at 0/0, top left screen X would be at 15
+            let desktopScreenY = 15;
+            let iphoneScreenX = 10;
+            let iphoneScreenY = 10;
+            var currentScreenX = desktopScreenX;
+            var currentScreenY = desktopScreenY;
+
+            //image positioning XY
+            var currentTopLeftX = (wdth / 2) - (currentWidth / 2);
+            var currentTopLeftY = (hght / 2) - (currentHeight / 2);
+            var currentScreenTopLeftX = currentTopLeftX + desktopScreenX;
+            var currentScreenTopLeftY = currentTopLeftY + desktopScreenY;
+
+            //iphone home button
+            let phoneHome = new Point(177, 334.5);
+            let phoneHomeRadius = 10;
+
+            //clear button position
+            let buttonDiameter = 22;
+            var clearButtonX = currentTopLeftX + currentWidth - (buttonDiameter / 2);
+            var clearButtonY = currentScreenTopLeftY - (buttonDiameter * 2);
+
+            //scrollbar
+            let scrollBarWidth = 10;
+            let scrollBarHeight = 30;
+            let scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
+            var scrollBarY = currentScreenTopLeftY;
+            var scrollBarTravel = currentScreenHeight - scrollBarHeight;
+
+            var percentScreenShown = scrollBarHeight / currentScreenHeight; //percentage of total scrollable content showing
+            var contentHeight = currentScreenHeight / percentScreenShown;
+            var contentY = 0;
+            var touchY = 0;
+            var dragging = false;
+            var dragOffset = 0;
+
+            //colors
+            let style = getComputedStyle(document.body);
+            let	backGroundClr = style.getPropertyValue('--sidebar-right-bg-color');
+            let	gridBckgrndClr = style.getPropertyValue('--main-bg-color');
+            let buttonClr = s.color(style.getPropertyValue('--purple-color'));
+            let markerClr = style.getPropertyValue('--model-select-bg-color');
+            let	gridLineClr = '#CCC';
+            var scrollBarClr = '#999'
+            let fontAndScaleClr = '#363A3B';
+
+            //action tracking
+            var clickStartTime = 0;
+            var mouseDownXY = new Point(0,0);
+            var lastMouseDownXY = mouseDownXY;
+            var mouseUpXY = new Point(0,0);
+            var mouseTarget = "";
+            var typedText = "";
+
+            //speech rec mode timer and bloom animation
+            var timer;
+            var timerFired = false;
+            var frameCount = 0;
+
+            //markers
+            var markers = [];
+
+            //loop control: things get laggy while looping, so only loop when focus is on magic box
+            $( "#not_gantt_but_is_magic" ).hover(
+                function() { //on over
+                    G.magicModels.run();
+                    s.loop();
+                }, function() {
+                    G.magicModels.pause();
+                    s.noLoop();
+                }
+            );
+
+
+            //load fonts and images
+            s.preload = function() {
+                fontItalic = s.loadFont('./style/fonts/Lato-Italic.ttf');
+                desktop = s.loadImage('./images/desktop.png');
+                iphone = s.loadImage('./images/iphone.png');
+                currentImage = desktop;
+            }
+
+
+            s.setup = function() {
+                s.createCanvas(wdth, hght);
+                s.noLoop();
+                s.textFont(fontItalic);
+            }
+
+
+            s.draw = function() {
+                //the p5 renderer is evidently not quite ready on initial load. Try catch prevents 
+                //try { 
+                    s.updateMarkers();
+                    s.drawBackground();
+                    if (selectedCHI != G.magicModels.selected) s.reset();
+                    s.setScrollBarY();
+                    s.drawGrid();
+                    s.drawMarkers();
+                    s.maskMarkers();
+                    s.setBackgroundImage();
+                    s.drawHomeMarkers();
+                    s.drawScrollBar();
+                    s.drawClearButton();
+                    s.drawSpeechRecInstructions();
+                    s.drawSpeechRecActive();
+                    s.drawGeneralInstructions();
+
+                //} catch(err) {}
+            }
+
+
+            s.updateMarkers = function() {
+                if (G.magicModels.actions.length == 0) markers.length = 0;
+                if (G.magicModels.actions.length > markers.length) {
+                    let delta = G.magicModels.actions.length - markers.length;
+                    for (var i = 0; i < delta; i++) {
+                        let index = G.magicModels.actions.length - delta - i;
+                        markers.push({name: G.magicModels.actions[index].name, point: G.magicModels.actions[index].point, contentY: contentY});
+                    }
+                }
+            }
+
+
+            s.drawBackground = function() {
+                //erase the canvas
+                s.fill(backGroundClr);
+                s.noStroke();
+                s.rect(0,0,wdth,hght);
+            }
+
+
+            //clear all markers and set parameters for G.magicModels selected CHI
+            s.reset = function() {
+                if (G.magicModels.selected == "desktop") {
+                    currentWidth = desktopWidth;
+                    currentHeight = desktopHeight;
+
+                    currentScreenWidth = desktopScreenWidth;
+                    currentScreenHeight = desktopScreenHeight;
+
+                    currentScreenX = desktopScreenX;
+                    currentScreenY = desktopScreenY;
+
+                    currentImage = desktop;
+                    scrollBarClr = '#999';
+
+                } else {
+                    currentWidth = iphoneWidth;
+                    currentHeight = iphoneHeight;
+
+                    currentScreenWidth = iphoneScreenWidth;
+                    currentScreenHeight = iphoneScreenHeight;
+
+                    currentScreenX = iphoneScreenX;
+                    currentScreenY = iphoneScreenY;
+
+                    currentImage = iphone;
+                    scrollBarClr = s.color(235, 235, 235, 180);
+                }
+
+                currentTopLeftX = (wdth / 2) - (currentWidth / 2);
+                currentTopLeftY = (hght / 2) - (currentHeight / 2);
+                currentScreenTopLeftX = currentTopLeftX + currentScreenX;
+                currentScreenTopLeftY = currentTopLeftY + currentScreenY;
+
+                scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
+                scrollBarY = currentScreenTopLeftY;
+                scrollBarTravel = currentScreenHeight - scrollBarHeight;
+
+                percentScreenShown = scrollBarHeight / currentScreenHeight;
+                contentHeight = currentScreenHeight / percentScreenShown;
+                contentY = 0;
+
+                clearButtonX = currentTopLeftX + currentWidth - (buttonDiameter / 2);
+                clearButtonY = currentScreenTopLeftY - (buttonDiameter * 2);
+
+                selectedCHI = G.magicModels.selected;
+                s.clear();
+            }
+
+
+            s.clear = function() {
+                G.magicModels.reset();
+            }
+
+
+            s.setScrollBarY = function() {
+                if (dragging) {
+                    //for the desktop, you drag the scrollbar, so we change the scroll bar position here
+                    if (selectedCHI == "desktop") {
+                        if (dragging) scrollBarY = s.mouseY + dragOffset;
+                        scrollBarY = Math.max(scrollBarY, currentScreenTopLeftY);
+                        scrollBarY = Math.min(scrollBarY, currentScreenTopLeftY + currentScreenHeight - scrollBarHeight);
+
+                    //for the iphone, you drag the screen, so we change the content Y position here	
+                    } else if (selectedCHI == "iphone") {
+                        if (dragging) {
+                            let touchDelta = s.mouseY - touchY;
+                            contentY += touchDelta;
+                            contentY = Math.max(contentY, 0);
+                            contentY = Math.min(contentY, contentHeight);
+                            touchY = s.mouseY;
+                        }
+                    }
+                }
+            }
+
+
+            s.drawGrid = function() {
+                //background 
+                s.noStroke();
+                s.fill(gridBckgrndClr);
+                s.rect(currentScreenTopLeftX, currentScreenTopLeftY, currentScreenWidth, currentScreenHeight);
+
+                //setup to draw gridlines
+                s.stroke(gridLineClr);
+                s.strokeWeight(1);
+                s.noFill();
+                let lineSpacing = 40;
+
+                //vertical lines
+                for (var x = lineSpacing; x < currentScreenWidth; x += lineSpacing) {
+                    let lineX = currentScreenTopLeftX + x;
+                    s.line(lineX, currentScreenTopLeftY, lineX, currentScreenTopLeftY + currentScreenHeight);
+                }
+
+                //horizontal lines
+                var contentPosition = contentY / contentHeight; //drag screen like iphone
+                if (selectedCHI == "desktop") contentPosition = scrollBarY / scrollBarHeight;
+
+                if (selectedCHI == "iphone") scrollBarY = currentScreenTopLeftY + (contentPosition * (currentScreenHeight - scrollBarHeight));
+                else contentY = ( (scrollBarY - currentScreenTopLeftY) / scrollBarTravel) * contentHeight;
+
+                let startY = contentY % lineSpacing;
+                for (var y = startY; y < currentScreenHeight; y += lineSpacing) {
+                    let lineY = currentScreenTopLeftY + currentScreenHeight - y;
+                    s.line(currentScreenTopLeftX, lineY, currentScreenTopLeftX + currentScreenWidth, lineY);
+                }
+            }
+
+
+            s.drawMarkers = function() {
+                s.noStroke();
+                s.textAlign(s.CENTER);
+
+                for (var i = 0; i < markers.length; i++) {
+                    s.fill(markerClr);
+
+                    let point = markers[i].point;
+                    if (point == null) continue;
+
+                    let name = markers[i].name;
+                    let yAdjust = markers[i].contentY;
+
+                    let delta = contentY - yAdjust;
+                    let adjustedY = point.y - delta;
+
+                    if (name == MagicActions.POINTANDCLICK || name == MagicActions.TOUCH) {
+                        s.ellipse(point.x, adjustedY, buttonDiameter);
+                        s.fill('#FFF');
+                        s.text(i + 1, point.x, adjustedY + 4);
+                    } else if (name == MagicActions.DRAGFROM || name == MagicActions.DRAGTO) {
+                        s.rect(point.x, point.y, scrollBarWidth, scrollBarHeight);
+                    } else if (name == MagicActions.SWIPE) {
+                        let x = point.x - (buttonDiameter / 2)
+                        s.rect(x, adjustedY, buttonDiameter, buttonDiameter * 2, buttonDiameter);
+                        s.fill('#FFF');
+                        s.text(i + 1, point.x, adjustedY + buttonDiameter);
+                    } 
+                }
+            }
+
+            s.maskMarkers = function() {
+                s.fill(backGroundClr);
+                //top - bottom
+                s.rect(currentScreenTopLeftX, currentScreenTopLeftY - currentScreenHeight, currentScreenWidth, currentScreenHeight);
+                s.rect(currentScreenTopLeftX, currentScreenTopLeftY + currentScreenHeight, currentScreenWidth, currentScreenHeight);
+
+                //left - right
+                s.rect(currentScreenTopLeftX - currentScreenWidth, 0, currentScreenWidth, hght);
+                s.rect(currentScreenTopLeftX + currentScreenWidth, 0, currentScreenWidth, hght);
+            }
+
+
+            s.setBackgroundImage = function() {
+                s.image(currentImage, currentTopLeftX, currentTopLeftY);
+            }
+
+
+            s.drawHomeMarkers = function() {
+                s.noStroke();
+                s.fill(markerClr);
+
+                for (var i = 0; i < markers.length; i++) {
+                    let name = markers[i].name;
+                    let point = markers[i].point;
+                    if (name == MagicActions.HOME) s.ellipse(point.x, point.y, buttonDiameter);
+                }
+            }
+
+            s.drawScrollBar = function() {
+                s.noStroke();
+                s.fill(scrollBarClr);
+                s.rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+            }
+
+
+            s.drawClearButton = function () {	
+                //button background
+                s.noStroke();
+                s.fill(buttonClr);
+                s.ellipse(clearButtonX, clearButtonY, buttonDiameter);
+
+                s.noFill();
+                s.stroke('#FFF');
+                s.strokeWeight(2);
+
+                //button icon <=|
+                let iconHght = 8;
+                let iconWdth = 8;
+
+                //top right corner to start
+                let vertexX = clearButtonX + (iconWdth / 2) + 1;
+                let vertexY = clearButtonY - (iconHght / 2); 
+
+                s.beginShape();
+                    s.vertex(vertexX, vertexY); //top right corner
+
+                    vertexY += iconHght;
+                    s.vertex(vertexX, vertexY); //bottom right corner
+
+                    vertexX -= iconWdth;
+                    s.vertex(vertexX, vertexY); //bottom left corner
+
+                    vertexX -= (iconWdth / 2);
+                    vertexY -= (iconHght / 2);
+                    s.vertex(vertexX, vertexY); //sharp point
+
+                    vertexX += (iconWdth / 2);
+                    vertexY -= (iconHght / 2);
+                    s.vertex(vertexX, vertexY); //top left corner
+
+                s.endShape(s.CLOSE);
+
+                s.fill('#AAA');
+                s.noStroke();
+                s.text("clear", clearButtonX - (buttonDiameter / 2) - 3, clearButtonY - buttonDiameter + 5);
+            }
+
+
+            s.drawSpeechRecInstructions = function() {
+                let alpha = Math.abs(frameCount - 255 / 2) * 2;
+                s.fill(85, 85, 85, alpha + 50);
+
+                s.textAlign(s.LEFT);
+                if (G.magicModels.speechRecMode == "say") {
+                    let txt = "Type the speech rec command. Press Enter when done."
+                    s.text(txt, 30, currentTopLeftY + currentHeight + 15);
+                } else if (G.magicModels.speechRecMode == "hear") {
+                    let txt = "Type the system aural response, if any. Press Enter when done."
+                    s.text(txt, 30, currentTopLeftY + currentHeight + 15);
+                }
+            }
+
+
+            s.drawSpeechRecActive = function() {
+                if (timerFired || G.magicModels.speechRecMode == "say" || G.magicModels.speechRecMode == "hear") {
+                    s.fill(133, 88, 122, Math.abs(255 - frameCount));
+                    s.ellipse( phoneHome.x, phoneHome.y, buttonDiameter + (buttonDiameter * (frameCount / 255)) );
+
+                    frameCount += 2;
+                    if (frameCount > 255) frameCount = 0;
+                } else {
+                    frameCount = 0
+                }
+            }
+
+
+            s.drawGeneralInstructions = function() {
+                s.fill('#555');
+                if (selectedCHI == "desktop") {
+                    s.text("Click on the monitor grid, drag the slider, or type while", 30, currentTopLeftY + currentHeight + 30);
+                    s.text("your cursor is over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 43);
+                } else {
+                    s.text("Click on the screen grid or home button; drag the grid (swipe);", 30, currentTopLeftY + currentHeight + 40);
+                    s.text("or type (touch screen typing) with your cursor", 30, currentTopLeftY + currentHeight + 52);
+                    s.text("over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 64);
+                    s.text("Click and hold the home button to model speech rec.", 30, currentTopLeftY + currentHeight + 76);
+
+                }
+            }
+
+
+            s.mousePressed = function() {
+                lastMouseDownXY = mouseDownXY
+                mouseDownXY = new Point(s.mouseX, s.mouseY);
+
+                let d = new Date();
+                clickStartTime = d.getTime();
+
+                // if iphone, allow dragging of screen
+                if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+                    dragging = true;
+                    touchY = s.mouseY;
+                    mouseTarget = "phone_screen";
+                }
+
+                else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
+                    mouseTarget = "phone_home";
+                    timer = setTimeout(s.timeout, 1000);
+                }
+
+                // allow dragging scrollbar		  
+                else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
+                    dragging = true;
+                    dragOffset = scrollBarY - s.mouseY;
+                    mouseTarget = "desktop_scroll_bar";
+
+                    let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+                    let barPnt = new Point(scrollBarX, scrollBarY);
+                    G.magicModels.addPointBased(MagicActions.DRAGFROM, barPnt, d);
+                }
+
+                // allow clicking with mouse 		  
+                else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+                    mouseTarget = "desktop_screen";
+                }
+
+                //detect click on clear button
+                else if (s.dist(clearButtonX, clearButtonY, s.mouseX, s.mouseY) <= buttonDiameter / 2) {
+                    s.clear();
+                }
+
+            }		
+
+            s.timeout = function() {
+                timerFired = true;
+            }
+
+
+            s.mouseReleased = function() {
+                if (G.magicModels.visible == false) return;
+
+                mouseUpXY = new Point(s.mouseX, s.mouseY);
+                let d = new Date();
+                let elapsedTime = d.getTime() - clickStartTime;
+
+                dragging = false;
+
+                if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+                    G.magicModels.speechRecMode = "none";
+                    if (mouseTarget == "phone_screen") {
+                        if (mouseDownXY.equals(mouseUpXY)) {
+                            let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+                            G.magicModels.addPointBased(MagicActions.TOUCH, mouseDownXY, d);
+                        } else {
+                            let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+                            G.magicModels.addPointBased(MagicActions.SWIPE, mouseUpXY, d);
+                        }
+                    }
+                }
+
+                else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
+                    if (mouseTarget = "phone_home") {
+                        let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+                        let homePnt = new Point(phoneHome.x, phoneHome.y);
+
+                        if (elapsedTime > 1000) {
+                            G.magicModels.speechRecMode = "say";
+                            G.magicModels.addPointBased(MagicActions.SPEECHRECSAY, homePnt, d);
+                        }
+                        else {
+                            G.magicModels.speechRecMode = "none";
+                            G.magicModels.addPointBased(MagicActions.HOME, homePnt, d);
+                        }
+                    } 
+                }
+
+                // allow dragging of screen		  
+                else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
+                    G.magicModels.speechRecMode = "none";
+                    if (mouseTarget == "desktop_scroll_bar")  {
+                        let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
+                        if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
+                            let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+                            let barPnt = new Point(scrollBarX, scrollBarY);
+                            G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
+                        }
+                    }
+                }
+
+
+                // allow dragging of screen		  
+                else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
+                    G.magicModels.speechRecMode = "none";
+                    let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
+                    if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
+                        let d = s.mappedDistance(mouseDownXY, mouseUpXY);
+                        let barPnt = new Point(scrollBarX, scrollBarY);
+                        G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
+                    } else if (mouseTarget == "desktop_screen")  {
+                        let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
+                        G.magicModels.addPointBased(MagicActions.POINTANDCLICK, mouseUpXY, d);
+                    }
+                }
+
+
+                mouseTarget = "";
+                clearTimeout(timer);
+                timerFired = false;
+            }
+
+
+            s.mappedDistance = function(startPoint, endPoint) {
+                var startX = startPoint.x - currentScreenTopLeftX; //reference to 0,0
+                var startY = startPoint.y - currentScreenTopLeftY; 
+                var endX   = endPoint.x   - currentScreenTopLeftX
+                var endY   = endPoint.y   - currentScreenTopLeftY;
+
+                if (selectedCHI == "desktop") {
+                    startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 1366);
+                    startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 768);
+                    endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 1366);
+                    endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 768);
+                    return s.dist(startX, startY, endX, endY);
+                } else {
+                    startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 750);
+                    startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 1334);
+                    endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 750);
+                    endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 1334);
+                    return s.dist(startX, startY, endX, endY);
+                }
+            }
+
+        }
+    }
 
 }
+
 G.magicModels = new MagicModelsManager();
 
+var magicModelsSketch;
+var magicModels;
 
-
-
-var magicModelsSketch = function(s) {
-	var wdth = $( '#magic_box' ).width();
-	var hght = $( '#magic_box' ).height();
-	
-	//selected CHI
-	var selectedCHI = "desktop";
-	
-	//fonts
-	var fontItalic;
-	
-	//images
-	var desktop;
-	var iphone;
-	var currentImage;
-	
-	//image width/height
-	let desktopWidth = 320;
-	let desktopHeight = 246;
-	let iphoneWidth = 154;
-	let iphoneHeight = 256;
-	var currentWidth = desktopWidth;
-	var currentHeight = desktopHeight;
-	
-	//image screen width/height
-	let desktopScreenWidth = 290;
-	let desktopScreenHeight = 169;
-	let iphoneScreenWidth = 134;
-	let iphoneScreenHeight = 212;
-	var currentScreenWidth = desktopScreenWidth;
-	var currentScreenHeight = desktopScreenHeight;
-	
-	//image screen x/y
-	let desktopScreenX = 15; //if image was at 0/0, top left screen X would be at 15
-	let desktopScreenY = 15;
-	let iphoneScreenX = 10;
-	let iphoneScreenY = 10;
-	var currentScreenX = desktopScreenX;
-	var currentScreenY = desktopScreenY;
-	
-	//image positioning XY
-	var currentTopLeftX = (wdth / 2) - (currentWidth / 2);
-	var currentTopLeftY = (hght / 2) - (currentHeight / 2);
-	var currentScreenTopLeftX = currentTopLeftX + desktopScreenX;
-	var currentScreenTopLeftY = currentTopLeftY + desktopScreenY;
-
-	//iphone home button
-	let phoneHome = new Point(177, 334.5);
-	let phoneHomeRadius = 10;
-	
-	//clear button position
-	let buttonDiameter = 22;
-	var clearButtonX = currentTopLeftX + currentWidth - (buttonDiameter / 2);
-	var clearButtonY = currentScreenTopLeftY - (buttonDiameter * 2);
-	
-	//scrollbar
-	let scrollBarWidth = 10;
-	let scrollBarHeight = 30;
-	let scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
-	var scrollBarY = currentScreenTopLeftY;
-	var scrollBarTravel = currentScreenHeight - scrollBarHeight;
-	
-	var percentScreenShown = scrollBarHeight / currentScreenHeight; //percentage of total scrollable content showing
-	var contentHeight = currentScreenHeight / percentScreenShown;
-	var contentY = 0;
-	var touchY = 0;
-	var dragging = false;
-	var dragOffset = 0;
-	
-	//colors
-	let style = getComputedStyle(document.body);
-	let	backGroundClr = style.getPropertyValue('--sidebar-right-bg-color');
-	let	gridBckgrndClr = style.getPropertyValue('--main-bg-color');
-	let buttonClr = s.color(style.getPropertyValue('--purple-color'));
-	let markerClr = style.getPropertyValue('--model-select-bg-color');
-	let	gridLineClr = '#CCC';
-	var scrollBarClr = '#999'
-	let fontAndScaleClr = '#363A3B';
-	
-	//action tracking
-	var clickStartTime = 0;
-	var mouseDownXY = new Point(0,0);
-	var lastMouseDownXY = mouseDownXY;
-	var mouseUpXY = new Point(0,0);
-	var mouseTarget = "";
-	var typedText = "";
-	
-	//speech rec mode timer and bloom animation
-	var timer;
-	var timerFired = false;
-	var frameCount = 0;
-	
-	//markers
-	var markers = [];
-	
-	//loop control: things get laggy while looping, so only loop when focus is on magic box
-	$( "#not_gantt_but_is_magic" ).hover(
-		function() { //on over
-			G.magicModels.run();
-			s.loop();
-		}, function() {
-			G.magicModels.pause();
-			s.noLoop();
-		}
-	);
-
-	
-	//load fonts and images
-	s.preload = function() {
-		fontItalic = s.loadFont('./style/fonts/Lato-Italic.ttf');
-		desktop = s.loadImage('./images/desktop.png');
-		iphone = s.loadImage('./images/iphone.png');
-		currentImage = desktop;
-	}
-	
-	
-	s.setup = function() {
-		s.createCanvas(wdth, hght);
-		s.noLoop();
-		s.textFont(fontItalic);
-	}
-	
-	
-	s.draw = function() {
-		//the p5 renderer is evidently not quite ready on initial load. Try catch prevents 
-		//try { 
-			s.updateMarkers();
-			s.drawBackground();
-			if (selectedCHI != G.magicModels.selected) s.reset();
-			s.setScrollBarY();
-			s.drawGrid();
-			s.drawMarkers();
-			s.maskMarkers();
-			s.setBackgroundImage();
-			s.drawHomeMarkers();
-			s.drawScrollBar();
-			s.drawClearButton();
-			s.drawSpeechRecInstructions();
-			s.drawSpeechRecActive();
-			s.drawGeneralInstructions();
-			
-		//} catch(err) {}
-	}
-	
-	
-	s.updateMarkers = function() {
-		if (G.magicModels.actions.length == 0) markers.length = 0;
-		if (G.magicModels.actions.length > markers.length) {
-			let delta = G.magicModels.actions.length - markers.length;
-			for (var i = 0; i < delta; i++) {
-				let index = G.magicModels.actions.length - delta - i;
-				markers.push({name: G.magicModels.actions[index].name, point: G.magicModels.actions[index].point, contentY: contentY});
-			}
-		}
-	}
-	
-	
-	s.drawBackground = function() {
-		//erase the canvas
-		s.fill(backGroundClr);
-		s.noStroke();
-		s.rect(0,0,wdth,hght);
-	}
-	
-	
-	//clear all markers and set parameters for G.magicModels selected CHI
-	s.reset = function() {
-		if (G.magicModels.selected == "desktop") {
-			currentWidth = desktopWidth;
-			currentHeight = desktopHeight;
-			
-			currentScreenWidth = desktopScreenWidth;
-			currentScreenHeight = desktopScreenHeight;
-
-			currentScreenX = desktopScreenX;
-			currentScreenY = desktopScreenY;
-
-			currentImage = desktop;
-			scrollBarClr = '#999';
-			
-		} else {
-			currentWidth = iphoneWidth;
-			currentHeight = iphoneHeight;
-			
-			currentScreenWidth = iphoneScreenWidth;
-			currentScreenHeight = iphoneScreenHeight;
-
-			currentScreenX = iphoneScreenX;
-			currentScreenY = iphoneScreenY;
-						
-			currentImage = iphone;
-			scrollBarClr = s.color(235, 235, 235, 180);
-		}
-		
-		currentTopLeftX = (wdth / 2) - (currentWidth / 2);
-		currentTopLeftY = (hght / 2) - (currentHeight / 2);
-		currentScreenTopLeftX = currentTopLeftX + currentScreenX;
-		currentScreenTopLeftY = currentTopLeftY + currentScreenY;
-		
-		scrollBarX = currentScreenTopLeftX + currentScreenWidth - scrollBarWidth;
-		scrollBarY = currentScreenTopLeftY;
-		scrollBarTravel = currentScreenHeight - scrollBarHeight;
-		
-		percentScreenShown = scrollBarHeight / currentScreenHeight;
-		contentHeight = currentScreenHeight / percentScreenShown;
-		contentY = 0;
-		
-		clearButtonX = currentTopLeftX + currentWidth - (buttonDiameter / 2);
-		clearButtonY = currentScreenTopLeftY - (buttonDiameter * 2);
-
-		selectedCHI = G.magicModels.selected;
-		s.clear();
-	}
-	
-	
-	s.clear = function() {
-		G.magicModels.reset();
-	}
-	
-	
-	s.setScrollBarY = function() {
-		if (dragging) {
-			//for the desktop, you drag the scrollbar, so we change the scroll bar position here
-			if (selectedCHI == "desktop") {
-				if (dragging) scrollBarY = s.mouseY + dragOffset;
-				scrollBarY = Math.max(scrollBarY, currentScreenTopLeftY);
-				scrollBarY = Math.min(scrollBarY, currentScreenTopLeftY + currentScreenHeight - scrollBarHeight);
-				
-			//for the iphone, you drag the screen, so we change the content Y position here	
-			} else if (selectedCHI == "iphone") {
-				if (dragging) {
-					let touchDelta = s.mouseY - touchY;
-					contentY += touchDelta;
-					contentY = Math.max(contentY, 0);
-					contentY = Math.min(contentY, contentHeight);
-					touchY = s.mouseY;
-				}
-			}
-		}
-	}
-	
-	
-	s.drawGrid = function() {
-		//background 
-		s.noStroke();
-		s.fill(gridBckgrndClr);
-		s.rect(currentScreenTopLeftX, currentScreenTopLeftY, currentScreenWidth, currentScreenHeight);
-		
-		//setup to draw gridlines
-		s.stroke(gridLineClr);
-		s.strokeWeight(1);
-		s.noFill();
-		let lineSpacing = 40;
-		
-		//vertical lines
-		for (var x = lineSpacing; x < currentScreenWidth; x += lineSpacing) {
-			let lineX = currentScreenTopLeftX + x;
-			s.line(lineX, currentScreenTopLeftY, lineX, currentScreenTopLeftY + currentScreenHeight);
-		}
-		
-		//horizontal lines
-		var contentPosition = contentY / contentHeight; //drag screen like iphone
-		if (selectedCHI == "desktop") contentPosition = scrollBarY / scrollBarHeight;
-		
-		if (selectedCHI == "iphone") scrollBarY = currentScreenTopLeftY + (contentPosition * (currentScreenHeight - scrollBarHeight));
-		else contentY = ( (scrollBarY - currentScreenTopLeftY) / scrollBarTravel) * contentHeight;
-		
-		let startY = contentY % lineSpacing;
-		for (var y = startY; y < currentScreenHeight; y += lineSpacing) {
-			let lineY = currentScreenTopLeftY + currentScreenHeight - y;
-			s.line(currentScreenTopLeftX, lineY, currentScreenTopLeftX + currentScreenWidth, lineY);
-		}
-	}
-	
-	
-	s.drawMarkers = function() {
-		s.noStroke();
-		s.textAlign(s.CENTER);
-		
-		for (var i = 0; i < markers.length; i++) {
-			s.fill(markerClr);
-			
-			let point = markers[i].point;
-			if (point == null) continue;
-			
-			let name = markers[i].name;
-			let yAdjust = markers[i].contentY;
-			
-			let delta = contentY - yAdjust;
-			let adjustedY = point.y - delta;
-			
-			if (name == MagicActions.POINTANDCLICK || name == MagicActions.TOUCH) {
-				s.ellipse(point.x, adjustedY, buttonDiameter);
-				s.fill('#FFF');
-				s.text(i + 1, point.x, adjustedY + 4);
-			} else if (name == MagicActions.DRAGFROM || name == MagicActions.DRAGTO) {
-				s.rect(point.x, point.y, scrollBarWidth, scrollBarHeight);
-			} else if (name == MagicActions.SWIPE) {
-				let x = point.x - (buttonDiameter / 2)
-				s.rect(x, adjustedY, buttonDiameter, buttonDiameter * 2, buttonDiameter);
-				s.fill('#FFF');
-				s.text(i + 1, point.x, adjustedY + buttonDiameter);
-			} 
-		}
-	}
-	
-	s.maskMarkers = function() {
-		s.fill(backGroundClr);
-		//top - bottom
-		s.rect(currentScreenTopLeftX, currentScreenTopLeftY - currentScreenHeight, currentScreenWidth, currentScreenHeight);
-		s.rect(currentScreenTopLeftX, currentScreenTopLeftY + currentScreenHeight, currentScreenWidth, currentScreenHeight);
-		
-		//left - right
-		s.rect(currentScreenTopLeftX - currentScreenWidth, 0, currentScreenWidth, hght);
-		s.rect(currentScreenTopLeftX + currentScreenWidth, 0, currentScreenWidth, hght);
-	}
-	
-	
-	s.setBackgroundImage = function() {
-		s.image(currentImage, currentTopLeftX, currentTopLeftY);
-	}
-	
-	
-	s.drawHomeMarkers = function() {
-		s.noStroke();
-		s.fill(markerClr);
-		
-		for (var i = 0; i < markers.length; i++) {
-			let name = markers[i].name;
-			let point = markers[i].point;
-			if (name == MagicActions.HOME) s.ellipse(point.x, point.y, buttonDiameter);
-		}
-	}
-	
-	s.drawScrollBar = function() {
-		s.noStroke();
-		s.fill(scrollBarClr);
-		s.rect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
-	}
-	
-	
-	s.drawClearButton = function () {	
-		//button background
-		s.noStroke();
-		s.fill(buttonClr);
-		s.ellipse(clearButtonX, clearButtonY, buttonDiameter);
-		
-		s.noFill();
-		s.stroke('#FFF');
-		s.strokeWeight(2);
-		
-		//button icon <=|
-		let iconHght = 8;
-		let iconWdth = 8;
-		
-		//top right corner to start
-		let vertexX = clearButtonX + (iconWdth / 2) + 1;
-		let vertexY = clearButtonY - (iconHght / 2); 
-		
-		s.beginShape();
-			s.vertex(vertexX, vertexY); //top right corner
-		
-			vertexY += iconHght;
-			s.vertex(vertexX, vertexY); //bottom right corner
-			
-			vertexX -= iconWdth;
-			s.vertex(vertexX, vertexY); //bottom left corner
-		
-			vertexX -= (iconWdth / 2);
-			vertexY -= (iconHght / 2);
-			s.vertex(vertexX, vertexY); //sharp point
-		
-			vertexX += (iconWdth / 2);
-			vertexY -= (iconHght / 2);
-			s.vertex(vertexX, vertexY); //top left corner
-		
-		s.endShape(s.CLOSE);
-		
-		s.fill('#AAA');
-		s.noStroke();
-		s.text("clear", clearButtonX - (buttonDiameter / 2) - 3, clearButtonY - buttonDiameter + 5);
-	}
-	
-	
-	s.drawSpeechRecInstructions = function() {
-		let alpha = Math.abs(frameCount - 255 / 2) * 2;
-		s.fill(85, 85, 85, alpha + 50);
-		
-		s.textAlign(s.LEFT);
-		if (G.magicModels.speechRecMode == "say") {
-			let txt = "Type the speech rec command. Press Enter when done."
-			s.text(txt, 30, currentTopLeftY + currentHeight + 15);
-		} else if (G.magicModels.speechRecMode == "hear") {
-			let txt = "Type the system aural response, if any. Press Enter when done."
-			s.text(txt, 30, currentTopLeftY + currentHeight + 15);
-		}
-	}
-	
-	
-	s.drawSpeechRecActive = function() {
-		if (timerFired || G.magicModels.speechRecMode == "say" || G.magicModels.speechRecMode == "hear") {
-			s.fill(133, 88, 122, Math.abs(255 - frameCount));
-			s.ellipse( phoneHome.x, phoneHome.y, buttonDiameter + (buttonDiameter * (frameCount / 255)) );
-			
-			frameCount += 2;
-			if (frameCount > 255) frameCount = 0;
-		} else {
-			frameCount = 0
-		}
-	}
-	
-	
-	s.drawGeneralInstructions = function() {
-		s.fill('#555');
-		if (selectedCHI == "desktop") {
-			s.text("Click on the monitor grid, drag the slider, or type while", 30, currentTopLeftY + currentHeight + 30);
-			s.text("your cursor is over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 43);
-		} else {
-			s.text("Click on the screen grid or home button; drag the grid (swipe);", 30, currentTopLeftY + currentHeight + 40);
-			s.text("or type (touch screen typing) with your cursor", 30, currentTopLeftY + currentHeight + 52);
-			s.text("over the grid to automatically build a model.", 30, currentTopLeftY + currentHeight + 64);
-			s.text("Click and hold the home button to model speech rec.", 30, currentTopLeftY + currentHeight + 76);
-
-		}
-	}
-	
-	
-	s.mousePressed = function() {
-		lastMouseDownXY = mouseDownXY
-		mouseDownXY = new Point(s.mouseX, s.mouseY);
-		
-		let d = new Date();
-		clickStartTime = d.getTime();
-		
-		// if iphone, allow dragging of screen
-		if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
-			dragging = true;
-			touchY = s.mouseY;
-			mouseTarget = "phone_screen";
-		}
-		
-		else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
-			mouseTarget = "phone_home";
-			timer = setTimeout(s.timeout, 1000);
-		}
-		
-		// allow dragging scrollbar		  
-		else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
-			dragging = true;
-			dragOffset = scrollBarY - s.mouseY;
-			mouseTarget = "desktop_scroll_bar";
-			
-			let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
-			let barPnt = new Point(scrollBarX, scrollBarY);
-			G.magicModels.addPointBased(MagicActions.DRAGFROM, barPnt, d);
-		}
-		
-		// allow clicking with mouse 		  
-		else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
-			mouseTarget = "desktop_screen";
-		}
-		
-		//detect click on clear button
-		else if (s.dist(clearButtonX, clearButtonY, s.mouseX, s.mouseY) <= buttonDiameter / 2) {
-			s.clear();
-		}
-		
-	}		
-	
-	s.timeout = function() {
-		timerFired = true;
-	}
-
-	
-	s.mouseReleased = function() {
-        if (G.magicModels.visible == false) return;
-        
-		mouseUpXY = new Point(s.mouseX, s.mouseY);
-		let d = new Date();
-		let elapsedTime = d.getTime() - clickStartTime;
-		
-		dragging = false;
-		
-		if (selectedCHI == "iphone" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
-			G.magicModels.speechRecMode = "none";
-			if (mouseTarget == "phone_screen") {
-				if (mouseDownXY.equals(mouseUpXY)) {
-					let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
-					G.magicModels.addPointBased(MagicActions.TOUCH, mouseDownXY, d);
-				} else {
-					let d = s.mappedDistance(mouseDownXY, mouseUpXY);
-					G.magicModels.addPointBased(MagicActions.SWIPE, mouseUpXY, d);
-				}
-			}
-		}
-		
-		else if (selectedCHI == "iphone" && s.dist(phoneHome.x, phoneHome.y, s.mouseX, s.mouseY) <= phoneHomeRadius) {
-			if (mouseTarget = "phone_home") {
-				let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
-				let homePnt = new Point(phoneHome.x, phoneHome.y);
-				
-				if (elapsedTime > 1000) {
-					G.magicModels.speechRecMode = "say";
-					G.magicModels.addPointBased(MagicActions.SPEECHRECSAY, homePnt, d);
-				}
-				else {
-					G.magicModels.speechRecMode = "none";
-					G.magicModels.addPointBased(MagicActions.HOME, homePnt, d);
-				}
-			} 
-		}
-		
-		// allow dragging of screen		  
-		else if (selectedCHI == "desktop" && s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {
-			G.magicModels.speechRecMode = "none";
-			if (mouseTarget == "desktop_scroll_bar")  {
-				let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
-				if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
-					let d = s.mappedDistance(mouseDownXY, mouseUpXY);
-					let barPnt = new Point(scrollBarX, scrollBarY);
-					G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
-				}
-			}
-		}
-		
-		
-		// allow dragging of screen		  
-		else if (selectedCHI == "desktop" && s.mouseX >= currentScreenTopLeftX && s.mouseX <= currentScreenTopLeftX + currentScreenWidth && s.mouseY >= currentScreenTopLeftY  && s.mouseY <= currentScreenTopLeftY + currentScreenHeight) {
-			G.magicModels.speechRecMode = "none";
-			let lastAction = G.magicModels.actions[G.magicModels.actions.length - 1]
-			if (G.magicModels.actions.length > 0 && lastAction == MagicActions.DRAGFROM) {
-				let d = s.mappedDistance(mouseDownXY, mouseUpXY);
-				let barPnt = new Point(scrollBarX, scrollBarY);
-				G.magicModels.addPointBased(MagicActions.DRAGTO, barPnt, d);
-			} else if (mouseTarget == "desktop_screen")  {
-				let d = s.mappedDistance(lastMouseDownXY, mouseDownXY);
-				G.magicModels.addPointBased(MagicActions.POINTANDCLICK, mouseUpXY, d);
-			}
-		}
-		
-
-		mouseTarget = "";
-		clearTimeout(timer);
-		timerFired = false;
-	}
-	
-
-	s.mappedDistance = function(startPoint, endPoint) {
-		var startX = startPoint.x - currentScreenTopLeftX; //reference to 0,0
-		var startY = startPoint.y - currentScreenTopLeftY; 
-		var endX   = endPoint.x   - currentScreenTopLeftX
-		var endY   = endPoint.y   - currentScreenTopLeftY;
-		
-		if (selectedCHI == "desktop") {
-			startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 1366);
-			startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 768);
-			endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 1366);
-			endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 768);
-			return s.dist(startX, startY, endX, endY);
-		} else {
-			startX = s.map(startPoint.x, 0, currentScreenWidth,  0, 750);
-			startY = s.map(startPoint.y, 0, currentScreenHeight, 0, 1334);
-			endX   = s.map(endPoint.x,   0, currentScreenWidth,  0, 750);
-			endY   = s.map(endPoint.y,   0, currentScreenHeight, 0, 1334);
-			return s.dist(startX, startY, endX, endY);
-		}
-	}
-	
-}
-var magicModels = new p5(magicModelsSketch, 'magic_box');

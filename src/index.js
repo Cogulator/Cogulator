@@ -106,10 +106,10 @@ const template = [
 	{
 		label: 'Edit',
 		submenu: [
-			{
+            {
 				role: 'undo'
 			},
-			{
+            {
 				role: 'redo'
 			},
 			{
@@ -140,7 +140,7 @@ const template = [
 				label: 'Find',
                 accelerator: 'CmdOrCtrl+F',
 				click () { mainWindow.webContents.send('Edit->Find') } //FinderCHI.js
-			}
+			},
 		]
 	},
 	{
@@ -161,6 +161,17 @@ const template = [
 				}
 			},
 			{
+				type: 'separator'
+			},
+            {
+                label: 'Light',
+				click () { mainWindow.webContents.send('View->Light'); } //DarkLightManager.js
+            },
+            {
+                label: 'Dark',
+				click () { mainWindow.webContents.send('View->Dark'); } //DarkLightManager.js
+            },
+            {
 				type: 'separator'
 			},
 			{

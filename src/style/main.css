@@ -9,11 +9,16 @@
 	--directory-txt-color: lightgray;
 	--delete-button-color: red;
 	--auto-complete-bg-color: #4A4A4A;
-	--stats-color: #555;
+	--stats-color: #000;
 	--stats-label-color: #777;
 	--border-color: #DFDFDF;
 	--gantt-stripe-color: #F0F0F0;
 	--purple-color: #85587A;
+    --scroll-bar-color: #EEE;
+    --box-shadow-color: grey;
+    --gantt-text-shadow-color: #FFF; 
+    --gantt-border-color: #CCC; 
+
 }
 
 
@@ -130,6 +135,7 @@
 	min-width: 100px;
 	font-family: 'Lato';
 	font-size: 18px;
+    color:var(--stats-color);
 } .stat_units {
 	font-family: 'Lato-Italic';
 	font-size: 13px;
@@ -177,7 +183,7 @@
 }
  
 ::-webkit-scrollbar-thumb {
-    background: #EEE; 
+    background:var(--scroll-bar-color); 
     border-radius:8px;
 }
 
@@ -224,6 +230,7 @@
 	margin-left: auto;
 	margin-right: auto;
 */
+    
 	border-top-left-radius: 30px;
 	border-top-right-radius: 30px;
 	width: 60px; /* Need a specific value to work */
@@ -231,11 +238,12 @@
 	line-height:25px;
 	text-align: center;
 	background-color:var(--main-bg-color);
+    color: var(--model-button-txt-color);
 	font-family: "Lato-Bold";
 	font-size:20px;
 	cursor:default;
 	user-select: none;
-	box-shadow: 0px -2px 2px grey;
+	box-shadow: 0px -2px 2px var(--box-shadow-color);
 	z-index: 100;
 }
 
@@ -273,7 +281,7 @@
 	width:100%;
 	height:450px;
 	background-color:var(--main-bg-color);
-	box-shadow: 0px -1px 5px grey;
+	box-shadow: 0px -1px 5px var(--box-shadow-color);
 }
 
 
