@@ -83,11 +83,8 @@
 }
 
 #not_gantt_but_is_magic {
-/*	position: relative;
-	float:left;*/
-    position:absolute;
-    right: 0px;
-    z-index: -1;
+	position: relative;
+	float:left;
 	width:356px;
 	height:100%;
 	background-color: var(--sidebar-right-bg-color);

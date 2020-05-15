@@ -275,14 +275,14 @@ class MagicModelsManager {
 	
 	
 	show() {
-        $('#not_gantt_but_is_magic').css("visibility", "visible");
-        $('#not_gantt_but_is_magic').css("width", "0px");
+		$('#not_gantt_but_is_magic').css("visibility", "visible");
         
-        let wdth = $( window ).width() - 356;
-        $( '#not_gantt_not_magic' ).animate({ width: wdth}, 500 );
-        $( '#not_gantt_but_is_magic' ).animate({ width: 356}, 500, function() {
-            $('#not_gantt_but_is_magic').css("z-index", "1000"); //moving the z-index helps smooth out the animation
+        $( '#not_gantt_not_magic' ).animate({ width: $( window ).width() - 356}, 500, function() {
+            $('#not_gantt_not_magic').css({ 'width': 'calc(100% - 356px'});
         });
+        
+        $('#not_gantt_but_is_magic').css("width", "0px");
+        $( '#not_gantt_but_is_magic' ).animate({ width: 356}, 500);
 		
 		$('#magic_button').html("<img src='images/magicOff.png'>");
 		G.magicModels.visible = true;
@@ -293,26 +293,36 @@ class MagicModelsManager {
 	
 	
 	hide() { //also called by ganttManager if not enough room for both windows
-        $('#not_gantt_but_is_magic').css("z-index", "-1");
         $( '#not_gantt_but_is_magic' ).animate({ width: 0}, 500 );
         $( '#not_gantt_not_magic' ).animate({ width: '100%'}, 500, function() {
             $('#not_gantt_but_is_magic').css("visibility", "hidden");
+            G.magicModels.visible = false;
+            G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
+            $('#magic_button').html("<img src='images/magicOn.png'>");
         })
-		
-		$('#magic_button').html("<img src='images/magicOn.png'>");
-		G.magicModels.visible = false;
-		G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
 		//probably remove the sketch too...
 	}
     
+    
     setMagicModels() {
+        //sketch won't set correctly if width is not correct
+        $('#not_gantt_but_is_magic').css("visibility", "visible");
+        $('#not_gantt_but_is_magic').css("width", "356px");
+        
         magicModelsSketch = undefined;
         magicModels = undefined;
         
         this.setMagicModelSketch();
         $('#magic_box').html(""); //empty out existing html
         magicModels = new p5(magicModelsSketch, 'magic_box');
+        
+        if (!this.visible) {
+            $('#not_gantt_but_is_magic').css("visibility", "hidden");
+            $('#not_gantt_but_is_magic').css("width", "0px");
+        }
+        
     }
+    
     
     setMagicModelSketch() {
         magicModelsSketch = function(s) {
