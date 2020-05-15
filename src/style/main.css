@@ -19,6 +19,7 @@
     --gantt-text-shadow-color: #FFF; 
     --gantt-border-color: #CCC; 
     --windows-menu-font-color: #000; 
+    --magic-button-background: #F8F8F8; 
 }
 
 
@@ -82,12 +83,15 @@
 }
 
 #not_gantt_but_is_magic {
-	position: relative;
-	float:left;
+/*	position: relative;
+	float:left;*/
+    position:absolute;
+    right: 0px;
+    z-index: -1;
 	width:356px;
 	height:100%;
 	background-color: var(--sidebar-right-bg-color);
-	visibility:hidden
+	visibility:hidden;
 }
 
 #sidebar_left {

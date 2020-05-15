@@ -29,7 +29,7 @@ class MagicModelsManager {
 		this.handsPosition = "";
 				
 		//toggle magic models on wand click
-		$( '#magic_button_container' ).click(function() {
+		$('#magic_button_container').click(function() {
 			let visibility = $('#not_gantt_but_is_magic').css('visibility');
 			if (visibility == "hidden") { //expand
 				G.magicModels.show();
@@ -39,7 +39,7 @@ class MagicModelsManager {
 		});
 		
 		//close magic models on close button click
-		$( '#close_magic_button').click(function() {
+		$('#close_magic_button').click(function() {
 			G.magicModels.hide();
 		});
 		
@@ -275,9 +275,16 @@ class MagicModelsManager {
 	
 	
 	show() {
-		$('#not_gantt_not_magic').css({ 'width': 'calc(100% - 356px'});
-		$('#not_gantt_but_is_magic').css("visibility", "visible");
-		$('#magic_button').html("<img src='images/magicOn.png'>");
+        $('#not_gantt_but_is_magic').css("visibility", "visible");
+        $('#not_gantt_but_is_magic').css("width", "0px");
+        
+        let wdth = $( window ).width() - 356;
+        $( '#not_gantt_not_magic' ).animate({ width: wdth}, 500 );
+        $( '#not_gantt_but_is_magic' ).animate({ width: 356}, 500, function() {
+            $('#not_gantt_but_is_magic').css("z-index", "1000"); //moving the z-index helps smooth out the animation
+        });
+		
+		$('#magic_button').html("<img src='images/magicOff.png'>");
 		G.magicModels.visible = true;
 		G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
 		
@@ -286,9 +293,13 @@ class MagicModelsManager {
 	
 	
 	hide() { //also called by ganttManager if not enough room for both windows
-		$('#not_gantt_not_magic').css('width', '100%');
-		$('#not_gantt_but_is_magic').css("visibility", "hidden");
-		$('#magic_button').html("<img src='images/magicOff.png'>");
+        $('#not_gantt_but_is_magic').css("z-index", "-1");
+        $( '#not_gantt_but_is_magic' ).animate({ width: 0}, 500 );
+        $( '#not_gantt_not_magic' ).animate({ width: '100%'}, 500, function() {
+            $('#not_gantt_but_is_magic').css("visibility", "hidden");
+        })
+		
+		$('#magic_button').html("<img src='images/magicOn.png'>");
 		G.magicModels.visible = false;
 		G.qutterManager.updateMarkers(); //at some point I'd rather do this by event listener in qutterManager
 		//probably remove the sketch too...
