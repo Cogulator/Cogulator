@@ -54,7 +54,7 @@ class ExportManager {
 	
 	
 	save(text, defaultName) {
-		var fullPath = dialog.showSaveDialog({
+		var fullPath = dialog.showSaveDialogSync({
 							defaultPath: '~/' + defaultName,
 							filters: [{
 								name: 'Plain Text',
