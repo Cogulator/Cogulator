@@ -51,8 +51,7 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#000');
         
         G.solarize.setLight();
-        G.magicModels.setMagicModels();
-        G.ganttManager.setGanttChart();
+        $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
     }
     
     youWantSomeLight() {
@@ -75,8 +74,6 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#000');
         
         G.solarize.setDim();
-        G.magicModels.setMagicModels();
-        G.ganttManager.setGanttChart();
     }
     
     youWantItDarker() {
@@ -113,8 +110,7 @@ class DarkLightManager {
        
     
         G.solarize.setDark();
-        G.magicModels.setMagicModels();
-        G.ganttManager.setGanttChart();
+        $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
     }
     
 }
