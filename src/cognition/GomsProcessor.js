@@ -97,6 +97,14 @@ class GomsProcessor {
 		$( document ).trigger( "GOMS_Processed", [this.totalTaskTime] );
 	}
     
+    removeComments(line) {
+        let commentIndex = line.indexOf("*");
+        
+        if (commentIndex == -1) return line.trim();
+        if (commentIndex == 0) return " ";
+        
+        return line.substring(0, commentIndex).trim();
+    }
     
     //@References refer to Goals earlier in the code
     //This function replaces @References with the full GOMS code
@@ -106,14 +114,10 @@ class GomsProcessor {
         var referencedLines = G.quill.getText().split("\n");
         var codeLines = [];
         for (var i = 0; i < referencedLines.length; i++) {
-            let line = referencedLines[i];
+            var line = this.removeComments(referencedLines[i]);
             
             //If this is a @Reference, find it's match earlier in the code and replace with full code
             if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) { //this is a reference line
-                
-                let goalIndex = line.indexOf("@");
-                let commentIndex = line.indexOf("*");
-                if (commentIndex >- 1 && commentIndex < goalIndex) continue;
                 
                 var keyword = "@goal"
                 if (line.toLowerCase().includes("@also")) keyword = "@also";
@@ -122,8 +126,8 @@ class GomsProcessor {
                 //look for the goal that the reference points to
                 var found = false
                 for (var j = 0; j < i; j++) {
-                    let testLine = referencedLines[j];
-                    
+                    let testLine = this.removeComments(referencedLines[j]);
+                                        
                     //This might be the referenced goal.  Will test further if "if" is true
                     if ( testLine.toLowerCase().includes(referenceGoalInfo.goal.toLowerCase()) ) {
                         let fullKeyword = keyword.replace("@", "")
@@ -133,7 +137,6 @@ class GomsProcessor {
                         found = true;
                     
                         let goalIndents = this.indentCount(testLine);
-                        //codeLines.push(testLine);
                         codeLines.push(line.replace("@",""));
                         
                         //Copy the goal steps for the goal the reference points to
