@@ -53,6 +53,10 @@
 	overflow:hidden;
 }
 
+.body {
+    position: fixed;
+}
+
 #electron-titlebar {
 	-webkit-app-region: drag;
 }
