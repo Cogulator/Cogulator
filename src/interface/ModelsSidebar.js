@@ -38,7 +38,37 @@ class ModelsSidebar {
 				$( '#sidebar_left' ).append(html);
 			}
 		}
+
+		// Double click to rename a file.
+		$(".model_label").dblclick(function(e) {
+			const originalDiv = $(this);
+
+			function doRename(newName) {
+				const fullPath = originalDiv.parent().data("path");
+				const newFile = G.modelsManager.renameModel(fullPath, newName);
+				// Easiest thing to do after renaming is to just rebuild the sidebar.
+				// This will make sure the renamed file gets put in the right place.
+				G.modelsSidebar.selectedPath = newFile.filePath;
+				G.modelsSidebar.buildSideBar();
+			}
+
+			const nameInput = $("<input>")
+				.attr("type", "text")
+				.addClass("rename_model")
+				.val($(this).text())
+				.blur(function () {
+					doRename($(this).val());
+				})
+				.keypress(function (event) {
+					if (event.key === "Enter") {
+						doRename($(this).val());
+					}
+				})
 		
+			originalDiv.hide();
+			nameInput.insertAfter(originalDiv);
+			nameInput.focus();
+		})
 		
 		//Select model listener
 		$(' .model_label ').click(function (e) {

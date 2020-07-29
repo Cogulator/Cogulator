@@ -43,6 +43,29 @@ class ModelsManager {
 	saveModel() {
 		G.io.writeToFile(this.selected, G.quill.getText());
 	}
+
+
+	/**
+	 * Rename the given file in fullPath to the newName
+	 * @param {String} fullPath Full path to file like /Users/demo/cogulator/filename.goms
+	 * @param {String} newName New name for file without extension like new_filename
+	 */
+	renameModel(fullPath, newName) {
+		// At the very minimum, name should not contain slashes or spaces.
+		const resolvedName = newName.replace(/\//g, "_").replace(/\\/g, "_").replace(/ /g, "_");
+		const directory = path.dirname(fullPath);
+		const newPath = path.join(directory, resolvedName + ".goms");
+		G.io.renameFile(fullPath, newPath);
+		// Set this one as the selected model. This prevents creating a file with the old name on window close.
+		// Then update models manager so it grabs the new file path.
+		this.selected = newPath;
+		G.modelsManager.setLastOpened();
+		G.modelsManager.update();
+		return {
+			file: resolvedName,
+			filePath: newPath,
+		};
+	}
 	
 	
 	deleteModels() {

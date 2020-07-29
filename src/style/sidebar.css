@@ -56,6 +56,23 @@
 	line-height: 26px;
 }
 
+input[type=text].rename_model {
+	position: absolute;
+	left:20px;
+	font-size:14px;
+	font-family: 'Lato-Regular';
+	width:130px;
+	background: white;
+	border: none;
+	margin: 0;
+	height:26px;
+	padding: 0 5px;
+}
+
+input[type=text].rename_model:focus {
+	outline-width: unset;
+}
+
 .strikethrough {
 	text-decoration: line-through;
 }
