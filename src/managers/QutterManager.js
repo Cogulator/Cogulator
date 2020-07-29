@@ -1,8 +1,10 @@
 class QutterManager { //Quill gutter
 	
 	constructor() {
-		this.lineHeight = 22; //dependent on set font size
-		this.showLineNumbers = false
+        this.lineHeight = 22; //dependent on set font size.  Refigured in updateMarkers
+        this.minLineHeight = 1000;
+        
+        this.showLineNumbers = false
         
         //Handle line number toggle
         ipcRenderer.on('View->Toggle Line Numbers', (sender, arg) => {
@@ -76,6 +78,15 @@ class QutterManager { //Quill gutter
 	
 	
 	updateMarkers() { 
+        //set the correct lineHeight value if not already set
+        if (this.minLineHeight == 1000) {
+            let lines = G.quill.getLines(1, G.quill.getLength());
+            for (var i = 0; i < lines.length; i++) this.minLineHeight = Math.min(this.minLineHeight, lines[i].domNode.clientHeight);
+            if (this.minLineHeight < 44) this.lineHeight = this.minLineHeight; //this is very suspect.  1) 44 is a guess as to what we should be looking for 2) if for some reason the window opens with max wrapping, we're screwed.
+            
+            console.log("Min:", this.minLineHeight, "   Set:", this.lineHeight);
+        }
+        
 		let errors = G.errorManager.errors;
 		let tips = G.tipManager.tips;
 		let insertionLine = G.qutterManager.getInsertionLine();
@@ -130,6 +141,8 @@ class QutterManager { //Quill gutter
 			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
 			for (var j = 0; j < wrappedLines - 1; j++) html += "<br>"; 
             
+
+            
             lineNumber++;
 		}
 			
@@ -145,6 +158,7 @@ class QutterManager { //Quill gutter
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);
 		}
+        
 	}
 	
 	
