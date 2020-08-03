@@ -124,7 +124,6 @@
 #main_nav {
 	position:absolute;
 	top:0px;
-	/* TODO: resize */
 	left: calc(var(--sidebar-left-width) + var(--sidebar-spacer-width) + 10px); 
 	width: calc(100% - var(--sidebar-left-width) - var(--sidebar-spacer-width) - var(--sidebar-right-width) - 30px);
 	height:59px;
