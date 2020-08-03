@@ -51,7 +51,6 @@
 .model_label {
 	position: absolute;
 	left:20px;
-	width:157px;
 	height:26px;
 	line-height: 26px;
 }
@@ -84,8 +83,10 @@ input[type=text].rename_model:focus {
 	border-bottom: 13px solid transparent; 
 	border-right:15px solid var(--main-bg-color); 
 	
-}.model_pointer_container {
+}
+
+.model_pointer_container {
 	position: absolute;
-	left:177px;
-	width:15px;
+	width: 15px;
+	right: 0;
 }

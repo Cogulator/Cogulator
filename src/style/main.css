@@ -19,7 +19,12 @@
     --gantt-text-shadow-color: #FFF; 
     --gantt-border-color: #CCC; 
     --windows-menu-font-color: #000; 
-    --magic-button-background: #F8F8F8; 
+	--magic-button-background: #F8F8F8; 
+	
+	--gutter-width: 40px;
+	--sidebar-spacer-width: 3px;
+	--sidebar-left-width: 190px;
+	--sidebar-right-width: 30px;
 }
 
 
@@ -84,6 +89,7 @@
 	float:left;
 	width:100%;
 	height:100%;
+	display:flex;
 }
 
 #not_gantt_but_is_magic {
@@ -96,22 +102,31 @@
 }
 
 #sidebar_left {
-	position:absolute;
-	top:0px;
-	left:0px;
-	width:192px;
+	width: var(--sidebar-left-width);
 	height:100%;
 	background-color:var(--sidebar-left-bg-color);
 	overflow-y:auto;
 	overflow-x:hidden;
 }
 
+#sidebar_spacer {
+	background: transparent;
+	height: 100%;
+	width: var(--sidebar-spacer-width);
+	cursor: col-resize
+}
+
+#sidebar_spacer:hover {
+	background: var(--model-select-bg-color);
+}
+
 
 #main_nav {
 	position:absolute;
 	top:0px;
-	left:203px;
-	width: calc(100% - 190px - 55px);
+	/* TODO: resize */
+	left: calc(var(--sidebar-left-width) + var(--sidebar-spacer-width) + 10px); 
+	width: calc(100% - var(--sidebar-left-width) - var(--sidebar-spacer-width) - var(--sidebar-right-width) - 30px);
 	height:59px;
 	border-bottom: 1px solid;
 	border-color:var(--border-color);
@@ -160,8 +175,8 @@
 	font-size: 16px;
 	position:absolute;
 	top:60px;
-	left:192px;
-	width: 40px;
+	left: calc(var(--sidebar-left-width) + var(--sidebar-spacer-width));
+	width: var(--gutter-width);
 	height:calc(100% - 60px);
 /*	background-color:var(--main-bg-color);*/
 	overflow: hidden;
@@ -173,8 +188,9 @@
 	font-size: 16px;
 	position:absolute;
 	top:60px;
-	left:232px;
-	width: calc(100% - 190px - 30px - 40px - 5px); /*5px for custom scroll bar width*/
+	left: calc(var(--sidebar-left-width) + var(--sidebar-spacer-width) + var(--gutter-width));
+	/* 5px is for padding to right of scrollbar */
+	width: calc(100% - var(--sidebar-left-width) - var(--sidebar-spacer-width) - var(--gutter-width) - var(--sidebar-right-width) - 5px);
 	height:calc(100% - 60px);
 	background-color:var(--main-bg-color);
 }
@@ -219,7 +235,7 @@
 	position:absolute;
 	top:0px;
 	right:0px;
-	width:30px;
+	width:var(--sidebar-right-width);
 	height:100%;
 	background-color:var(--sidebar-right-bg-color);
 }
