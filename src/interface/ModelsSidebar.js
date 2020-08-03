@@ -2,14 +2,44 @@ $( document ).ready(function() {
     G.modelsSidebar = new ModelsSidebar("");
 });
 
+const MAX_SIDEBAR_WIDTH = 500;
+const MIN_SIDEBAR_WIDTH = 20;
+
 class ModelsSidebar {
 	constructor(selected) {
 		this.showSelected = this.showSelected.bind(this);
 		this.selectedPath = selected;
+		this.resizing = false;
 		
 		this.buildSideBar();
+		this.enableSideBarResize();
 	}
 
+	enableSideBarResize() {
+		function resizeHandler(event) {
+			if (event.pageX >= MIN_SIDEBAR_WIDTH && event.pageX <= MAX_SIDEBAR_WIDTH) {
+				// Because of the magic of CSS variables, all we have to do is update the sidebar-left-width
+				// Check the calculations in main.css to see how everything else is calculated based on this.
+				const html = document.getElementsByTagName('html')[0];
+				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
+			}
+		}
+
+		// On mousedown on the spacer, set indicator that we are resizing the sidebar and bind the resizing handler.
+		$('#sidebar_spacer').on('mousedown', function() {
+			G.modelsSidebar.resizing = true;
+			$(document).on('mousemove', resizeHandler);
+		})
+
+		// Mouseup could happen anywhere, so check that on the document.
+		// If there's a mouseup and we're resizing, stop the resizing handler.
+		$(document).on('mouseup', function() {
+			if (G.modelsSidebar.resizing) {
+				G.modelsSidebar.resizing = false;
+				$(document).off('mousemove', resizeHandler);
+			}
+		})
+	}
 		
 	buildSideBar() {
 		$( '#sidebar_left' ).empty();
