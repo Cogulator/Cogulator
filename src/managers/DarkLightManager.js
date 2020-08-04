@@ -20,11 +20,6 @@ class DarkLightManager {
             this.youWantItBright();
 		})
         
-        //Currently not in use
-        ipcRenderer.on('View->Dim', (sender, arg) => {
-            this.youWantSomeLight();
-		})
-        
         ipcRenderer.on('View->Dark', (sender, arg) => {
             this.youWantItDarker();
             
@@ -49,31 +44,10 @@ class DarkLightManager {
         $(':root').css('--gantt-text-shadow-color', '#FFF');
         $(':root').css('--gantt-border-color', '#CCC');
         $(':root').css('--windows-menu-font-color', '#000');
+        $(':root').css('--line_number-color', 'lightgray');
         
         G.solarize.setLight();
         $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
-    }
-    
-    youWantSomeLight() {
-        this.isDark = false;
-        
-        $(':root').css('--main-bg-color', '#BFBFBF');
-        $(':root').css('--sidebar-left-bg-color', '#EFEFEF');
-        $(':root').css('--sidebar-right-bg-color', '#EFEFEF');
-        $(':root').css('--stats-color', '#000');
-        $(':root').css('--border-color', '#777');
-        $(':root').css('--button-icon-color', '#000');
-        $(':root').css('--scroll-bar-color', '#777');
-        $(':root').css('--model-button-select-txt-color', 'white');
-        $(':root').css('--model-button-txt-color', 'black');
-	    $(':root').css('--directory-txt-color', 'lightgray');
-        $(':root').css('--box-shadow-color', 'grey');
-        $(':root').css('--gantt-stripe-color', '#F0F0F0');
-        $(':root').css('--gantt-text-shadow-color', '#FFF');
-        $(':root').css('--gantt-border-color', '#CCC');
-        $(':root').css('--windows-menu-font-color', '#000');
-        
-        G.solarize.setDim();
     }
     
     youWantItDarker() {
@@ -94,6 +68,7 @@ class DarkLightManager {
         $(':root').css('--gantt-text-shadow-color', '#111');
         $(':root').css('--gantt-border-color', '#002730');
         $(':root').css('--windows-menu-font-color', '#93A1A1');
+        $(':root').css('--line_number-color', '#586E75');
         
         $('html[electron-titlebar-platform=win32] #electron-titlebar > .button img').css('-webkit-filter', 'invert(50%)');
             

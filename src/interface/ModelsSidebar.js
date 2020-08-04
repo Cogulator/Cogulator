@@ -2,14 +2,44 @@ $( document ).ready(function() {
     G.modelsSidebar = new ModelsSidebar("");
 });
 
+const MAX_SIDEBAR_WIDTH = 500;
+const MIN_SIDEBAR_WIDTH = 20;
+
 class ModelsSidebar {
 	constructor(selected) {
 		this.showSelected = this.showSelected.bind(this);
 		this.selectedPath = selected;
+		this.resizing = false;
 		
 		this.buildSideBar();
+		this.enableSideBarResize();
 	}
 
+	enableSideBarResize() {
+		function resizeHandler(event) {
+			if (event.pageX >= MIN_SIDEBAR_WIDTH && event.pageX <= MAX_SIDEBAR_WIDTH) {
+				// Because of the magic of CSS variables, all we have to do is update the sidebar-left-width
+				// Check the calculations in main.css to see how everything else is calculated based on this.
+				const html = document.getElementsByTagName('html')[0];
+				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
+			}
+		}
+
+		// On mousedown on the spacer, set indicator that we are resizing the sidebar and bind the resizing handler.
+		$('#sidebar_spacer').on('mousedown', function() {
+			G.modelsSidebar.resizing = true;
+			$(document).on('mousemove', resizeHandler);
+		})
+
+		// Mouseup could happen anywhere, so check that on the document.
+		// If there's a mouseup and we're resizing, stop the resizing handler.
+		$(document).on('mouseup', function() {
+			if (G.modelsSidebar.resizing) {
+				G.modelsSidebar.resizing = false;
+				$(document).off('mousemove', resizeHandler);
+			}
+		})
+	}
 		
 	buildSideBar() {
 		$( '#sidebar_left' ).empty();
@@ -38,7 +68,37 @@ class ModelsSidebar {
 				$( '#sidebar_left' ).append(html);
 			}
 		}
+
+		// Double click to rename a file.
+		$(".model_label").dblclick(function(e) {
+			const originalDiv = $(this);
+
+			function doRename(newName) {
+				const fullPath = originalDiv.parent().data("path");
+				const newFile = G.modelsManager.renameModel(fullPath, newName);
+				// Easiest thing to do after renaming is to just rebuild the sidebar.
+				// This will make sure the renamed file gets put in the right place.
+				G.modelsSidebar.selectedPath = newFile.filePath;
+				G.modelsSidebar.buildSideBar();
+			}
+
+			const nameInput = $("<input>")
+				.attr("type", "text")
+				.addClass("rename_model")
+				.val($(this).text())
+				.blur(function () {
+					doRename($(this).val());
+				})
+				.keypress(function (event) {
+					if (event.key === "Enter") {
+						doRename($(this).val());
+					}
+				})
 		
+			originalDiv.hide();
+			nameInput.insertAfter(originalDiv);
+			nameInput.focus();
+		})
 		
 		//Select model listener
 		$(' .model_label ').click(function (e) {

@@ -1,8 +1,8 @@
 class QutterManager { //Quill gutter
 	
 	constructor() {
-		this.lineHeight = 22; //dependent on set font size
-		this.showLineNumbers = false
+        this.lineHeight = 22; //dependent on set font size.  Magic number.
+        this.showLineNumbers = false
         
         //Handle line number toggle
         ipcRenderer.on('View->Toggle Line Numbers', (sender, arg) => {
@@ -127,8 +127,9 @@ class QutterManager { //Quill gutter
             }
 			
 			
-			let wrappedLines = lines[i].domNode.clientHeight / this.lineHeight;
+			let wrappedLines = Math.floor(lines[i].domNode.clientHeight / this.lineHeight);
 			for (var j = 0; j < wrappedLines - 1; j++) html += "<br>"; 
+            
             
             lineNumber++;
 		}
@@ -145,6 +146,7 @@ class QutterManager { //Quill gutter
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);
 		}
+        
 	}
 	
 	

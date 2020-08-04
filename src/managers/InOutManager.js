@@ -51,7 +51,12 @@ class InOutManager {
 		}
 		
 		callback(data); 
-    }
+	}
+	
+
+	renameFile(sourcePth, targetPth) {
+		fs.renameSync(sourcePth, targetPth);
+	}
 	
 	
 	copyFile(sourcePth, targetPth, callback) {

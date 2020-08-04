@@ -95,11 +95,11 @@ class TipManager {
 
 			if (step.operator == "look" || step.operator == "search") {
 				lookNotTakenByPointOrTouch = true;
-			} else if (step.operator == "point" || step.operator == "touch") {
+			} else if (step.operator == "point" || step.operator == "touch" || step.operator == "drag") {
 				if (lookNotTakenByPointOrTouch) lookNotTakenByPointOrTouch = false;
 				else this.tips.push(new Tip("eyes_to_target", step.lineNo));
 				
-				if (step.operator == "point") pointNotTakenByClick = true;
+				if (step.operator == "point" || step.operator == "drag") pointNotTakenByClick = true;
 			} else if (step.operator == "click") {
 				if (pointNotTakenByClick) pointNotTakenByClick = false;
 				else this.tips.push(new Tip("missing_point", step.lineNo));
