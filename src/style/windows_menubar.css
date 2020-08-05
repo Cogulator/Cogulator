@@ -4,6 +4,7 @@
     height:30px;
     margin-left:5px;
 	pointer-events: all;
+    background-color: var(--sidebar-right-bg-color);
     -webkit-app-region: no-drag;
 }
 

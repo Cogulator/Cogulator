@@ -16,7 +16,8 @@ class WindowsTitleBar {
         let halfHeight = height / 2;
         let codeTop = 60 + halfHeight;
         
-        $( '#sidebar_left' ).css('padding-top', height + 'px');
+        //$( '#sidebar_left' ).css('padding-top', height + 'px'); //not sure this was ever necessary
+        //$( '#sidebar_left' ).css('height', 'calc(100% - ' + height + 'px'); //if use line above, include this line ensure scroll to the bottom
         $( '#main_nav' ).css('padding-top', halfHeight + 'px');
         $( '#gutter' ).css('top', codeTop + 'px');
         $( '#gutter' ).css('height', 'calc(100% - ' +  codeTop + 'px');
