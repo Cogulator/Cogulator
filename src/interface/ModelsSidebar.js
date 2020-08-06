@@ -20,8 +20,9 @@ class ModelsSidebar {
 			if (event.pageX >= MIN_SIDEBAR_WIDTH && event.pageX <= MAX_SIDEBAR_WIDTH) {
 				// Because of the magic of CSS variables, all we have to do is update the sidebar-left-width
 				// Check the calculations in main.css to see how everything else is calculated based on this.
-				const html = document.getElementsByTagName('html')[0];
-				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
+//				const html = document.getElementsByTagName('html')[0];
+//				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
+                $(':root').css('--sidebar-left-width',  event.pageX + 'px');
 			}
 		}
 

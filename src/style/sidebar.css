@@ -54,6 +54,7 @@
 	position: absolute;
 	left:20px;
 	height:26px;
+    width:100%; /* ensure clickable across width of sidebar */
 	line-height: 26px;
 }
 

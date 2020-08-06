@@ -35,7 +35,8 @@ class DarkLightManager {
         $(':root').css('--stats-color', '#000');
         $(':root').css('--border-color', '#DFDFDF');
         $(':root').css('--button-icon-color', '#000');
-        $(':root').css('--scroll-bar-color', '#EEE');
+        $(':root').css('--scroll-bar-color', '#DDD');
+        $(':root').css('--scroll-bar-hover-color', '#CCC');
         $(':root').css('--model-button-select-txt-color', 'white');
         $(':root').css('--model-button-txt-color', 'black');
 	    $(':root').css('--directory-txt-color', 'lightgray');
@@ -60,6 +61,7 @@ class DarkLightManager {
         $(':root').css('--border-color', '#094D5E');
         $(':root').css('--button-icon-color', '#93A1A1');
         $(':root').css('--scroll-bar-color', '#476A72');
+        $(':root').css('--scroll-bar-hover-color', '#66838A');
         $(':root').css('--model-button-select-txt-color', 'white');
         $(':root').css('--model-button-txt-color', '#93A1A1');
 	    $(':root').css('--directory-txt-color', '#586E75');

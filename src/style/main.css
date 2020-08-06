@@ -14,7 +14,8 @@
 	--border-color: #DFDFDF;
 	--gantt-stripe-color: #F0F0F0;
 	--purple-color: #85587A;
-    --scroll-bar-color: #EEE;
+    --scroll-bar-color: #DDD;
+    --scroll-bar-hover-color: #CCC;
     --box-shadow-color: grey;
     --gantt-text-shadow-color: #FFF; 
     --gantt-border-color: #CCC; 
@@ -208,7 +209,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #CCC; 
+    background: var(--scroll-bar-hover-color); 
 }
 
 
