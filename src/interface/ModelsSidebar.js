@@ -69,6 +69,7 @@ class ModelsSidebar {
 				$( '#sidebar_left' ).append(html);
 			}
 		}
+        $( '#sidebar_left' ).append("<div class='directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
 
 		// Double click to rename a file.
 		$(".model_label").dblclick(function(e) {
