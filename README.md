@@ -16,6 +16,7 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 - jquery with the command "npm install jquery --save"
 - trash with the command "npm install trash --save"
 - electron-titlebar with the command "npm install electron-titlebar --save"
+- electron-json-storage with the command "npm install --save electron-json-storage"
 - update.electron.org service with the command "npm install update-electron-app --save"
 
 # License
