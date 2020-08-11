@@ -427,7 +427,6 @@ var ganttSketch = function(s) {
 
 
     s.drawGanttChartLabel = function() {
-        console.log(G.darkLightManager.isDark);
         if (G.darkLightManager.isDark) s.image(cpmLabelDark,25,marginTop + 10);
         else                           s.image(cpmLabelLight,25,marginTop + 10);
         

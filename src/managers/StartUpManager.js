@@ -2,7 +2,8 @@ class StartUpManager {
 	
 	load() {
 		this.index = 0;
-		this.js = ["./objects/Components.js", 
+		this.js = ["./managers/SettingsManager.js",
+                   "./objects/Components.js", 
 					"./objects/Operator.js",
 					"./objects/Step.js",
 					"./objects/Chunk.js",
@@ -56,6 +57,7 @@ class StartUpManager {
 			});
 		} else {
 			G.modelsManager.loadLastModel();
+            if (G.darkLightManager.isDark) G.darkLightManager.youWantItDarker();
 		}
 	}
 }

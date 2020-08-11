@@ -14,15 +14,16 @@
 
 class DarkLightManager {
 	constructor() {
-        this.isDark = false;
+        this.isDark = G.settingsManager.getSetting('darkMode');
         
 		ipcRenderer.on('View->Light', (sender, arg) => {
             this.youWantItBright();
+            G.settingsManager.setSetting('darkMode', false);
 		})
         
         ipcRenderer.on('View->Dark', (sender, arg) => {
             this.youWantItDarker();
-            
+            G.settingsManager.setSetting('darkMode', true);
 		})
 	}
     

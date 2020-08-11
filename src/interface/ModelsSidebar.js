@@ -10,6 +10,9 @@ class ModelsSidebar {
 		this.showSelected = this.showSelected.bind(this);
 		this.selectedPath = selected;
 		this.resizing = false;
+        
+        let sideBarWidth =  G.settingsManager.getSetting('sidebarWidth');
+        $(':root').css('--sidebar-left-width',  sideBarWidth + 'px'); //size to last saved width
 		
 		this.buildSideBar();
 		this.enableSideBarResize();
@@ -23,6 +26,7 @@ class ModelsSidebar {
 //				const html = document.getElementsByTagName('html')[0];
 //				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
                 $(':root').css('--sidebar-left-width',  event.pageX + 'px');
+                G.settingsManager.setSetting('sidebarWidth', event.pageX); //set from saved settings
 			}
 		}
 
