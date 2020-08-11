@@ -103,6 +103,8 @@ class AutocompleteManager {
 		
 		
 	show(completionTxt, caretIndex) {
+        this.codeLeft = parseInt( $( '#code' ).css('left').replace("px", "") ); //because the sidebar can be resized, need to reset this variable
+        
 		this.isVisible = true;
 		let caretBounds = G.quill.getBounds(caretIndex + 1);
 		$( '#autocomplete' ).text(completionTxt);
