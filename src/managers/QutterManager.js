@@ -2,11 +2,12 @@ class QutterManager { //Quill gutter
 	
 	constructor() {
         this.lineHeight = 22; //dependent on set font size.  Magic number.
-        this.showLineNumbers = false
+        this.showLineNumbers = G.settingsManager.getSetting('lineNumbers');
         
         //Handle line number toggle
         ipcRenderer.on('View->Toggle Line Numbers', (sender, arg) => {
             G.qutterManager.showLineNumbers = !G.qutterManager.showLineNumbers;
+            G.settingsManager.setSetting('lineNumbers', G.qutterManager.showLineNumbers);
             G.qutterManager.updateMarkers();
 		})
         
@@ -24,8 +25,10 @@ class QutterManager { //Quill gutter
 		G.quill.on('selection-change', function(range, oldRange, source) {
 			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
 		});
+        
+        //onkeyup update the markers/line numbers if necessary
 		$( document ).on("keyup", function() {
-			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
+			G.qutterManager.updateMarkers();
 		});
 		
 		
