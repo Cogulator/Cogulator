@@ -411,7 +411,19 @@ var magicModelsSketch = function(s) {
         }
     );
     
+    
+    $( document ).on( "Dark_Mode_StartUp", function() {
+        setPallete();
+    });
+    
+    
     $( document ).on( "Dark_Mode_Change", function() {
+        setPallete();
+        s.draw();
+    });
+    
+    
+    function setPallete(){
         style = getComputedStyle(document.body);
         backGroundClr = style.getPropertyValue('--sidebar-right-bg-color');
         gridBckgrndClr = style.getPropertyValue('--main-bg-color');
@@ -420,9 +432,7 @@ var magicModelsSketch = function(s) {
         gridLineClr = '#CCC';
         scrollBarClr = '#999'
         fontAndScaleClr = '#363A3B';
-        
-        s.draw();
-    });
+    }
 
 
     //load fonts and images

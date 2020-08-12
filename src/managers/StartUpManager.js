@@ -57,7 +57,7 @@ class StartUpManager {
 			});
 		} else {
 			G.modelsManager.loadLastModel();
-            if (G.darkLightManager.isDark) G.darkLightManager.youWantItDarker();
+            if (G.darkLightManager.isDark) G.darkLightManager.youWantItDarker(true); //true indicates this is happening on startup
 		}
 	}
 }

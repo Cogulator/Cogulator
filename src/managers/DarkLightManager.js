@@ -52,7 +52,7 @@ class DarkLightManager {
         $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
     }
     
-    youWantItDarker() {
+    youWantItDarker(onStartUp) {
         this.isDark = true;
         
         $(':root').css('--main-bg-color', '#073642');
@@ -86,9 +86,9 @@ class DarkLightManager {
             }
         );
        
-    
         G.solarize.setDark();
-        $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
+        if (onStartUp) $( document ).trigger( "Dark_Mode_StartUp" ); //listen for by MagicModels and GanttChart
+        else           $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
     }
     
 }

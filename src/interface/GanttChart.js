@@ -26,6 +26,8 @@
 
 class GanttManager {
 	constructor() {
+        this.open = false;
+        
 		//addlisteners for slide up/down
 		$('#not_gantt_container').addClass('full_height');
 		$( '#gantt_button' ).click( function () {
@@ -35,6 +37,7 @@ class GanttManager {
 				$('#gantt_container').animate({bottom:'0px'},"slow", function() {
 					$('#not_gantt_container').addClass('partial_height').removeClass('full_height');
 					$( '#gantt_button_text' ).addClass('rotate_180').removeClass('rotate_0');
+                    G.ganttManager.open = true;
 				 });
 				$('#gantt_button').animate({bottom:'450px'}, "slow");
 				//hide
@@ -42,9 +45,9 @@ class GanttManager {
 				$('#not_gantt_container').addClass('full_height').removeClass('partial_height');
 				$('#gantt_container').animate({bottom:'-450px'}, "slow", function() {
 					$( '#gantt_button_text' ).addClass('rotate_0').removeClass('rotate_180');
+                    G.ganttManager.open = false;
 				});
 				$('#gantt_button').animate({bottom:'0px'}, "slow");
-				
 			}
 		});
 	}
@@ -56,9 +59,11 @@ class GanttManager {
 			$('#gantt_container').animate({bottom:'0px'},"slow", function() {
 				$('#not_gantt_container').addClass('partial_height').removeClass('full_height');
 				$( '#gantt_button_text' ).addClass('rotate_180').removeClass('rotate_0');
+                G.ganttManager.open = true;
 			 });
 			$('#gantt_button').animate({bottom:'450px'}, "slow");
 		}
+        
 	}
 	
 	//used by MagicModels to close Gantt if not enough room
@@ -67,6 +72,7 @@ class GanttManager {
 			$('#not_gantt_container').addClass('full_height').removeClass('partial_height');
 			$('#gantt_container').animate({bottom:'-450px'}, "slow", function() {
 				$( '#gantt_button_text' ).addClass('rotate_0').removeClass('rotate_180');
+                G.ganttManager.open = false;
 			});
 			$('#gantt_button').animate({bottom:'0px'}, "slow");
 		}
@@ -181,8 +187,20 @@ var ganttSketch = function(s) {
             s.loopOff //this can be on mouseout once we're sure it's working
         }
     );
+    
+    
+    $( document ).on( "Dark_Mode_StartUp", function() {
+        setPallete();
+        s.draw();
+    });
+    
 
     $( document ).on( "Dark_Mode_Change", function() {
+        setPallete();
+        s.draw();
+    });
+    
+    function setPallete() {
         style = getComputedStyle(document.body);
         backGroundClr = style.getPropertyValue('--main-bg-color');
         stripeClr = style.getPropertyValue('--gantt-stripe-color');
@@ -191,9 +209,7 @@ var ganttSketch = function(s) {
         chunkInfoPaneBackground = style.getPropertyValue('--main-bg-color');
         shadowClr = style.getPropertyValue('--gantt-text-shadow-color'); 
         palette = [fontAndScaleClr,'#DC322F', '#2AA198', '#6C71C4','#859900', '#CB4B16'];  // Alternate syntax
-
-        s.draw();
-    });
+    }
 
     let looping = false;
     let timer;
@@ -247,7 +263,7 @@ var ganttSketch = function(s) {
     }
 
 
-    s.draw = function() {
+    s.draw = function() {     
         //the p5 renderer is evidently not quite ready on initial load. Try catch prevents 
         try {
             s.setScale();			
@@ -888,7 +904,7 @@ var ganttSketch = function(s) {
     }
 
 
-    s.mousePressed = function() {	
+    s.mousePressed = function() {
         // detect click on slider		  
         if (s.mouseX >= scrollBarX && s.mouseX <= scrollBarX + scrollBarWidth && s.mouseY >= scrollBarY  && s.mouseY <= scrollBarY + scrollBarHeight) {		    
             dragging = true;
@@ -940,6 +956,8 @@ var ganttSketch = function(s) {
     }
 
     s.mouseMoved = function () {
+        if (!G.ganttManager.open) return; //don't draw while the thing is opening/closing... makes the animation choppy
+        
         if (mouseOverGantt) {
             hoverChunk = undefined;
             if (G.memoryChunks) {
@@ -960,6 +978,8 @@ var ganttSketch = function(s) {
 
 
     s.mouseWheel = function(evt) {
+        if (!G.ganttManager.open) return; //don't draw while the thing is opening/closing... makes the animation choppy
+        
         if (mouseOverGantt) {
             s.loopOn();
             timer = window.setTimeout(s.loopOff, 1000);
