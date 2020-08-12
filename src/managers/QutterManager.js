@@ -86,8 +86,9 @@ class QutterManager { //Quill gutter
         var lineNumber = 1;
 		
 		//for each line, see if an error exists
-		let lines = G.quill.getLines(1, G.quill.getLength());
+		let lines = G.quill.getLines(0, G.quill.getLength());
 		for (var i = 0; i < lines.length; i++) {
+                    
 			//determine if this line has an error in it.
 			var foundErrorOrTip = false;
 			for (var j = 0; j < errors.length; j++) {
@@ -140,8 +141,6 @@ class QutterManager { //Quill gutter
 		//Finish off side bar
 		if (insertionLine != null && insertionLine == lines.length) {
 			html += "<div class='error_and_tip_marker_container'><div class='insertion_marker purple_background' data-line='" + insertionLine + "'>+</div></div>"
-		} else if (this.showLineNumbers) {
-			html += "<span class='line_number'>" + lineNumber + "</span><br>";
 		} else {
             html += "<br>"; 
         }
@@ -149,7 +148,6 @@ class QutterManager { //Quill gutter
 		if (html != $('#gutter').html) {
 			$('#gutter').html(html);
 		}
-        
 	}
 	
 	
