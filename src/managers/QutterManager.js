@@ -146,6 +146,7 @@ class QutterManager { //Quill gutter
         }
 		
 		if (html != $('#gutter').html) {
+            G.errorPopOver.hide(); //prevents orphaned error marker that persists if mouse is over error marker that disapears
 			$('#gutter').html(html);
 		}
 	}
