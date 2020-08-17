@@ -35,6 +35,7 @@ class ModelsSidebar {
 		// If there's a mouseup and we're resizing, stop the resizing handler.
 		$(document).on('mouseup', function() {
 			if (G.modelsSidebar.resizing) {
+				G.qutterManager.updateMarkers();
 				G.modelsSidebar.resizing = false;
 				$(document).off('mousemove', resizeHandler);
 			}
