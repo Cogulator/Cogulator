@@ -18,12 +18,10 @@ class DarkLightManager {
         
 		ipcRenderer.on('View->Light', (sender, arg) => {
             this.youWantItBright();
-            G.settingsManager.setSetting('darkMode', false);
 		})
         
         ipcRenderer.on('View->Dark', (sender, arg) => {
             this.youWantItDarker();
-            G.settingsManager.setSetting('darkMode', true);
 		})
 	}
     
@@ -51,6 +49,8 @@ class DarkLightManager {
         
         G.solarize.setLight();
         $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
+        
+        G.settingsManager.setSetting('darkMode', false);
     }
     
     youWantItDarker(onStartUp) {
@@ -91,6 +91,8 @@ class DarkLightManager {
         G.solarize.setDark();
         if (onStartUp) $( document ).trigger( "Dark_Mode_StartUp" ); //listen for by MagicModels and GanttChart
         else           $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
+        
+        G.settingsManager.setSetting('darkMode', true);
     }
     
 }

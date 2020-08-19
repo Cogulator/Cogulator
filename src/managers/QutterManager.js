@@ -6,9 +6,7 @@ class QutterManager { //Quill gutter
         
         //Handle line number toggle
         ipcRenderer.on('View->Toggle Line Numbers', (sender, arg) => {
-            G.qutterManager.showLineNumbers = !G.qutterManager.showLineNumbers;
-            G.settingsManager.setSetting('lineNumbers', G.qutterManager.showLineNumbers);
-            G.qutterManager.updateMarkers();
+            G.qutterManager.handleToggleMarkers();
 		})
         
 		//Sync Qutter scroll to Quill scroll
@@ -76,6 +74,13 @@ class QutterManager { //Quill gutter
 		});
 		
 	} 
+    
+    
+    handleToggleMarkers() {
+        G.qutterManager.showLineNumbers = !G.qutterManager.showLineNumbers;
+        G.settingsManager.setSetting('lineNumbers', G.qutterManager.showLineNumbers);
+        G.qutterManager.updateMarkers();
+    }
 	
 	
 	updateMarkers() { 
