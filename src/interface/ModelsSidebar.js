@@ -16,6 +16,7 @@ class ModelsSidebar {
 		
 		this.buildSideBar();
 		this.enableSideBarResize();
+		this.enbableModelDragDrop();
 	}
 
 	enableSideBarResize() {
@@ -46,6 +47,63 @@ class ModelsSidebar {
 			}
 		})
 	}
+
+	enbableModelDragDrop() {
+		$('.directory_label').on('dragover', function(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			$(this).addClass('dragging');
+		})
+
+		$('.directory_label').on('dragleave', function(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			$(this).removeClass('dragging');
+		})
+
+		$('.directory_label').on('drop', function(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			$(this).removeClass('dragging');
+
+			// Make sure there is data and a model is being dropped.
+			const textData = event.originalEvent.dataTransfer.getData("text");
+			if (textData) {
+				const droppedData = JSON.parse(textData);
+				if (droppedData.type && droppedData.type === 'model-file') {
+					const newFilePath = G.modelsManager.moveModel(droppedData.fullPath, $(this).data('path'));
+
+					// It's possible to drop a file on the directory it's already in.
+					// So only do stuff if the file was moved to a new directory.
+					if (newFilePath !== droppedData.fullPath) {
+						// If we moved the currently selected model, we need to update selectedPath.
+						if (droppedData.fullPath === G.modelsSidebar.selectedPath) {
+							G.modelsSidebar.selectedPath = newFilePath;
+						}
+						
+						// Easiest thing to do after moving is to just rebuild the sidebar.
+						// This will make sure the moved file gets put in the right place.
+						G.modelsSidebar.buildSideBar();
+						
+						// Then we also need to re-enable drag and drop on the rebuilt sidebar.
+						G.modelsSidebar.enbableModelDragDrop();
+					}
+				}
+			}
+		})
+
+		$('.model_label').on('dragstart', function(event) {
+			const fullPath = $(this).parent().data('path');
+			event.originalEvent.dataTransfer.effectAllowed = 'move';
+			// Store the path and type of thing being dragged.
+			event.originalEvent.dataTransfer.setData('text/plain', JSON.stringify({
+				type: 'model-file',
+				fullPath,
+			}));
+			console.log('dragstart dataTransfer.items.length', event.originalEvent.dataTransfer.items.length)
+		});
+
+	}
 		
 	buildSideBar() {
 		$( '#sidebar_left' ).empty();
@@ -53,7 +111,7 @@ class ModelsSidebar {
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
-			$( '#sidebar_left' ).append("<div class='directory_label'>" + models.directory + "</div>");
+			$( '#sidebar_left' ).append("<div class='directory_label' data-path='" + models.directoryPath + "'>" + models.directory + "</div>");
 			
 			for (var j = 0; j < models.files.length; j++) {
 				let file = models.files[j];
@@ -68,13 +126,13 @@ class ModelsSidebar {
 				//button
 				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "'>" +
 								"<div class='model_button_delete' data-marked='x'> </div>" +
-								"<div class='model_label'>" + file.file + "</div>" +
+								"<div class='model_label' draggable='true'>" + file.file + "</div>" +
 								"<div class='model_pointer_container'>" + pointerDiv + "</div>";
 							"</div>";
 				$( '#sidebar_left' ).append(html);
 			}
 		}
-        $( '#sidebar_left' ).append("<div class='directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
+        $( '#sidebar_left' ).append("<div class='empty_directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
 
 		// Double click to rename a file.
 		$(".model_label").dblclick(function(e) {
