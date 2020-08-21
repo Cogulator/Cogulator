@@ -44,7 +44,6 @@ class FinderCHI {
         this.unHighlight();
         if (find == "") {
             $( '#finder_stats' ).text('');
-            //$( '#finder_text_field' ).css('background-color', 'transparent');
             $( '#finder_text_field' ).css('border-color', '#C6C3C3');
             return;
         }
@@ -80,7 +79,6 @@ class FinderCHI {
             );
             
             $( '#finder_stats' ).text('1 of ' + this.matches.length);
-            //$( '#finder_text_field' ).css('background-color', '#E5F1ED'); //green
             $( '#finder_text_field' ).css('border-color', '#4CBD99'); //green
             G.quill.setSelection(this.matches[0].index, 0); //scroll to the first match
             $( '#finder_text_field' ).focus(); //returns focus to find text field

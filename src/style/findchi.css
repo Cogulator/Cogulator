@@ -21,7 +21,8 @@
 }
 
 #finder_text_field{
-  transition: all 0.5s ease;
+    color: var(--stats-color);
+    transition: all 0.5s ease;
 }
 
 /*previous next container*/
@@ -30,6 +31,7 @@
     float:left;
     width:40px;
     margin-left: 15px;
+    color: var(--stats-color);
     background-color: var(--sidebar-left-bg-color);
     border: 1px solid;
     border-radius: 30px;
