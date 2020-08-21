@@ -100,7 +100,6 @@ class ModelsSidebar {
 				type: 'model-file',
 				fullPath,
 			}));
-			console.log('dragstart dataTransfer.items.length', event.originalEvent.dataTransfer.items.length)
 		});
 
 	}
