@@ -46,6 +46,31 @@ class ModelsManager {
 
 
 	/**
+	 * Move the given file in fullPath to the target directory.
+	 * @param {String} fullPath 
+	 * @param {String} target 
+	 * @returns {String} path of new file
+	 */
+	moveModel(fullPath, target) {
+		const fileName = path.basename(fullPath);
+		const targetPath = path.join(target, fileName);
+
+		// Only do stuff if moving to a different directory.
+		if (fullPath !== targetPath) {
+			// If this file was selected, then update the path to it.
+			if (this.selected === fullPath) {
+				this.selected = targetPath;
+				G.modelsManager.setLastOpened();
+			}
+
+			G.io.renameFile(fullPath, targetPath);
+			G.modelsManager.update();
+		}
+		return targetPath;
+	}
+
+
+	/**
 	 * Rename the given file in fullPath to the newName
 	 * @param {String} fullPath Full path to file like /Users/demo/cogulator/filename.goms
 	 * @param {String} newName New name for file without extension like new_filename

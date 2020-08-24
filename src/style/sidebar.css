@@ -1,4 +1,4 @@
-.directory_label {
+.directory_label, .empty_directory_label{
 	font-family: 'Lato';
 	font-size: 17px;
 	position: relative;
@@ -12,6 +12,10 @@
     cursor:default;
 	user-select: none;
 	color:var(--directory-txt-color);
+}
+
+.directory_label.dragging {
+	background-color: var(--border-color);
 }
 
 .model_button{
