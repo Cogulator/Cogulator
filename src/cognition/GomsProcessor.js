@@ -130,12 +130,13 @@ class GomsProcessor {
                                         
                     //This might be the referenced goal.  Will test further if "if" is true
                     if ( testLine.toLowerCase().includes(referenceGoalInfo.goal.toLowerCase()) ) {
+                                                
                         let fullKeyword = keyword.replace("@", "")
                         let fullGoalInfo = this.pullGoalAndChunks(testLine, fullKeyword);
                         
                         if (referenceGoalInfo.goal.toLowerCase() != fullGoalInfo.goal.toLowerCase()) continue;
                         found = true;
-                    
+                                            
                         let goalIndents = this.indentCount(testLine);
                         codeLines.push(line.replace("@",""));
                         
@@ -159,8 +160,10 @@ class GomsProcessor {
                                     break;
                                 }
                                 codeLines.push(goms);
-                            } else  {
-                                break;
+                            } else {
+                                //remove all comments and white space. if this is a comment or empty line, we'll keep looking
+                                let cleanLine = this.removeComments(goms).replace(/\s/g, "");
+                                if (cleanLine.length > 0) break;
                             }                  
                         }
 

@@ -57,9 +57,6 @@ class StartUpManager {
 			});
 		} else {
 			G.modelsManager.loadLastModel();
-            
-            
-            console.log(G.settingsManager.getSetting('darkMode'), G.darkLightManager.isDark);
             if (G.darkLightManager.isDark) G.darkLightManager.youWantItDarker(true); //true indicates this is happening on startup
 		}
 	}
