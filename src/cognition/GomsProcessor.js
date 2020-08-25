@@ -115,7 +115,7 @@ class GomsProcessor {
         var codeLines = [];
         for (var i = 0; i < referencedLines.length; i++) {
             var line = this.removeComments(referencedLines[i]);
-            
+                        
             //If this is a @Reference, find it's match earlier in the code and replace with full code
             if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) { //this is a reference line
                 
@@ -138,6 +138,7 @@ class GomsProcessor {
                         found = true;
                                             
                         let goalIndents = this.indentCount(testLine);
+                        this.lineTracker.push(i);
                         codeLines.push(line.replace("@",""));
                         
                         //Copy the goal steps for the goal the reference points to
@@ -151,19 +152,19 @@ class GomsProcessor {
                                 goms = goms.replace(fullGoalInfo.chunks[index], referenceGoalInfo.chunks[index]);
                             }
                             
-                            this.lineTracker.push(i);
-                            
                             if (lineIndents > goalIndents) {
                                 // Make sure this isn't a nested reference
                                 if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) {
                                     G.errorManager.errors.push(new GomsError("nested_reference", i));
                                     break;
                                 }
+                                
+                                this.lineTracker.push(i);
                                 codeLines.push(goms);
                             } else {
                                 //remove all comments and white space. if this is a comment or empty line, we'll keep looking
                                 let cleanLine = this.removeComments(goms).replace(/\s/g, "");
-                                if (cleanLine.length > 0) break;
+                                if (cleanLine.length > 0) { break; }
                             }                  
                         }
 
