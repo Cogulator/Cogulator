@@ -21,7 +21,7 @@ class QutterManager { //Quill gutter
 		
 		//on selection change on keydown, check to see if the current line is blank, if so update the markers so the insert button will be shown
 		G.quill.on('selection-change', function(range, oldRange, source) {
-			if (G.qutterManager.getInsertionLine() != null) G.qutterManager.updateMarkers();
+			G.qutterManager.updateMarkers();
 		});
         
         //onkeyup update the markers/line numbers if necessary
@@ -89,7 +89,7 @@ class QutterManager { //Quill gutter
 		let insertionLine = G.qutterManager.getInsertionLine();
 		var html = "";
         var lineNumber = 1;
-		
+        	
 		//for each line, see if an error exists
 		let lines = G.quill.getLines(0, G.quill.getLength());
 		for (var i = 0; i < lines.length; i++) {

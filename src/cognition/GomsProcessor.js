@@ -122,17 +122,18 @@ class GomsProcessor {
                 var keyword = "@goal"
                 if (line.toLowerCase().includes("@also")) keyword = "@also";
                 let referenceGoalInfo = this.pullGoalAndChunks(line, keyword);
-                
+                                
                 //look for the goal that the reference points to
                 var found = false
                 for (var j = 0; j < i; j++) {
                     let testLine = this.removeComments(referencedLines[j]);
                                         
                     //This might be the referenced goal.  Will test further if "if" is true
+                    
                     if ( testLine.toLowerCase().includes(referenceGoalInfo.goal.toLowerCase()) ) {
-                                                
-                        let fullKeyword = keyword.replace("@", "")
-                        let fullGoalInfo = this.pullGoalAndChunks(testLine, fullKeyword);
+                        keyword = "goal"
+                        if (testLine.toLowerCase().includes("also")) keyword = "also";
+                        let fullGoalInfo = this.pullGoalAndChunks(testLine, keyword);
                         
                         if (referenceGoalInfo.goal.toLowerCase() != fullGoalInfo.goal.toLowerCase()) continue;
                         found = true;
@@ -188,18 +189,25 @@ class GomsProcessor {
     pullGoalAndChunks(line, keyword) {
         var goal = line;
         
+        var thread = "";
+        let threadIndex = line.indexOf(" as ");
+        if (threadIndex > -1) {
+            thread = line.substr(37, line.length);
+            goal = line.substr(0,threadIndex);
+        }
+        
         //identify chunkNames, if any
         var matches = [];
         var match;
         let regex = /<[^>]+>/g;
         while( (match = regex.exec(goal)) != null ) matches.push( match[0] );
         for (var i = 0; i < matches.length; i++) goal = goal.replace(matches[i], "");
-
+            
         goal = goal.toLowerCase().replace(keyword, "");
         goal = goal.replace(":", "");
         goal = goal.replace(/\./g, "");
 
-        return {goal: goal.trim(), chunks: matches};
+        return {goal: goal.trim(), chunks: matches, thread: thread.trim()};
     }
     
     

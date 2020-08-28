@@ -64,8 +64,9 @@ class InsertionCHI {
 	show(atLine) {
 		if (this.hiddening) return;
 		if ( $('#insertion_chi_container').css("display") != "none" ) return;
-		
-		G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
+        
+        //G.insertionCHI.deleteIndex = G.quillManager.lastSelection.index;
+		G.insertionCHI.deleteIndex = G.quill.getSelection().index;
 		
 		// -- Determine the position of the insertCHI
 		let offset = $(".insertion_marker").offset();
@@ -107,6 +108,8 @@ class InsertionCHI {
 		$("#insertion_chi_container").slideToggle( "fast", function() {
 			G.insertionCHI.showring = false;
 		});
+        
+        document.activeElement.blur();
 	}
 	
 	

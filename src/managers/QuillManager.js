@@ -1,6 +1,6 @@
 class QuillManager {
 	constructor() {
-		this.lastSelection;
+		this.lastSelection = {index: 0, length: 0}
 		
 		G.quill.on('selection-change', function(range, oldRange, source) {
 			if (range && oldRange) G.quillManager.lastSelection = range;

@@ -54,7 +54,6 @@ class Memory {
 		this.interleavedSteps.length = 0;
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
 		this.fromStack = 0;
-		//this.longTermMemory = [];
 
 		this.workingmemory.length = 0;
 		this.rehearsals.length = 0;
@@ -76,26 +75,60 @@ class Memory {
 		this.interleavedSteps.length = 0;
 		for (var i = 0; i < intersteps.length; i++) this.interleavedSteps.push(intersteps[i]);
 
-		this.interleavedSteps.sort(function(a, b){
-			return a.endTime-b.endTime;
-		});
+//		this.interleavedSteps.sort(function(a, b){
+//			return a.endTime-b.endTime;
+//		});
         
 		for (var i = 0; i < this.interleavedSteps.length; i++) {
 			var step = this.interleavedSteps[i];
+            
+            var toTime = step.endTime;
+            if (i + 1 < this.interleavedSteps.length) {
+                let nextStep = this.interleavedSteps[i+1];
+                if (nextStep.startTime < step.endTime) toTime = nextStep.startTime;
+            }
+            
+            //basically want you want to do is go to the end of this step time, or the start of the next step end time... whichever is earliest
 			var stackToAddChunk = this.findChunkStackAtTime(step.endTime);
-			this.decayMemory(stackToAddChunk);
+            if (step.chunkNames.length == 0 || step.operator == "ignore") this.decayMemory(stackToAddChunk);
+			//this.decayMemory(stackToAddChunk);
 
 			var isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, false); //set to false if you don't want to automate working memory
 			if (step.chunkNames.length > 0) {
+                
 				isWmOperator = this.isWorkingMemoryOperator(step.operator, step.resource, true); //count any operators if chunk name is inserted
 				for (var j = 0; j < step.chunkNames.length; j++) {
 					var chunkName = step.chunkNames[j];
 					if (step.operator == "ignore") {
 						this.popChunkWithName(chunkName, stackToAddChunk); //remove from stack... no questions asked
 					} else { //attempt to push chunk to stack
-						var chunkAction = this.pushChunk(isWmOperator, step.operator, chunkName, stackToAddChunk, step); //can add multiple chunks simultaneously... not realistic, but maybe passable
+                        
+                        // START TEST //
+                        //if there is more than one chunk, we'll distribute them evenly across the step time
+                        var chunkAction;
+                        if (step.chunkNames.length == 1 || step.time <= 50) {
+                            this.decayMemory(stackToAddChunk);
+                            chunkAction = this.pushChunk(isWmOperator, step.operator, chunkName, stackToAddChunk, step); 
+                            
+                        } else {
+                            var addAt = (step.time / step.chunkNames.length) * j + step.startTime;
+                            
+                                addAt = Math.max(50, addAt);
+                                addAt = Math.max(step.startTime, addAt);
+                                addAt = Math.min(step.endTime, addAt);
+                            let stackAt = this.findChunkStackAtTime(addAt);
+                                                        
+                            this.decayMemory(stackAt);
+                            chunkAction = this.pushChunk(isWmOperator, step.operator, chunkName, stackAt, step); 
+                            
+                        }
+                        // END TEST //
+                        
+						//var chunkAction = this.pushChunk(isWmOperator, step.operator, chunkName, stackToAddChunk, step); //can add multiple chunks simultaneously... not realistic, but maybe passable
 					}
 				}
+                
+                //if (step.operator != "ignore" && step.time > 50 && step.chunkNames.length > 1) this.decayMemory(stackToAddChunk); 
 			} else if (isWmOperator) {
 				this.pushChunk(true, step.operator, "", stackToAddChunk, step);
 			}
@@ -106,7 +139,7 @@ class Memory {
 	}
 
 
-	pushChunk(isWmOperator, operator, chunkName, chunkStack, step) {
+	pushChunk(isWmOperator, operator, chunkName, chunkStack, step) {    
 		var rehearsals = this.initialRehearsal;
 		if (operator == "recall") rehearsals = 10; //if recalling from LTM, and not already an existing chunk, assume an initial level of rehearsal that's fairly high
         
@@ -126,7 +159,6 @@ class Memory {
 				this.colorPalette.push(this.colorPalette[0]); //place the current color at end of list
 				this.colorPalette.shift(); // remove the current color from begninning of list
 			}
-            //this.longTermMemory[chunk.chunkName] = chunk;
 		} else if (existingChunk && isWmOperator) { //chunks in lines like Say or Type, will be color coded and tested for memory availablity, but they don't add activation
             if (operator == "attend") { //attend to item in memory.  setup this way to provide subjective workload estimate base on memory availabity.  all other cog ops presume rehearsal
                 var timeInMemory = this.getTimeChunkInMemoryInSeconds(chunkStack, existingChunk.addedAt);
@@ -155,12 +187,24 @@ class Memory {
 	decayMemory(toStack) {
 		for (var i = this.fromStack; i < toStack; i++) {
 			var stack = this.workingmemory[i - 1];
-			
+            			
 			//carry over the chunk from the previous cycle if recall probability greater than 0.5
-			if(stack != undefined) {
+			if (stack != undefined) {
 				for (var j = 0; j < stack.length; j++) {
 					var chunk = stack[j];
-
+                    
+                    //check to see if the chunk already exists in the stack your pushing to.  This can happen with multitasking when multiple chunks are distributed evenly across step time
+                    var alreadyExists = false;
+                    let targetStack = this.workingmemory[i];
+                    for (var itr = 0; itr < targetStack.length; itr++) {
+                        if (targetStack[itr].chunkName == chunk.chunkName) {
+                            alreadyExists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (alreadyExists) continue;
+                    
 					//set the chunk stack set if not set already
 					if (chunk.stackDepthAtPush == -1) chunk.stackDepthAtPush = stack.length; //uses the previous cycle stack depth;
 					var timeChunkInMemoryInSeconds = this.getTimeChunkInMemoryInSeconds(i, chunk.addedAt);
@@ -248,8 +292,7 @@ class Memory {
 	//based on ACT-R & Workload Curve paper
 	getActivation(cogLoad, timeChunkInMemoryInSeconds, rehearsals) {
 		var m = Math.log(rehearsals/Math.sqrt(timeChunkInMemoryInSeconds)); //activation
-            m = (m + 1 / cogLoad) - 1
-			//m = m + (1 / cogLoad) - 1; //activation divided among all chunks
+            m = (m + 1 / cogLoad) - 1; //activation divided among all chunks
 		return m;
 	}
 

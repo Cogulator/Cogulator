@@ -186,35 +186,29 @@ class MagicModelsManager {
 			if (action == MagicActions.POINT) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
 				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
-				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.CLICK) {
-				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
 				actionGOMS += "\nClick on <" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.POINTANDCLICK) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
 				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
-				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";				
 				actionGOMS += "\nClick on <" +  this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.DRAGFROM) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
 				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
-				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";
 				actionGOMS += "\nClick on <" + this.actions.length  + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.DRAGTO) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
 				actionGOMS += "\nPoint to <" + this.actions.length + "> " + timeModifier;
-				actionGOMS += "\nCognitive_processor verify cursor over <" + this.actions.length + ">";;				
 				actionGOMS += "\nClick on <" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.TYPE) {
 				if (lastAction != MagicActions.TYPE) actionGOMS += "\nType ";
 				actionGOMS += text;
 			} else if (action == MagicActions.KEYSTROKE) {
-				actionGOMS += "\nCognitive_processor verify correct";
 				actionGOMS += "\nKeystroke ";
 				actionGOMS += text;
 			} 
@@ -223,17 +217,14 @@ class MagicModelsManager {
 		else if (this.selected == "iphone") {
 			if (action == MagicActions.TOUCH && text != "") {
 				actionGOMS += "\nLook at <" + text + ">";
-				actionGOMS += "\nCognitive_processor verify <" + text + ">";				
 				actionGOMS += "\nTouch <" + text + ">";
 				actionGOMS += "\nIgnore <" + text + ">";
 			} else if (action == MagicActions.TOUCH) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
-				actionGOMS += "\nCognitive_processor verify <" + this.actions.length + ">";				
 				actionGOMS += "\nTouch " + text + "<" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
 			} else if (action == MagicActions.SWIPE) {
 				actionGOMS += "\nLook at <" + this.actions.length + ">";
-				actionGOMS += "\nCognitive_processor <" + this.actions.length + ">";	
 				actionGOMS += "\nTouch <" + this.actions.length + ">";
 				actionGOMS += "\nSwipe on <" + this.actions.length + ">";
 				actionGOMS += "\nIgnore <" + this.actions.length + ">";
@@ -242,14 +233,12 @@ class MagicModelsManager {
 				actionGOMS += text;
 			} else if (action == MagicActions.HOME) {
 				actionGOMS += "\nLook at <Home " + this.actions.length + ">";
-				actionGOMS += "\nCognitive_processor <Home " + this.actions.length + ">";	
 				actionGOMS += "\nTouch <Home " + this.actions.length + ">";
 				actionGOMS += "\nClick <Home " + this.actions.length + ">";
 				actionGOMS += "\nIgnore <Home " + this.actions.length + ">";
 			} else if (action == MagicActions.SPEECHRECSAY) {
 				if (lastAction != MagicActions.SPEECHRECSAY) {
 					actionGOMS += "\nLook at <Home " + this.actions.length + ">";
-					actionGOMS += "\nCognitive_processor verify <Home " + this.actions.length + ">";	
 					actionGOMS += "\nTouch <Home " + this.actions.length + ">";
 					actionGOMS += "\nClick and hold <Home " + this.actions.length + ">";
 					actionGOMS += "\nIgnore <Home " + this.actions.length + ">";
