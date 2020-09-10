@@ -185,6 +185,7 @@ class ModelsSidebar {
 				// This will make sure the renamed file gets put in the right place.
 				G.modelsSidebar.selectedPath = newFile.filePath;
 				G.modelsSidebar.buildSideBar();
+				G.modelsSidebar.enbableModelDragDrop();
 			}
 
 			const nameInput = $("<input>")
