@@ -1,29 +1,39 @@
 .directory_label, .empty_directory_label{
 	font-family: 'Lato';
 	font-size: 17px;
-	position: relative;
-	float:left;
 	width:100%;
 	height:40px;
 	line-height: 40px;
-	padding-left: 10px;
 	font-family: 'Lato';
 	white-space: nowrap;
     cursor:default;
 	user-select: none;
 	color:var(--directory-txt-color);
+	display: flex;
+	align-content: center;
+	justify-content: space-between;
 }
 
 .directory_label.dragging {
 	background-color: var(--border-color);
 }
 
+.directory_label .label {
+	flex-grow: 1;
+}
+
+.directory_label .button {
+	flex-grow: 0;
+	width: 18px;
+	padding: 0 0 0 10px;
+	font-size: 11px;
+}
+
 .model_button{
 	font-family: 'Lato';
 	font-size: 14px;
-	position: relative;
-	float:left;
-	width:100%;
+	display: flex;
+	align-items: center;
 	height:26px;
 	white-space: nowrap;
 	color:var(--model-button-txt-color);;
@@ -36,43 +46,24 @@
 	color: white;
 }
 
-.model_button_delete {
-	position: absolute;
+.model_button_delete, .model_button_undo {
 	text-align: center;
-	left:0px;
 	width:20px;
-	height:26px;
-	line-height:26px;
-}
-
-.model_button_undo {
-	position: absolute;
-	text-align: center;
-	left:0px;
-	width:20px;
-	height:26px;
 	line-height:26px;
 }
 
 .model_label {
-	position: absolute;
-	left:20px;
-	height:26px;
-    width:100%; /* ensure clickable across width of sidebar */
+	flex-grow: 1;
 	line-height: 26px;
 }
 
 input[type=text].rename_model {
-	position: absolute;
-	left:20px;
-	font-size:14px;
-	font-family: 'Lato-Regular';
-	width:130px;
+	flex-grow: 1;
 	background: white;
-	border: none;
-	margin: 0;
-	height:26px;
-	padding: 0 5px;
+	font-family: 'Lato-Regular';
+	padding: 0 5px; 
+	margin-right: 5px;
+	align-self: stretch;
 }
 
 input[type=text].rename_model:focus {
@@ -89,11 +80,4 @@ input[type=text].rename_model:focus {
 	border-top: 13px solid transparent;
 	border-bottom: 13px solid transparent; 
 	border-right:15px solid var(--main-bg-color); 
-	
-}
-
-.model_pointer_container {
-	position: absolute;
-	width: 15px;
-	right: 0;
 }
