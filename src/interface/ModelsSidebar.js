@@ -105,33 +105,74 @@ class ModelsSidebar {
 	}
 		
 	buildSideBar() {
+		const rightArrow = "&#9654;"
+		const downArrow = "&#9660;"
+
 		$( '#sidebar_left' ).empty();
 		
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
-			$( '#sidebar_left' ).append("<div class='directory_label' data-path='" + models.directoryPath + "'>" + models.directory + "</div>");
+
+			let directoryButton = "<div></div>"
+			if (models.directory !== "") {
+				directoryButton = "<div class='button'><div class='arrow'>" + downArrow + "</div></div>";
+			}
+
+			$( '#sidebar_left' ).append(
+				"<div class='directory_label' data-open='true' data-path='" + models.directoryPath + "'>" + 
+					directoryButton +
+					"<div class='label'>" + models.directory + "</div>" +
+				"</div>"
+			);
+
+			// Build a directory_group to contain all files within this directory. Makes slideUp and slideDown possible.
+			const directoryGroup = $(`<div class="directory_group" data-path="${models.directoryPath}"></div>`);
+			$( '#sidebar_left' ).append(directoryGroup)
 			
 			for (var j = 0; j < models.files.length; j++) {
 				let file = models.files[j];
 				
 				var buttonClass = "model_button";
-				var pointerDiv = "<div></div>";
+				var pointerDiv = "";
 				if (this.selectedPath == file.filePath) {
 					buttonClass = "model_button model_button_selected";
 					pointerDiv = "<div class='model_pointer'></div>";
 				}
-				
-				//button
-				let html = "<div class='" + buttonClass + "' data-path='" + file.filePath + "'>" +
-								"<div class='model_button_delete' data-marked='x'> </div>" +
-								"<div class='model_label' draggable='true'>" + file.file + "</div>" +
-								"<div class='model_pointer_container'>" + pointerDiv + "</div>";
-							"</div>";
-				$( '#sidebar_left' ).append(html);
+
+				directoryGroup.append(
+					"<div class='" + buttonClass + "' data-path='" + file.filePath + "'>" +
+						"<div class='model_button_delete' data-marked='x'> </div>" +
+						"<div class='model_label' draggable='true'>" + file.file + "</div>" +
+						pointerDiv +
+					"</div>"
+				);
+
 			}
 		}
+
         $( '#sidebar_left' ).append("<div class='empty_directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
+
+		$(".directory_label .button").click(function(e) {
+			const directoryOpen = $(this).parent().data("open");
+			const directoryPath = $(this).parent().data("path");
+
+			if (directoryOpen) {
+				$(this).parent().data("open", false);
+				$(this).html(rightArrow);
+
+				// Find all directory_group divs with this directoryPath and collapse them.
+				$(`.directory_group[data-path='${directoryPath}']`).slideUp();
+
+			}
+			else {
+				$(this).parent().data("open", true);
+				$(this).html(downArrow);
+
+				// Find all directory_group divs with this directoryPath and show them.
+				$(`.directory_group[data-path='${directoryPath}']`).slideDown();
+			}
+		});
 
 		// Double click to rename a file.
 		$(".model_label").dblclick(function(e) {
@@ -197,19 +238,17 @@ class ModelsSidebar {
 		
 	
 	showSelected(selectedPath, loadModel) {
-		$('#sidebar_left').children('.model_button').each(function(i) { 
-			let path = $(this).data("path");
-			if (path == selectedPath) {
-				$(this).addClass('model_button_selected');
-				$( this ).children('.model_pointer_container').html("<div class='model_pointer'></div>");
-				G.modelsSidebar.selectedPath = path;
-				
-				if (selectedPath != G.modelsManager.selected && !loadModel) G.modelsManager.loadModel(path);
-			} else {
-				$(this).removeClass('model_button_selected');
-				$( this ).children('.model_pointer_container').html("<div></div>");
-			}
-		});
+		// Remove model_button_selected and model_pointer from all model buttons.
+		$('#sidebar_left .model_button').removeClass('model_button_selected');
+		$('#sidebar_left .model_button').find('.model_pointer').remove();
+
+		// Add model_button_selected and model_pointer to the currently selected button.
+		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).addClass('model_button_selected');
+		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).append("<div class='model_pointer'></div>");
+
+		if (selectedPath != G.modelsManager.selected && !loadModel) {
+			G.modelsManager.loadModel(selectedPath);
+		}
 	}
 
 	
