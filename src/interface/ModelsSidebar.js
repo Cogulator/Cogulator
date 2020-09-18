@@ -5,6 +5,60 @@ $( document ).ready(function() {
 const MAX_SIDEBAR_WIDTH = 500;
 const MIN_SIDEBAR_WIDTH = 20;
 
+/**
+ * Function to show an HTML rename input in place of the given labelDiv.
+ * @param {HTMLElement} labelDiv The div to replace temporarily.
+ * @param {String} type Either 'model' or 'directory'.
+ */
+function showRenameInput(labelDiv, type) {
+	function doRename(newName) {
+		const fullPath = labelDiv.parent().data("path");
+
+		if (type === 'model') {
+			const newFile = G.modelsManager.renameModel(fullPath, newName);
+			if (newFile) {
+				G.modelsSidebar.selectedPath = newFile.filePath;
+			}
+		}
+
+		if (type === 'directory') {
+			G.modelsManager.renameDirectory(fullPath, newName);
+		}
+
+		// Easiest thing to do after renaming is to just rebuild the sidebar.
+		// This will make sure the renamed model or directory gets put in the right place.
+		G.modelsSidebar.buildSideBar();
+	}
+
+	const nameInput = $("<input>")
+		.attr("type", "text")
+		.addClass("rename")
+		.val(labelDiv.text())
+		.blur(function () {
+			doRename($(this).val());
+		})
+		.keypress(function (event) {
+			if (event.key === "Enter") {
+				$(this).blur();
+			}
+		})
+ 
+	labelDiv.hide();
+	nameInput.insertAfter(labelDiv);
+	nameInput.focus();
+}
+
+function confirmDelete(name) {
+	const result = dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+		type: 'question',
+		buttons: ['Delete', 'Cancel'],
+		defaultId: 0,
+		message: `Are you sure you want to delete ${name}?`
+	});
+	// Result is the index of the button clicked. 0 = Delete, 1 = Cancel
+	return (result === 0)
+}
+
 class ModelsSidebar {
 	constructor(selected) {
 		this.showSelected = this.showSelected.bind(this);
@@ -16,7 +70,6 @@ class ModelsSidebar {
 		
 		this.buildSideBar();
 		this.enableSideBarResize();
-		this.enbableModelDragDrop();
 	}
 
 	enableSideBarResize() {
@@ -24,8 +77,6 @@ class ModelsSidebar {
 			if (event.pageX >= MIN_SIDEBAR_WIDTH && event.pageX <= MAX_SIDEBAR_WIDTH) {
 				// Because of the magic of CSS variables, all we have to do is update the sidebar-left-width
 				// Check the calculations in main.css to see how everything else is calculated based on this.
-//				const html = document.getElementsByTagName('html')[0];
-//				html.style.cssText = `--sidebar-left-width: ${event.pageX}px`;
                 $(':root').css('--sidebar-left-width',  event.pageX + 'px');
                 G.settingsManager.setSetting('sidebarWidth', event.pageX); //set from saved settings
 			}
@@ -48,7 +99,137 @@ class ModelsSidebar {
 		})
 	}
 
-	enbableModelDragDrop() {
+	enableDirectoryActions() {
+		// Context menu for directories.
+		$(".directory_label .label").contextmenu(function(e) {
+			const directoryDiv = $(this);
+
+			// Not allowed to rename or delete root (which will have blank text).
+			if (!directoryDiv.text()) {
+				return;
+			}
+
+			const menu = new remote.Menu();
+			menu.append(new remote.MenuItem({
+				label: 'Rename Directory',
+				click: () => {
+					showRenameInput(directoryDiv, 'directory');
+				}
+			}));
+			menu.append(new remote.MenuItem({
+				label: 'Delete Directory',
+				click: () => {
+					if (confirmDelete(directoryDiv.text())) {
+						G.modelsManager.deleteDirectory(directoryDiv.parent().data("path"));
+					}
+				}
+			}));
+			menu.popup();
+		});
+
+		// Double click to rename a directory.
+		$(".directory_label .label").dblclick(function(e) {
+			const directoryDiv = $(this);
+		
+			// Not allowed to rename or delete root (which will have blank text).
+			if (!directoryDiv.text()) {
+				return;
+			}
+
+			showRenameInput(directoryDiv, 'directory');
+		})
+
+		// Button to expand/collapse directory.
+		$(".directory_label .button").click(function(e) {
+			const directoryOpen = $(this).parent().data("open");
+			const directoryPath = $(this).parent().data("path");
+
+			if (directoryOpen) {
+				$(this).parent().data("open", false);
+				$(this).html(rightArrow);
+
+				// Find all directory_group divs with this directoryPath and collapse them.
+				$(`.directory_group[data-path='${directoryPath}']`).slideUp();
+
+			}
+			else {
+				$(this).parent().data("open", true);
+				$(this).html(downArrow);
+
+				// Find all directory_group divs with this directoryPath and show them.
+				$(`.directory_group[data-path='${directoryPath}']`).slideDown();
+			}
+		});
+	}
+
+	enableModelActions() {
+		// Context menu for models.
+		$(".model_label").contextmenu(function(e) {
+			const modelDiv = $(this);
+
+			const menu = new remote.Menu();
+			menu.append(new remote.MenuItem({
+				label: 'Duplicate Model',
+				click: () => {
+					G.modelsManager.duplicateModel(modelDiv.parent().data('path'));
+				}
+			}));
+			menu.append(new remote.MenuItem({
+				label: 'Rename Model',
+				click: () => {
+					showRenameInput(modelDiv, 'model');
+				}
+			}));
+			menu.append(new remote.MenuItem({
+				label: 'Delete Model',
+				click: () => {
+					if (confirmDelete(modelDiv.text())) {
+						G.modelsManager.deleteModel(modelDiv.parent().data("path"));
+					}
+				}
+			}));
+			menu.popup();
+		});
+
+		// Double click to rename a file.
+		$(".model_label").dblclick(function(e) {
+			showRenameInput($(this), 'model');
+		})
+		
+		// Click to select.
+		$(".model_label").click(function (e) {
+			let path = $(this).parent().data("path");
+			if (G.modelsSidebar.selectedPath != path) {
+				G.modelsManager.loadModel(path);
+			}
+		});
+
+		// Hover over model and show delete/undo button listener
+		$(' .model_button ').hover(function (e) {
+			let marked = $( this ).children('.model_button_delete').data("marked");
+			$( this ).children('.model_button_delete').text(marked); //this scope change
+		}, function (e) {
+			$( this ).children('.model_button_delete').text(" "); //this scope change
+		});
+
+		// Select delete/undo listener
+		$(' .model_button_delete ').click(function (e) {
+			var marked = $( this ).data("marked");
+			if (marked == "x") marked = "u";
+			else marked = "x";
+					
+			if ( $( this ).siblings('.model_label').hasClass('strikethrough') ) {
+				$( this ).siblings('.model_label').removeClass('strikethrough');
+			} else {
+				$( this ).siblings('.model_label').addClass('strikethrough');
+			}
+			
+			$( this ).text(marked);
+			$( this ).data("marked", marked);
+		});
+	}
+
+	enableModelDragDrop() {
 		$('.directory_label').on('dragover', function(event) {
 			event.preventDefault();
 			event.stopPropagation();
@@ -84,9 +265,6 @@ class ModelsSidebar {
 						// Easiest thing to do after moving is to just rebuild the sidebar.
 						// This will make sure the moved file gets put in the right place.
 						G.modelsSidebar.buildSideBar();
-						
-						// Then we also need to re-enable drag and drop on the rebuilt sidebar.
-						G.modelsSidebar.enbableModelDragDrop();
 					}
 				}
 			}
@@ -153,92 +331,13 @@ class ModelsSidebar {
 
         $( '#sidebar_left' ).append("<div class='empty_directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
 
-		$(".directory_label .button").click(function(e) {
-			const directoryOpen = $(this).parent().data("open");
-			const directoryPath = $(this).parent().data("path");
-
-			if (directoryOpen) {
-				$(this).parent().data("open", false);
-				$(this).html(rightArrow);
-
-				// Find all directory_group divs with this directoryPath and collapse them.
-				$(`.directory_group[data-path='${directoryPath}']`).slideUp();
-
-			}
-			else {
-				$(this).parent().data("open", true);
-				$(this).html(downArrow);
-
-				// Find all directory_group divs with this directoryPath and show them.
-				$(`.directory_group[data-path='${directoryPath}']`).slideDown();
-			}
-		});
-
-		// Double click to rename a file.
-		$(".model_label").dblclick(function(e) {
-			const originalDiv = $(this);
-
-			function doRename(newName) {
-				const fullPath = originalDiv.parent().data("path");
-				const newFile = G.modelsManager.renameModel(fullPath, newName);
-				// Easiest thing to do after renaming is to just rebuild the sidebar.
-				// This will make sure the renamed file gets put in the right place.
-				G.modelsSidebar.selectedPath = newFile.filePath;
-				G.modelsSidebar.buildSideBar();
-				G.modelsSidebar.enbableModelDragDrop();
-			}
-
-			const nameInput = $("<input>")
-				.attr("type", "text")
-				.addClass("rename_model")
-				.val($(this).text())
-				.blur(function () {
-					doRename($(this).val());
-				})
-				.keypress(function (event) {
-					if (event.key === "Enter") {
-						doRename($(this).val());
-					}
-				})
-		
-			originalDiv.hide();
-			nameInput.insertAfter(originalDiv);
-			nameInput.focus();
-		})
-		
-		//Select model listener
-		$(' .model_label ').click(function (e) {
-			let path = $(this).parent().data("path");
-			if (G.modelsSidebar.selectedPath != path) G.modelsSidebar.showSelected(path); //scope is lost, so just reference Global
-		});
-		
-		//Hover over model and show delete/undo button listener
-		$(' .model_button ').hover(function (e) {
-			let marked = $( this ).children('.model_button_delete').data("marked");
-			$( this ).children('.model_button_delete').text(marked); //this scope change
-		}, function (e) {
-			$( this ).children('.model_button_delete').text(" "); //this scope change
-		});
-		
-		//Select delete/undo listener
-		$(' .model_button_delete ').click(function (e) {
-			var marked = $( this ).data("marked");
-			if (marked == "x") marked = "u";
-			else marked = "x";
-					
-			if ( $( this ).siblings('.model_label').hasClass('strikethrough') ) {
-				$( this ).siblings('.model_label').removeClass('strikethrough');
-			} else {
-				$( this ).siblings('.model_label').addClass('strikethrough');
-			}
-			
-			$( this ).text(marked);
-			$( this ).data("marked", marked);
-		});
+		this.enableDirectoryActions();
+		this.enableModelActions();
+		this.enableModelDragDrop();
 	}
 		
 	
-	showSelected(selectedPath, loadModel) {
+	showSelected(selectedPath) {
 		// Remove model_button_selected and model_pointer from all model buttons.
 		$('#sidebar_left .model_button').removeClass('model_button_selected');
 		$('#sidebar_left .model_button').find('.model_pointer').remove();
@@ -247,9 +346,7 @@ class ModelsSidebar {
 		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).addClass('model_button_selected');
 		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).append("<div class='model_pointer'></div>");
 
-		if (selectedPath != G.modelsManager.selected && !loadModel) {
-			G.modelsManager.loadModel(selectedPath);
-		}
+		G.modelsSidebar.selectedPath = selectedPath;
 	}
 
 	

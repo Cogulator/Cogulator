@@ -29,6 +29,69 @@ class ModelsManager {
 		this.models = this.getModels();
 	}
 
+
+	/**
+	 * Delete a directory and everything in it.
+	 * @param {String} fullPath Full path to the directory.
+	 */
+	deleteDirectory(fullPath) {
+		G.io.delete(fullPath, () => {
+			G.modelsManager.update();
+		
+			// If a model was selecetd in this directory, select first model in list just so something is selected.
+			if (this.selected.startsWith(`${fullPath}${path.sep}`)) {
+				this.selected = this.models[0].filePath;
+				G.modelsManager.setLastOpened();
+				G.modelsManager.loadModel(this.selected);
+			}
+			
+			G.modelsSidebar.buildSideBar();
+		});
+	}
+
+
+	/**
+	 * Rename a directory.
+	 * @param {String} fullPath Full path to the directory.
+	 * @param {String} newName New name for the directory.
+	 */
+	renameDirectory(fullPath, newName) {
+		// At the very minimum, name should not contain slashes or spaces.
+		const resolvedName = newName.replace(/\//g, "_").replace(/\\/g, "_").replace(/ /g, "_").trim();
+
+		// If new name is blank, don't do anything.
+		if (!resolvedName) {
+			return;
+		}
+
+		const directory = path.dirname(fullPath);
+		let newPath = path.join(directory, resolvedName);
+
+		// If new path is same as old path, don't do anything.
+		if (newPath === fullPath) {
+			return;
+		}
+
+		// If desired path exists, add a number to it so it doesn't error or overwrite anything.
+		// Loop until we find a directory name that doesn't exist.
+		let counter = 0;
+		while (G.io.pathExists(newPath)) {
+			counter += 1;
+			newPath = path.join(directory, `${resolvedName}_${counter}`)
+		}
+
+		G.io.rename(fullPath, newPath);
+		G.modelsManager.update();
+
+		// If a model in this directory was selected, select it again under the new directory name.
+		if (this.selected.startsWith(`${fullPath}${path.sep}`)) {
+			const newModelPath = path.join(newPath, path.basename(this.selected));
+			this.selected = newModelPath;
+			G.modelsManager.setLastOpened();
+			G.modelsManager.loadModel(this.selected);
+		}
+	}
+
 	
 	newModel(name, directory) {
 		let pth = path.join(G.paths.models, directory);
@@ -63,7 +126,7 @@ class ModelsManager {
 				G.modelsManager.setLastOpened();
 			}
 
-			G.io.renameFile(fullPath, targetPath);
+			G.io.rename(fullPath, targetPath);
 			G.modelsManager.update();
 		}
 		return targetPath;
@@ -77,29 +140,97 @@ class ModelsManager {
 	 */
 	renameModel(fullPath, newName) {
 		// At the very minimum, name should not contain slashes or spaces.
-		const resolvedName = newName.replace(/\//g, "_").replace(/\\/g, "_").replace(/ /g, "_");
+		const resolvedName = newName.replace(/\//g, "_").replace(/\\/g, "_").replace(/ /g, "_").trim();
+		
+		// If new name is blank, don't do anything.
+		if (!resolvedName) {
+			return;
+		}
+
 		const directory = path.dirname(fullPath);
-		const newPath = path.join(directory, resolvedName + ".goms");
-		G.io.renameFile(fullPath, newPath);
+		let newPath = path.join(directory, `${resolvedName}.goms`);
+
+		// If new path is same as old path, don't do anything.
+		if (newPath === fullPath) {
+			return;
+		}
+
+		// If desired path exists, add a number to it so it doesn't error or overwrite anything.
+		// Loop until we find a model name that doesn't exist.
+		let counter = 0;
+		while (G.io.pathExists(newPath)) {
+			counter += 1;
+			newPath = path.join(directory, `${resolvedName}_${counter}.goms`)
+		}
+
+		G.io.rename(fullPath, newPath);
+		G.modelsManager.update();
 		// Set this one as the selected model. This prevents creating a file with the old name on window close.
-		// Then update models manager so it grabs the new file path.
 		this.selected = newPath;
 		G.modelsManager.setLastOpened();
-		G.modelsManager.update();
 		return {
 			file: resolvedName,
 			filePath: newPath,
 		};
 	}
+
+	/**
+	 * Delete a model immediately.
+	 * @param {String} fullPath Full path to model
+	 */
+	deleteModel(fullPath) {
+		G.io.delete(fullPath, () => {
+			G.modelsManager.update();
+		
+			// If this model was selecetd, select first model in list just so something is selected.
+			if (this.selected === fullPath) {
+				this.selected = this.models[0].filePath;
+				G.modelsManager.setLastOpened();
+				G.modelsManager.loadModel(this.selected);
+			}
+			
+			G.modelsSidebar.buildSideBar();
+		});
+	}
 	
-	
+
 	deleteModels() {
 		//loop through all the model buttons created in the sidebar and deleted if marked x
 		$( ".model_button" ).each(function( index ) {
 			let marked = $( this ).children('.model_button_delete').data("marked");
 			let p = $( this ).data("path");
-			if (marked == "u") G.io.deleteFile(p); //if it's marked u, that means it's be marked for deletion and "u" for undo is the shown option
+			if (marked == "u") G.io.delete(p); //if it's marked u, that means it's be marked for deletion and "u" for undo is the shown option
 		});
+	}
+
+
+	/**
+	 * Duplicate a model and append _copy to the new filename.
+	 * /Example/INTRO.goms => /Example/INTRO_copy.goms
+	 * @param {String} fullPath Full path to the model to copy. 
+	 */
+	duplicateModel(fullPath) {
+		let newFileName = path.basename(fullPath)
+
+		// Strip the .goms extension (make sure it has it first just in case).
+		if (G.io.isGOMS(newFileName)) {
+			newFileName = newFileName.slice(0, -5);
+
+			let newPath = path.join(path.dirname(fullPath), `${newFileName}_copy.goms`);
+
+			// If desired path exists, add a number to it so it doesn't error or overwrite anything.
+			// Loop until we find a model name that doesn't exist.
+			let counter = 0;
+			while (G.io.pathExists(newPath)) {
+				counter += 1;
+				newPath = path.join(path.dirname(fullPath), `${newFileName}_copy_${counter}.goms`);
+			}
+
+			G.io.copyFile(fullPath, newPath, () => {
+				G.modelsManager.update();
+				G.modelsSidebar.buildSideBar();
+			});
+		}
 	}
 	
 	
@@ -138,7 +269,7 @@ class ModelsManager {
 		G.quill.setText(code); //setting text will be picked up on in customeventmanager and cause the model to process
         G.quill.history.clear();
 		G.quill.focus();
-		G.modelsSidebar.showSelected(G.modelsManager.selected, false);
+		G.modelsSidebar.showSelected(G.modelsManager.selected);
 		G.modelsManager.setLastOpened();
 	}
 	
@@ -164,7 +295,7 @@ class ModelsManager {
         $( ".model_button" ).each(function( index ) {
 			if ($( this ).children('.model_button_delete').data("marked") == "u") {
                 let p = $( this ).data("path");
-                G.modelsManager.shutDownFunctions.push(function() {G.io.deleteFile(p, G.modelsManager.shutDownProcessor)});
+                G.modelsManager.shutDownFunctions.push(function() {G.io.delete(p, G.modelsManager.shutDownProcessor)});
             }
 		}); 
         
