@@ -54,19 +54,12 @@ class InOutManager {
 	}
 	
 
-	renameFile(sourcePth, targetPth) {
+	rename(sourcePth, targetPth) {
 		fs.renameSync(sourcePth, targetPth);
 	}
 	
 	
 	copyFile(sourcePth, targetPth, callback) {
-		console.log("COPY", sourcePth, targetPth);
-//		try {
-//			fs.createReadStream(sourcePth).pipe(fs.createWriteStream(targetPth));
-//		} catch(err) {
-//			dialog.showErrorBox("Could not copy file.", "Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened.");
-//		}
-		
 		try {
 			const BUF_LENGTH = 64*1024;
 			const buff = new Buffer(BUF_LENGTH);
@@ -93,7 +86,7 @@ class InOutManager {
 	
 	//Only handles one directory level down right now
 	newFile(pth, filename, text, callback) {
-		if (!this.fileExists(pth)) fs.mkdirSync(pth);
+		if (!this.pathExists(pth)) fs.mkdirSync(pth);
 		
 		let fullPath = path.join(pth, filename);
 		
@@ -111,7 +104,7 @@ class InOutManager {
 	
 	
 	newDirectory(pth) {
-		if (!this.fileExists(pth)) fs.mkdirSync(pth);
+		if (!this.pathExists(pth)) fs.mkdirSync(pth);
 	}
 	
 	
@@ -123,7 +116,7 @@ class InOutManager {
 			dialog.showErrorBox("Could not save.", "Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 		}
 		
-		if (typeof callback === 'function' && callback()) callback();
+		if (typeof callback === 'function') callback();
 	}
 	
 	
@@ -138,14 +131,14 @@ class InOutManager {
 	}
 	
 	
-	deleteFile(pth, callback = 0) {
+	delete(pth, callback = 0) {
 		trash(pth).then(() => {
-			if (typeof callback === 'function' && callback()) callback();
+			if (typeof callback === 'function') callback();
 		});
 	}
 	
 	
-	fileExists(pth) {
+	pathExists(pth) {
 		if (fs.existsSync(pth)) return true;
 		return false;
 	}

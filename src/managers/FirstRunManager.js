@@ -25,7 +25,7 @@
 class FirstRunManager {
 
 	constructor() {
-		if (G.io.fileExists(G.paths.cogulator)) {
+		if (G.io.pathExists(G.paths.cogulator)) {
 			G.startUp.load();
 		} else { 
 			G.helpScreen.show();

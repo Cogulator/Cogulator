@@ -1,7 +1,6 @@
 .directory_label, .empty_directory_label{
 	font-family: 'Lato';
 	font-size: 17px;
-	width:100%;
 	height:40px;
 	line-height: 40px;
 	font-family: 'Lato';
@@ -24,6 +23,7 @@
 
 .directory_label .button {
 	flex-grow: 0;
+	flex-shrink: 0;
 	width: 18px;
 	padding: 0 0 0 10px;
 	font-size: 11px;
@@ -47,6 +47,7 @@
 }
 
 .model_button_delete, .model_button_undo {
+	flex-shrink: 0;
 	text-align: center;
 	width:20px;
 	line-height:26px;
@@ -57,18 +58,27 @@
 	line-height: 26px;
 }
 
-input[type=text].rename_model {
+input[type=text].rename {
 	flex-grow: 1;
 	background: white;
 	font-family: 'Lato-Regular';
 	padding: 0 5px; 
+	width: 50px;
 	margin-right: 5px;
 	align-self: stretch;
 	border: none;
 }
 
-input[type=text].rename_model:focus {
+input[type=text].rename:focus {
 	outline-width: unset;
+}
+
+.model_button input[type=text].rename {
+	font-size: 14px;
+}
+
+.directory_label input[type=text].rename {
+	font-size: 17px;
 }
 
 .strikethrough {
