@@ -154,14 +154,14 @@ class ModelsSidebar {
 				$(this).html(rightArrow);
 
 				// Find all directory_group divs with this directoryPath and collapse them.
-				$(`.directory_group[data-path='${directoryPath}']`).slideUp();
+				$(`.directory_group[data-path='${directoryPath.replace(/["\\]/g, '\\$&')}']`).slideUp();
                 G.settingsManager.setSetting(directoryPath, "closed");
 			} else {
 				$(this).parent().data("open", true);
 				$(this).html(downArrow);
 
 				// Find all directory_group divs with this directoryPath and show them.
-				$(`.directory_group[data-path='${directoryPath}']`).slideDown();
+				$(`.directory_group[data-path='${directoryPath.replace(/["\\]/g, '\\$&')}']`).slideDown();
                 G.settingsManager.setSetting(directoryPath, "open");
 			}
 		});
@@ -338,7 +338,7 @@ class ModelsSidebar {
             
             // Check to see if the directory should be open or closed
             if (G.settingsManager.getSetting(models.directoryPath) == "closed") {
-                $(`.directory_group[data-path='${models.directoryPath}']`).slideUp();
+                $(`.directory_group[data-path='${models.directoryPath.replace(/["\\]/g, '\\$&')}']`).slideUp();
             }
 		}
 
