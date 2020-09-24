@@ -143,6 +143,11 @@ class ModelsSidebar {
 		$(".directory_label .button").click(function(e) {
 			const directoryOpen = $(this).parent().data("open");
 			const directoryPath = $(this).parent().data("path");
+            
+            const rightArrow = "&#9654;"
+		    const downArrow = "&#9660;"
+            
+            
 
 			if (directoryOpen) {
 				$(this).parent().data("open", false);
@@ -150,14 +155,14 @@ class ModelsSidebar {
 
 				// Find all directory_group divs with this directoryPath and collapse them.
 				$(`.directory_group[data-path='${directoryPath}']`).slideUp();
-
-			}
-			else {
+                G.settingsManager.setSetting(directoryPath, "closed");
+			} else {
 				$(this).parent().data("open", true);
 				$(this).html(downArrow);
 
 				// Find all directory_group divs with this directoryPath and show them.
 				$(`.directory_group[data-path='${directoryPath}']`).slideDown();
+                G.settingsManager.setSetting(directoryPath, "open");
 			}
 		});
 	}
@@ -291,14 +296,18 @@ class ModelsSidebar {
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
+            
+            var lastWasOpen = true;
+            if (G.settingsManager.getSetting(models.directoryPath) == "closed") lastWasOpen = false;
 
 			let directoryButton = "<div></div>"
 			if (models.directory !== "") {
-				directoryButton = "<div class='button'><div class='arrow'>" + downArrow + "</div></div>";
+                if (lastWasOpen) directoryButton = "<div class='button'><div class='arrow'>" + downArrow + "</div></div>";
+                else             directoryButton = "<div class='button'><div class='arrow'>" + rightArrow + "</div></div>";
 			}
 
 			$( '#sidebar_left' ).append(
-				"<div class='directory_label' data-open='true' data-path='" + models.directoryPath + "'>" + 
+				"<div class='directory_label' data-open='" + lastWasOpen + "' data-path='" + models.directoryPath + "'>" + 
 					directoryButton +
 					"<div class='label'>" + models.directory + "</div>" +
 				"</div>"
@@ -325,8 +334,12 @@ class ModelsSidebar {
 						pointerDiv +
 					"</div>"
 				);
-
 			}
+            
+            // Check to see if the directory should be open or closed
+            if (G.settingsManager.getSetting(models.directoryPath) == "closed") {
+                $(`.directory_group[data-path='${models.directoryPath}']`).slideUp();
+            }
 		}
 
         $( '#sidebar_left' ).append("<div class='empty_directory_label'> </div>"); //just add a little space at the bottom with an empty directory label div
