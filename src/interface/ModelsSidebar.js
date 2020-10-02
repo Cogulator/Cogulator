@@ -322,7 +322,8 @@ class ModelsSidebar {
 				
 				var buttonClass = "model_button";
 				var pointerDiv = "";
-				if (this.selectedPath == file.filePath) {
+                
+				if (this.selectedPath.replace(/["\\]/g, '\\$&') == file.filePath.replace(/["\\]/g, '\\$&')) {
 					buttonClass = "model_button model_button_selected";
 					pointerDiv = "<div class='model_pointer'></div>";
 				}
@@ -356,8 +357,9 @@ class ModelsSidebar {
 		$('#sidebar_left .model_button').find('.model_pointer').remove();
 
 		// Add model_button_selected and model_pointer to the currently selected button.
-		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).addClass('model_button_selected');
-		$(`#sidebar_left .model_button[data-path='${selectedPath}']`).append("<div class='model_pointer'></div>");
+        let pth = selectedPath.replace(/["\\]/g, '\\$&');
+		$(`#sidebar_left .model_button[data-path='${pth}']`).addClass('model_button_selected');
+		$(`#sidebar_left .model_button[data-path='${pth}']`).append("<div class='model_pointer'></div>");
 
 		G.modelsSidebar.selectedPath = selectedPath;
 	}
