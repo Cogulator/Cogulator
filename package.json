@@ -22,7 +22,13 @@
       "packagerConfig": {
         "packageManager": "npm",
         "icon": "./src/icons/1024x1024",
-        "osxSign": {}
+        "osxSign": {
+          "hardened-runtime": true,
+          "entitlements": "./src/entitlements.plist",
+          "entitlements-inherit": "./src/entitlements.plist",
+          "signature-flags": "library"
+        },
+        "osxNotarize": {}
       },
       "makers": [
         {

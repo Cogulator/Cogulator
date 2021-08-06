@@ -148,6 +148,7 @@ class Memory {
 
 		var existingChunk = null;
 		if (chunkName != "") existingChunk = this.getExistingChunk(operator, chunkName, chunkStack);
+        if (existingChunk == null) existingChunk = this.getExistingChunk(operator, chunkName, chunkStack + 1); //Temporary solution. Memory is only modeled on 50ms cycles.  But steps can happen at in time.  This prevents a memory error from off-cycle steps
 
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
 			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
