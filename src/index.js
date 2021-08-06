@@ -1,7 +1,7 @@
 const electron = require('electron');
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, remote } = require('electron');
 const path = require('path');
-require('update-electron-app')()
+require('update-electron-app')();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -21,12 +21,16 @@ const createWindow = () => {
 								  height: 1000, 
 								  frame: false,
 								  titleBarStyle: 'hiddenInset',
-                                  webPreferences: {nodeIntegration: true},
+                                  webPreferences: {nodeIntegration: true, 
+                                                   contextIsolation: false,  
+                                                   enableRemoteModule: true},
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   } else {
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-                                webPreferences: {nodeIntegration: true},
+                                  webPreferences: {nodeIntegration: true, 
+                                                   contextIsolation: false,  
+                                                   enableRemoteModule: true},
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
