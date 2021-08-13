@@ -40,8 +40,9 @@ class Step {
 		
 		if (cn == null) return;
 		for (var i = 0; i < cn.length; i ++) { //create new array to save value and not reference to array
-			this.chunkNames.push(cn[i]);
+			let name = cn[i];
+            let printable_ASCII_only_string = name;//.replace(/[^ -~]+/g, "");
+            this.chunkNames.push(printable_ASCII_only_string);
 		}
 	}
-
 }
