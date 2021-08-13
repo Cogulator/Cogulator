@@ -1,7 +1,7 @@
 {
   "name": "Cogulator",
   "productName": "Cogulator",
-  "version": "4.3.5",
+  "version": "4.3.6",
   "description": "Cogulator: A Cognitive Calculator",
   "main": "src/index.js",
   "scripts": {
@@ -21,14 +21,7 @@
     "forge": {
       "packagerConfig": {
         "packageManager": "npm",
-        "icon": "./src/icons/1024x1024",
-        "osxSign": {
-          "hardened-runtime": true,
-          "entitlements": "./src/entitlements.plist",
-          "entitlements-inherit": "./src/entitlements.plist",
-          "signature-flags": "library"
-        },
-        "osxNotarize": {}
+        "icon": "./src/icons/1024x1024"
       },
       "makers": [
         {
