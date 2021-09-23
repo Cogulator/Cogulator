@@ -6,3 +6,4 @@ out/
 package-lock.json
 package-lock.json
 src/entitlements.plist
+yarn-error.log
