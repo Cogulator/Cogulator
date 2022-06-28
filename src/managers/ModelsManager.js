@@ -96,7 +96,9 @@ class ModelsManager {
 	newModel(name, directory) {
 		let pth = path.join(G.paths.models, directory);
 		G.io.newFile(pth, name + ".goms", "", this.onNewModelCreated);
-	} onNewModelCreated(pth, text) {
+	} 
+    
+    onNewModelCreated(pth, text) {
 		G.modelsManager.update();
 		G.modelsSidebar.buildSideBar();
 		G.modelsManager.loadModel(pth);

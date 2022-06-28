@@ -87,16 +87,20 @@ class InOutManager {
 	//Only handles one directory level down right now
 	newFile(pth, filename, text, callback) {
 		if (!this.pathExists(pth)) fs.mkdirSync(pth);
-		
 		let fullPath = path.join(pth, filename);
 		
 		try {  
 			let file = fs.openSync(fullPath, 'w');
-			fs.close(file);
+            fs.close(file, (err) => {
+                if (err)
+                    console.error('Failed to close file', err);
+                else {
+                    console.log("\n> File Closed successfully");
+                }
+            });
 		} catch(err) {
-			console.log("CREATE ERROR", err);
-			dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
-
+            console.log("CREATE ERROR", err);
+            dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
 		}
 		
 		if (typeof callback === 'function') callback(fullPath, text);

@@ -6,7 +6,7 @@
 	--model-select-bg-color: #4CBD99;
 	--model-button-select-txt-color: white;
 	--model-button-txt-color: black;
-	--directory-txt-color: lightgray;
+	--directory-txt-color: #777;
 	--delete-button-color: red;
 	--auto-complete-bg-color: #4A4A4A;
 	--stats-color: alice;
@@ -295,7 +295,7 @@
   	animation: spinTo360 0.5s forwards;
 } @keyframes spinTo360 {
   	100% {
-    	transform: rotate(360deg);
+    	transform: rotate(-360deg);
 	}
 }
 

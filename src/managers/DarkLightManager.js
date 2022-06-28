@@ -38,7 +38,7 @@ class DarkLightManager {
         $(':root').css('--scroll-bar-hover-color', '#CCC');
         $(':root').css('--model-button-select-txt-color', 'white');
         $(':root').css('--model-button-txt-color', 'black');
-	    $(':root').css('--directory-txt-color', 'lightgray');
+	    $(':root').css('--directory-txt-color', '#777');
         $(':root').css('--box-shadow-color', 'grey');
         $(':root').css('--gantt-stripe-color', '#F0F0F0');
         $(':root').css('--gantt-text-shadow-color', '#FFF');
