@@ -171,6 +171,7 @@ class ModelsSidebar {
 		// Context menu for models.
 		$(".model_label").contextmenu(function(e) {
 			const modelDiv = $(this);
+            console.log("🚡 rc", modelDiv, modelDiv.parent());
 
 			const menu = new remote.Menu();
 			menu.append(new remote.MenuItem({
@@ -219,18 +220,28 @@ class ModelsSidebar {
 
 		// Select delete/undo listener
 		$(' .model_button_delete ').click(function (e) {
-			var marked = $( this ).data("marked");
-			if (marked == "x") marked = "u";
-			else marked = "x";
-					
-			if ( $( this ).siblings('.model_label').hasClass('strikethrough') ) {
-				$( this ).siblings('.model_label').removeClass('strikethrough');
-			} else {
-				$( this ).siblings('.model_label').addClass('strikethrough');
-			}
-			
-			$( this ).text(marked);
-			$( this ).data("marked", marked);
+            const modelName = $(this).parent().children(".model_label").text();
+            const modelPath = $(this).parent().data("path");
+            
+            if (confirmDelete(modelName)) {
+                G.modelsManager.deleteModel(modelPath);
+            }
+            
+            //this is the code for the old toggle undo. 
+            //I like the idea behind this, but there's something that just doesn't feel good about not immediately deleting the file and waiting for Cogulator to Close
+            //Plus, it didn't always work as expected (getting the file deleted before Cogulator completely closed out was a problem)
+//			var marked = $( this ).data("marked");
+//			if (marked == "x") marked = "u";
+//			else marked = "x";
+//					
+//			if ( $( this ).siblings('.model_label').hasClass('strikethrough') ) {
+//				$( this ).siblings('.model_label').removeClass('strikethrough');
+//			} else {
+//				$( this ).siblings('.model_label').addClass('strikethrough');
+//			}
+//			
+//			$( this ).text(marked);
+//			$( this ).data("marked", marked);
 		});
 	}
 
