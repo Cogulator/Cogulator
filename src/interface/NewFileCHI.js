@@ -19,6 +19,10 @@ class NewFileCHI { //Model, Operator, or Method CHI
 		$(document).on("keyup", ".new_file_text_field", function(evt) {
 			G.newFileCHI.handleKeystroke( evt, this.id, $(this).val() );
     	});
+        
+        $(document).on("keydown", ".new_file_text_field", function(evt) {
+			G.newFileCHI.handleKeyDown( evt, this.id );
+    	});
 		
 		$(document).on("click", ".create_button_container", function(evt) {
 			G.newFileCHI.handleCreateClick(evt.target.id);
@@ -248,9 +252,33 @@ class NewFileCHI { //Model, Operator, or Method CHI
 				} else {
 					$('#folder_autocomplete').empty();
 				}
+                
+                if (event.keyCode === 9) { //TAB to autocomplete folder name
+                    let ac = $('#folder_autocomplete').text();
+                    $('#folder_autocomplete').empty();
+                    $('#folder_name').val(ac)
+                }
+                
 				break;
 		}
+        
+        //handle enter press in new model chi
+        switch(id) {
+            case "model_name":
+			case "folder_name":
+                if (evt.keyCode == 13) G.newFileCHI.handleCreateClick("create_model_button");
+                break;
+            default:
+                break;
+        }
 	}
+    
+    
+    handleKeyDown(evt, id) {
+        if (event.keyCode === 9 && id == "folder_name") {
+            event.preventDefault();
+        }
+    }
 	
 	
 	validateIsNumber(evt) {
