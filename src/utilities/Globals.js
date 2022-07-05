@@ -1,8 +1,6 @@
 const electron = require('electron');
-const remote = require('electron').remote;
-const app = remote.app;
+const { BrowserWindow } = require('electron');
 const path = require('path');
-const dialog = require('electron').remote.dialog;
 const {ipcRenderer} = require('electron');
 
 class Globals {

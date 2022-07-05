@@ -54,13 +54,8 @@ class ExportManager {
 	
 	
 	save(text, defaultName) {
-		var fullPath = dialog.showSaveDialogSync({
-							defaultPath: '~/' + defaultName,
-							filters: [{
-								name: 'Plain Text',
-								extensions: ['txt']
-							}]
-						});
+        let fullPath = ipcRenderer.sendSync('dialog-export-path', defaultName);
+        if (fullPath === undefined) return;
 		G.io.writeToFile(fullPath, text);
 	}
 }

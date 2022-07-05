@@ -47,7 +47,9 @@ class InOutManager {
 			var data = fs.readFileSync(pth, 'utf8');
 		} catch(err) {
 			console.log("LOAD FILE");
-			dialog.showErrorBox("Could not open file.", "Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+            let error = "Could not open file. Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.";
+            ipcRenderer.sendSync('dialog-error', error);
+			//dialog.showErrorBox("Could not open file.", "Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
 		}
 		
 		callback(data); 
@@ -77,7 +79,9 @@ class InOutManager {
 			fs.closeSync(fdr);
 			fs.closeSync(fdw);
 		} catch (err) {
-			dialog.showErrorBox("Could not copy file.", "Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+			//dialog.showErrorBox("Could not copy file.", "Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+            let error = "Could not copy file. Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened."
+            ipcRenderer.sendSync('dialog-error', error);
 		}
 
 		callback(targetPth);
@@ -100,7 +104,9 @@ class InOutManager {
             });
 		} catch(err) {
             console.log("CREATE ERROR", err);
-            dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+            //dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+            let error = "Could not create file. Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file."
+            ipcRenderer.sendSync('dialog-error', error);
 		}
 		
 		if (typeof callback === 'function') callback(fullPath, text);
@@ -117,7 +123,9 @@ class InOutManager {
 			fs.writeFileSync(pth, text);
 		} catch(err) {
 			console.log("SAVE ERROR", err);
-			dialog.showErrorBox("Could not save.", "Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+			//dialog.showErrorBox("Could not save.", "Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
+            let error = "Could not save. Could not save file at " + pth + ". This can be caused by permissions that do not allow for writing the file."
+            ipcRenderer.sendSync('dialog-error', error);
 		}
 		
 		if (typeof callback === 'function') callback();
@@ -128,7 +136,9 @@ class InOutManager {
 		try {  
 			fs.appendFileSync(pth, text)
 		} catch(err) {
-			dialog.showErrorBox("Could not save.", "Could not save operator. Verify you have permission to write to " + pth);
+			//dialog.showErrorBox("Could not save.", "Could not save operator. Verify you have permission to write to " + pth);
+            let error = "Could not save. Could not save operator. Verify you have permission to write to " + pth
+            ipcRenderer.sendSync('dialog-error', error);
 		}
 		
 		callback();

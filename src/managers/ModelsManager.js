@@ -15,12 +15,23 @@ class ModelsManager {
 		window.addEventListener('unload', function(event) {
 			G.modelsManager.saveModel();
 			G.modelsManager.deleteModels();
-            console.log("TRY TO UNLOAD");
 		})
 		
 		ipcRenderer.on('File->Save', (sender, arg) => {
 			G.modelsManager.saveModel();
 		})
+        
+        ipcRenderer.on('Model->Duplicate', (sender, path) => {
+            G.modelsManager.duplicateModel(path);
+        })
+        
+        ipcRenderer.on('Model->Delete', (sender, path) => {
+            G.modelsManager.deleteModel(path);
+        })
+        
+        ipcRenderer.on('Directory->Delete', (sender, path) => {
+            G.modelsManager.deleteDirectory(path);
+        })
 	}
 	
 	

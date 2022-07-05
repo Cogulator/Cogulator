@@ -1,7 +1,9 @@
+
+
 const electron = require('electron');
-const { app, BrowserWindow, remote } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron'); 
 const path = require('path');
-require('update-electron-app')();
+const config = require('electron-json-config').factory();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -22,15 +24,13 @@ const createWindow = () => {
 								  frame: false,
 								  titleBarStyle: 'hiddenInset',
                                   webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false,  
-                                                   enableRemoteModule: true},
+                                                   contextIsolation: false},
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   } else {
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
                                   webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false,  
-                                                   enableRemoteModule: true},
+                                                   contextIsolation: false},
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
@@ -51,7 +51,7 @@ const createWindow = () => {
   });
 
   // Custom menu using the code at the bottom of this file
-  Menu.setApplicationMenu(menu)
+  Menu.setApplicationMenu(menu);
 };
 
 // This method will be called when Electron has finished
@@ -80,7 +80,6 @@ app.on('activate', () => {
 
 
 // Template and initialization of custom menu
-const {Menu} = require('electron')
 const template = [
 	{
 		label: 'File',
@@ -307,3 +306,129 @@ if (process.platform === 'darwin') {
 }
 
 const menu = Menu.buildFromTemplate(template)
+
+
+//Should probably move all of this to on ready at some point
+ipcMain.on('read-desktop-path', (event, args) => {
+    event.returnValue = electron.app.getPath('desktop');
+});
+
+ipcMain.on('read-documents-path', (event, args) => {
+    event.returnValue = electron.app.getPath('documents');
+});
+
+
+if (config.get('darkMode') == undefined) config.set('darkMode', false);
+if (config.get('sidebarWidth') == undefined) config.set('sidebarWidth', 190);
+if (config.get('lineNumbers') == undefined) config.set('lineNumbers', false);
+
+
+ipcMain.on('set-config', (event, key, value) => {
+    config.set(key, value);
+    event.returnValue = "setit";
+});
+
+ipcMain.on('get-config', (event, key) => {
+    event.returnValue = config.get(key);
+});
+
+ipcMain.on('read-documents-path', (event, args) => {
+    event.returnValue = electron.app.getPath('documents');
+});
+
+ipcMain.on('dialog-error', (event, error) => {
+    dialog.showErrorBox(error);
+});
+
+
+ipcMain.on('dialog-delete-confirm', (event, name) => {
+    const result = dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+		type: 'question',
+		buttons: ['Delete', 'Cancel'],
+		defaultId: 0,
+		message: `Are you sure you want to delete ${name}?`
+	});
+    
+    event.returnValue = (result === 0);
+});
+
+
+//Dialog box for selecting path to export model or working memory trace
+ipcMain.on('dialog-export-path', (event, name) => {
+    var fullPath = dialog.showSaveDialogSync({
+        defaultPath: '~/' + name,
+        filters: [{
+            name: 'Plain Text',
+            extensions: ['txt']
+        }]
+    });
+    
+    console.log(">>>",fullPath,"<<<");
+    event.returnValue = fullPath; //if cancel, this will return undefined
+});
+
+//Builds a model context menu on demand for ModelsSidebar
+ipcMain.on('model-context-menu', (event, path, name) => {
+    var modelContextMenu = new Menu();
+    modelContextMenu.append(new MenuItem({
+        label: 'Duplicate Model',
+        click: () => {
+            mainWindow.webContents.send('Model->Duplicate', path);
+        }
+    }));
+    modelContextMenu.append(new MenuItem({
+        label: 'Rename Model',
+        click: () => {
+            mainWindow.webContents.send('Model->Rename', path, name);
+        }
+    }));
+    modelContextMenu.append(new MenuItem({
+        label: 'Delete Model',
+        click: () => {
+            const result = dialog.showMessageBoxSync(mainWindow, {
+                type: 'question',
+                buttons: ['Delete', 'Cancel'],
+                defaultId: 0,
+                message: `Are you sure you want to delete ${name}?`
+            });
+                        
+            if (result == 0) { //if delete rather than cancel
+                mainWindow.webContents.send('Model->Delete', path);
+            } 
+        }
+    }));
+    
+    modelContextMenu.popup();
+    event.returnValue = "";
+});
+
+//Builds a directory context menu on demand for ModelsSidebar
+ipcMain.on('directory-context-menu', (event, path, name) => {
+    var directoryContextMenu = new Menu();
+    directoryContextMenu.append(new MenuItem({
+        label: 'Rename Directory',
+        click: () => {
+            mainWindow.webContents.send('Directory->Rename', path, name);
+        }
+    }));
+    directoryContextMenu.append(new MenuItem({
+        label: 'Delete Directory',
+        click: () => {
+            const result = dialog.showMessageBoxSync(mainWindow, {
+                type: 'question',
+                buttons: ['Delete', 'Cancel'],
+                defaultId: 0,
+                message: `Are you sure you want to delete ${name}?`
+            });
+                        
+            if (result == 0) { //if delete rather than cancel
+                mainWindow.webContents.send('Directory->Delete', path);
+            } 
+        }
+    }));
+    
+    directoryContextMenu.popup();
+    event.returnValue = "";
+});
+
+

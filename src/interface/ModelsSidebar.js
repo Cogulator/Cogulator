@@ -5,30 +5,41 @@ $( document ).ready(function() {
 const MAX_SIDEBAR_WIDTH = 500;
 const MIN_SIDEBAR_WIDTH = 20;
 
+ipcRenderer.on('Model->Rename', (sender, path, name) => {
+    showRenameInput(path, name, "model");
+})
+ipcRenderer.on('Directory->Rename', (sender, path, name) => {
+    showRenameInput(path, name, "directory");
+})
+
 /**
  * Function to show an HTML rename input in place of the given labelDiv.
  * @param {HTMLElement} labelDiv The div to replace temporarily.
  * @param {String} type Either 'model' or 'directory'.
  */
-function showRenameInput(labelDiv, type) {
+function showRenameInput(path, name, type) {
 	function doRename(newName) {
-		const fullPath = labelDiv.parent().data("path");
-
 		if (type === 'model') {
-			const newFile = G.modelsManager.renameModel(fullPath, newName);
+			const newFile = G.modelsManager.renameModel(path, newName);
 			if (newFile) {
 				G.modelsSidebar.selectedPath = newFile.filePath;
 			}
 		}
 
 		if (type === 'directory') {
-			G.modelsManager.renameDirectory(fullPath, newName);
+			G.modelsManager.renameDirectory(path, newName);
 		}
 
-		// Easiest thing to do after renaming is to just rebuild the sidebar.
-		// This will make sure the renamed model or directory gets put in the right place.
 		G.modelsSidebar.buildSideBar();
 	}
+    
+    var searchClass = ".model_label";
+    if (type === 'directory') searchClass = ".directory_label .label";
+    
+    let labelDiv = $(searchClass).filter(function() {
+        return $(this).text() === name;
+    });
+    if (path != labelDiv.parent().data("path")) return;
 
 	const nameInput = $("<input>")
 		.attr("type", "text")
@@ -38,9 +49,7 @@ function showRenameInput(labelDiv, type) {
 			doRename($(this).val());
 		})
 		.keypress(function (event) {
-			if (event.key === "Enter") {
-				$(this).blur();
-			}
+			if (event.key === "Enter") $(this).blur();
 		})
  
 	labelDiv.hide();
@@ -49,14 +58,7 @@ function showRenameInput(labelDiv, type) {
 }
 
 function confirmDelete(name) {
-	const result = dialog.showMessageBoxSync(remote.getCurrentWindow(), {
-		type: 'question',
-		buttons: ['Delete', 'Cancel'],
-		defaultId: 0,
-		message: `Are you sure you want to delete ${name}?`
-	});
-	// Result is the index of the button clicked. 0 = Delete, 1 = Cancel
-	return (result === 0)
+    return ipcRenderer.sendSync('dialog-delete-confirm', name);
 }
 
 class ModelsSidebar {
@@ -103,40 +105,21 @@ class ModelsSidebar {
 		// Context menu for directories.
 		$(".directory_label .label").contextmenu(function(e) {
 			const directoryDiv = $(this);
+			if (!directoryDiv.text()) return; // Not allowed to rename or delete root (which will have blank text).
 
-			// Not allowed to rename or delete root (which will have blank text).
-			if (!directoryDiv.text()) {
-				return;
-			}
-
-			const menu = new remote.Menu();
-			menu.append(new remote.MenuItem({
-				label: 'Rename Directory',
-				click: () => {
-					showRenameInput(directoryDiv, 'directory');
-				}
-			}));
-			menu.append(new remote.MenuItem({
-				label: 'Delete Directory',
-				click: () => {
-					if (confirmDelete(directoryDiv.text())) {
-						G.modelsManager.deleteDirectory(directoryDiv.parent().data("path"));
-					}
-				}
-			}));
-			menu.popup();
+            let path = directoryDiv.parent().data('path');
+            let name = directoryDiv.text();
+            ipcRenderer.sendSync('directory-context-menu', path, name);
 		});
 
 		// Double click to rename a directory.
 		$(".directory_label .label").dblclick(function(e) {
 			const directoryDiv = $(this);
-		
-			// Not allowed to rename or delete root (which will have blank text).
-			if (!directoryDiv.text()) {
-				return;
-			}
+			if (!directoryDiv.text()) return; // Not allowed to rename or delete root (which will have blank text).
 
-			showRenameInput(directoryDiv, 'directory');
+            let path = directoryDiv.parent().data('path');
+            let name = directoryDiv.text();
+            showRenameInput(path, name, 'directory');
 		})
 
 		// Button to expand/collapse directory.
@@ -146,8 +129,6 @@ class ModelsSidebar {
             
             const rightArrow = "&#9654;"
 		    const downArrow = "&#9660;"
-            
-            
 
 			if (directoryOpen) {
 				$(this).parent().data("open", false);
@@ -170,36 +151,18 @@ class ModelsSidebar {
 	enableModelActions() {
 		// Context menu for models.
 		$(".model_label").contextmenu(function(e) {
-			const modelDiv = $(this);
-            console.log("🚡 rc", modelDiv, modelDiv.parent());
-
-			const menu = new remote.Menu();
-			menu.append(new remote.MenuItem({
-				label: 'Duplicate Model',
-				click: () => {
-					G.modelsManager.duplicateModel(modelDiv.parent().data('path'));
-				}
-			}));
-			menu.append(new remote.MenuItem({
-				label: 'Rename Model',
-				click: () => {
-					showRenameInput(modelDiv, 'model');
-				}
-			}));
-			menu.append(new remote.MenuItem({
-				label: 'Delete Model',
-				click: () => {
-					if (confirmDelete(modelDiv.text())) {
-						G.modelsManager.deleteModel(modelDiv.parent().data("path"));
-					}
-				}
-			}));
-			menu.popup();
+			let modelDiv = $(this);
+            let path = modelDiv.parent().data('path');
+            let name = modelDiv.text();
+            ipcRenderer.sendSync('model-context-menu', path, name);
 		});
 
 		// Double click to rename a file.
 		$(".model_label").dblclick(function(e) {
-			showRenameInput($(this), 'model');
+            let modelDiv = $(this);
+            let path = modelDiv.parent().data('path');
+            let name = modelDiv.text();
+            showRenameInput(path, name, 'model');
 		})
 		
 		// Click to select.

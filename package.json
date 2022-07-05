@@ -1,7 +1,7 @@
 {
   "name": "Cogulator",
   "productName": "Cogulator",
-  "version": "4.3.8",
+  "version": "4.4.0",
   "description": "Cogulator: A Cognitive Calculator",
   "main": "src/index.js",
   "scripts": {
@@ -53,21 +53,21 @@
     }
   },
   "dependencies": {
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "electron-json-config": "^1.5.3",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
+    "electron-json-config": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "electron-titlebar": "0.0.3",
     "jquery": "^3.5.1",
-    "npm": "^8.11.0",
-    "trash": "^7.2.0",
+    "npm": "^8.13.0",
+    "trash": "^7.0.0",
     "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.59",
-    "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
-    "@electron-forge/maker-zip": "^6.0.0-beta.59",
-    "electron": "^15.5.5"
+    "@electron-forge/cli": "^6.0.0-beta.64",
+    "@electron-forge/maker-deb": "^6.0.0-beta.64",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
+    "@electron-forge/maker-zip": "^6.0.0-beta.64",
+    "electron": "^19.0.0"
   },
   "repository": {
     "type": "git",

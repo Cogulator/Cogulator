@@ -1,5 +1,5 @@
 
-const { BrowserWindow,  webFrame} = require('electron');
+const { webFrame} = require('electron');
 
 
 class WindowsTitleBar {
@@ -139,7 +139,8 @@ class WindowsTitleBar {
 		let currentZoomFactor = webFrame.getZoomFactor();
 		let fullScreen = G.windowsTitleBar.currentWindow.isFullScreen();
 		
-		let cogulatorPath = path.join(app.getPath('documents'), "cogulator");
+        let documentPath = ipcRenderer.sendSync('read-documents-path');
+		let cogulatorPath = path.join(documentPath, "cogulator");
 		let rowTxt = $(evt.currentTarget).text();
 		
 		if 		(rowTxt == "SaveCtrl+S") G.modelsManager.saveModel();
