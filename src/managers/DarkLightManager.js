@@ -47,6 +47,8 @@ class DarkLightManager {
         $(':root').css('--line_number-color', 'lightgray');
         $(':root').css('--auto-complete-bg-color', '#4A4A4A');
         
+        $( '#reload_model_button' ).html('<img src="images/reload.png">');
+        
         G.solarize.setLight();
         $( document ).trigger( "Dark_Mode_Change" ); //listen for by MagicModels and GanttChart
         
@@ -74,6 +76,8 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#93A1A1');
         $(':root').css('--line_number-color', '#586E75');
         $(':root').css('--auto-complete-bg-color', '#93A1A1');
+        
+        $( '#reload_model_button' ).html('<img src="images/reload_dark.png">');
         
         $('html[electron-titlebar-platform=win32] #electron-titlebar > .button img').css('-webkit-filter', 'invert(50%)');
             
