@@ -58,7 +58,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-titlebar": "0.0.3",
     "jquery": "^3.5.1",
-    "npm": "^7.20.5",
+    "npm": "^8.11.0",
     "trash": "^7.2.0",
     "update-electron-app": "^2.0.1"
   },
