@@ -50,15 +50,20 @@ class ModelsManager {
 			G.modelsManager.update();
 		
 			// If a model was selecetd in this directory, select first model in list just so something is selected.
-			if (this.selected.startsWith(`${fullPath}${path.sep}`)) {
-				this.selected = this.models[0].filePath;
-				G.modelsManager.setLastOpened();
-				G.modelsManager.loadModel(this.selected);
-			}
-			
-			G.modelsSidebar.buildSideBar();
+			if (this.selected.startsWith(`${fullPath}${path.sep}`)) G.modelsManager.selectDefaultModel();
 		});
 	}
+
+    
+    /**
+	 * Select a default model (first in list).  Used when directory is deleted or models folder changed.
+	 */
+    selectDefaultModel() {
+        this.selected = this.models[0].filePath;
+        G.modelsManager.setLastOpened();
+        G.modelsManager.loadModel(this.selected);
+        G.modelsSidebar.buildSideBar();
+    }
 
 
 	/**
@@ -265,6 +270,7 @@ class ModelsManager {
 			let models = this.paths[i];
 			for (var j = 0; j < models.files.length; j++) {
 				modelsArr.push(models.files[j]);
+                console.log("MDL", models.files[j])
 			}
 		}
 		return modelsArr;

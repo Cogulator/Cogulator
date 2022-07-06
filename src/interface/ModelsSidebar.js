@@ -11,6 +11,12 @@ ipcRenderer.on('Model->Rename', (sender, path, name) => {
 ipcRenderer.on('Directory->Rename', (sender, path, name) => {
     showRenameInput(path, name, "directory");
 })
+ipcRenderer.on('File->ChangeModelsDirectory', (sender) => {
+    console.log("REBUILD");
+    G.paths.updateModelsDirectory(); //point to the newest model directory
+    G.modelsManager.update(); //update the list of available models in memory
+    G.modelsManager.selectDefaultModel() //default to the first model in the group, if any .  Also rebuilds the sidebar.
+})
 
 /**
  * Function to show an HTML rename input in place of the given labelDiv.
@@ -129,6 +135,8 @@ class ModelsSidebar {
             
             const rightArrow = "&#9654;"
 		    const downArrow = "&#9660;"
+            
+            let modelsPath = G.paths.models; //used to seperate setSetting below for currently selected models directory
 
 			if (directoryOpen) {
 				$(this).parent().data("open", false);
@@ -136,14 +144,14 @@ class ModelsSidebar {
 
 				// Find all directory_group divs with this directoryPath and collapse them.
 				$(`.directory_group[data-path='${directoryPath.replace(/["\\]/g, '\\$&')}']`).slideUp();
-                G.settingsManager.setSetting(directoryPath, "closed");
+                G.settingsManager.setSetting(modelsPath + directoryPath, "closed");
 			} else {
 				$(this).parent().data("open", true);
 				$(this).html(downArrow);
 
 				// Find all directory_group divs with this directoryPath and show them.
 				$(`.directory_group[data-path='${directoryPath.replace(/["\\]/g, '\\$&')}']`).slideDown();
-                G.settingsManager.setSetting(directoryPath, "open");
+                G.settingsManager.setSetting(modelsPath + directoryPath, "open");
 			}
 		});
 	}
@@ -267,12 +275,13 @@ class ModelsSidebar {
 
 		$( '#sidebar_left' ).empty();
 		
+        let allModelsPath = G.paths.models; //used to seperate setSetting below for currently selected models directory
 		let modelPaths = G.modelsManager.paths; //{directory, directoryPath, files:[{file, filePath}]}
 		for (var i = 0; i < modelPaths.length; i++) {
 			let models = modelPaths[i];
             
             var lastWasOpen = true;
-            if (G.settingsManager.getSetting(models.directoryPath) == "closed") lastWasOpen = false;
+            if (G.settingsManager.getSetting(allModelsPath + models.directoryPath) == "closed") lastWasOpen = false;
 
 			let directoryButton = "<div></div>"
 			if (models.directory !== "") {
@@ -312,7 +321,7 @@ class ModelsSidebar {
 			}
             
             // Check to see if the directory should be open or closed
-            if (G.settingsManager.getSetting(models.directoryPath) == "closed") {
+            if (G.settingsManager.getSetting(allModelsPath + models.directoryPath) == "closed") {
                 $(`.directory_group[data-path='${models.directoryPath.replace(/["\\]/g, '\\$&')}']`).slideUp();
             }
 		}

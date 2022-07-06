@@ -103,6 +103,27 @@ const template = [
 					let cogulatorPath = path.join(app.getPath('documents'), "cogulator");
 					require('electron').shell.openExternal("file://" + cogulatorPath);
 				}
+			},
+            {
+				label: 'Change Models Folder',
+				click () { 
+                    let options = {properties:["openDirectory"]}
+                    let dir = dialog.showOpenDialogSync(options); //returns an array evidently, if without "multiSelections"
+                    if (dir == undefined || dir[0] == undefined) return;
+                    config.set('cogModelsPath', dir[0]);
+                    mainWindow.webContents.send('File->ChangeModelsDirectory');
+                    
+				}
+			},
+            {
+				label: 'Use Default Models Folder',
+				click () { 
+                    let docPath = electron.app.getPath('documents');
+                    var modelsPath = path.join(docPath, "cogulator");
+                    modelsPath = path.join(modelsPath, "models");
+                    config.set('cogModelsPath', modelsPath);
+                    mainWindow.webContents.send('File->ChangeModelsDirectory');
+				}
 			}
 		]
 	},
@@ -308,20 +329,17 @@ if (process.platform === 'darwin') {
 const menu = Menu.buildFromTemplate(template)
 
 
-//Should probably move all of this to on ready at some point
-ipcMain.on('read-desktop-path', (event, args) => {
-    event.returnValue = electron.app.getPath('desktop');
-});
 
-ipcMain.on('read-documents-path', (event, args) => {
-    event.returnValue = electron.app.getPath('documents');
-});
-
-
+// -- SETTINGS CONTROLS ---------------------------------------------- //
 if (config.get('darkMode') == undefined) config.set('darkMode', false);
 if (config.get('sidebarWidth') == undefined) config.set('sidebarWidth', 190);
 if (config.get('lineNumbers') == undefined) config.set('lineNumbers', false);
-
+if (config.get('cogModelsPath') == undefined) {
+    let docPath = electron.app.getPath('documents');
+    var modelsPath = path.join(docPath, "cogulator");
+    modelsPath = path.join(modelsPath, "models");
+    config.set('cogModelsPath', modelsPath);
+}
 
 ipcMain.on('set-config', (event, key, value) => {
     config.set(key, value);
@@ -332,15 +350,28 @@ ipcMain.on('get-config', (event, key) => {
     event.returnValue = config.get(key);
 });
 
+
+// -- GET DOCUMENTS & DESKTOP PATH ----------------------------------------------
 ipcMain.on('read-documents-path', (event, args) => {
     event.returnValue = electron.app.getPath('documents');
 });
 
+ipcMain.on('read-desktop-path', (event, args) => {
+    event.returnValue = electron.app.getPath('desktop');
+});
+
+ipcMain.on('read-models-path', (event, args) => {
+    event.returnValue = config.get('cogModelsPath');
+});
+
+
+//-- DIALOG BOXES ----------------------------------------------
+// Dialog Box for error
 ipcMain.on('dialog-error', (event, error) => {
     dialog.showErrorBox(error);
 });
 
-
+//Dialog box for confirming delete
 ipcMain.on('dialog-delete-confirm', (event, name) => {
     const result = dialog.showMessageBoxSync(remote.getCurrentWindow(), {
 		type: 'question',
@@ -367,6 +398,8 @@ ipcMain.on('dialog-export-path', (event, name) => {
     event.returnValue = fullPath; //if cancel, this will return undefined
 });
 
+
+//-- CONTEXT MENUS ----------------------------------------------
 //Builds a model context menu on demand for ModelsSidebar
 ipcMain.on('model-context-menu', (event, path, name) => {
     var modelContextMenu = new Menu();
