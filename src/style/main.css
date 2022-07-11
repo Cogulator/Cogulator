@@ -68,6 +68,14 @@
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
+#electron-titlebar {
+    z-index: 10000; 
+    top:-9px; 
+    left: -9px; 
+    height:30px; 
+    width:calc(100% + 18px);
+    -webkit-app-region: drag;
+}
 
 #container {
 	position: absolute;
