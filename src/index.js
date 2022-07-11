@@ -4,6 +4,8 @@ const electron = require('electron');
 const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron'); 
 const path = require('path');
 const config = require('electron-json-config').factory();
+const { setupTitlebar, attachTitlebarToWindow } = require ('custom-electron-titlebar/main');
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -19,13 +21,15 @@ const createWindow = () => {
 	
 	
   if (require('os').type() == "Windows_NT") {
+      setupTitlebar();
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-								  frame: false,
-								  titleBarStyle: 'hiddenInset',
                                   webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false},
+                                                   contextIsolation: false,
+                                                   preload: path.join(app.getAppPath(), 'src', 'preload.js')},
+                                  titleBarStyle: 'hidden',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
+      attachTitlebarToWindow(mainWindow);
   } else {
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 

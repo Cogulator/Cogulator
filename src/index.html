@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+44<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<title>Cogulator</title>
+        <link rel="icon" type="image/x-icon" href="./icons/1024x1024.ico">
 		<link rel="stylesheet" type="text/css" href="./style/quill.core.css">
 		<link rel="stylesheet" type="text/css" href="./style/main.css">
 		<link rel="stylesheet" type="text/css" href="./style/sidebar.css">
@@ -13,15 +14,12 @@
 		<link rel="stylesheet" type="text/css" href="./style/errors_tips.css">
 		<link rel="stylesheet" type="text/css" href="./style/magic_models.css">
 		<link rel="stylesheet" type="text/css" href="./style/help_screen.css">
-        <link rel="stylesheet" type="text/css" href="./style/windows_menubar.css">
 		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
 		<script type='text/javascript' src='./libraries/quill.min.js'></script>
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
 	</head>
+    
 	<body>
-<!--        <div id='electron-titlebar' class='drag' style='z-index: 10000; top:-9px; left: -9px; height:30px; width:calc(100% + 18px);'></div>-->
-		<div id='electron-titlebar' style='z-index: 10000; top:-9px; left: -9px; height:30px; width:calc(100% + 18px);'></div>
-		
 		<div id='container'>
 			<div id='not_gantt_container'>
 				<div id='not_gantt_not_magic'>
@@ -173,15 +171,11 @@
                 if (windowsPlatforms.indexOf(platform) > -1) return true;
                 return false;
             }
-            
-            //change reload button if is windows
-            //if ( isWindows() ) document.getElementById("reload_model_button").innerHTML = "↻";
         </script>
 				
 		<script type='text/javascript' src='./utilities/Globals.js'></script>
 		<script type='text/javascript' src='./managers/FilePathManager.js'></script>
 		<script type='text/javascript' src='./managers/InOutManager.js'></script>
-        <script type='text/javascript' src='./interface/WindowsTitleBar.js'></script>
 		<script type='text/javascript' src='./managers/StartUpManager.js'></script>
 		<script type='text/javascript' src='./interface/HelpScreen.js'></script>
 		<script type='text/javascript' src='./managers/FirstRunManager.js'></script>

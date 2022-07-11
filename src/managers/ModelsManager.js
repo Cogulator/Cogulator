@@ -270,7 +270,6 @@ class ModelsManager {
 			let models = this.paths[i];
 			for (var j = 0; j < models.files.length; j++) {
 				modelsArr.push(models.files[j]);
-                console.log("MDL", models.files[j])
 			}
 		}
 		return modelsArr;

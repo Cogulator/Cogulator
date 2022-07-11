@@ -63,8 +63,9 @@
     position: fixed;
 }
 
-#electron-titlebar {
-	-webkit-app-region: drag;
+.cet-titlebar,
+.cet-titlebar > * {
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 
