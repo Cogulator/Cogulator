@@ -377,7 +377,7 @@ ipcMain.on('dialog-error', (event, error) => {
 
 //Dialog box for confirming delete
 ipcMain.on('dialog-delete-confirm', (event, name) => {
-    const result = dialog.showMessageBoxSync(remote.getCurrentWindow(), {
+    const result = dialog.showMessageBoxSync(mainWindow, {
 		type: 'question',
 		buttons: ['Delete', 'Cancel'],
 		defaultId: 0,
