@@ -82,7 +82,6 @@ app.on('activate', () => {
   }
 });
 
-
 // Template and initialization of custom menu
 const template = [
 	{
@@ -247,7 +246,10 @@ const template = [
 			{
 				label: 'Learn More',
 				click () { require('electron').shell.openExternal('http://cogulator.io') }
-			}
+			},
+            {
+                label: "Version: " + app.getVersion()
+            }
 		]
 	}
 ]
