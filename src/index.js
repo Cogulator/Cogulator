@@ -374,7 +374,7 @@ ipcMain.on('read-models-path', (event, args) => {
 //-- DIALOG BOXES ----------------------------------------------
 // Dialog Box for error
 ipcMain.on('dialog-error', (event, error) => {
-    dialog.showErrorBox(error);
+    dialog.showErrorBox("Error", error);
 });
 
 //Dialog box for confirming delete
