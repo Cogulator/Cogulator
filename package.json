@@ -53,21 +53,21 @@
     }
   },
   "dependencies": {
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
-    "custom-electron-titlebar": "^4.1.0",
-    "electron-json-config": "^2.0.0",
-    "electron-squirrel-startup": "^1.0.0",
+    "@electron-forge/maker-squirrel": "^7.4",
+    "custom-electron-titlebar": "^4.2.8",
+    "electron-json-config": "^2.1.0",
+    "electron-squirrel-startup": "^1.0.1",
     "jquery": "^3.5.1",
-    "npm": "^8.13.0",
-    "trash": "^7.0.0",
-    "update-electron-app": "^2.0.1"
+    "npm": "^10.8.2",
+    "trash": "^7.2.0",
+    "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.64",
-    "@electron-forge/maker-deb": "^6.0.0-beta.64",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
-    "@electron-forge/maker-zip": "^6.0.0-beta.64",
-    "electron": "^19.0.0"
+    "@electron-forge/cli": "^7.4",
+    "@electron-forge/maker-deb": "^7.4",
+    "@electron-forge/maker-rpm": "^7.4",
+    "@electron-forge/maker-zip": "^7.4",
+    "electron": "^31.4.0"
   },
   "repository": {
     "type": "git",
