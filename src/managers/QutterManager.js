@@ -9,8 +9,13 @@ class QutterManager { //Quill gutter
             G.qutterManager.handleToggleMarkers();
 		})
         
-		//Sync Qutter scroll to Quill scroll
-		$( G.quill.scrollingContainer ).scroll(function(){
+		//Assign the .ql-editor DIV inside of #code a name
+		// var codeDiv =  document.getElementById('code');
+		// var quillDiv = codeDiv.getElementsByClassName('ql-editor')[0];
+		// quillDiv.id = "quill-code";
+
+		$( '.ql-editor' ).on( 'scroll', function() {
+			console.log("🦙", this.scrollTop);
 			$('#gutter').scrollTop(this.scrollTop);
 		})
 		
