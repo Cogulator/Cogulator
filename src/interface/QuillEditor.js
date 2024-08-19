@@ -2,7 +2,7 @@
 
 var bindings = {
 	list: {
-		key: 'enter',
+		key: 'Enter',
 		handler: function(range, context) {
 			if (G.autocomplete.isVisible) {
 				G.autocomplete.complete();
