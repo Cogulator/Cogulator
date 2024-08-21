@@ -25,7 +25,6 @@ class SolarizeManager {
 			if (G.solarize.selected != G.modelsSidebar.selectedPath) G.solarize.all();
 			else 													 G.solarize.line();
 		});
-		
 	}
     
     
@@ -150,8 +149,6 @@ class SolarizeManager {
 						
 		//update
 		G.quill.updateContents(retain, 'silent');
-		if (G.quill.getSelection() == null) return;
-		if (G.quill.getSelection().length == 1) G.quill.format('color', 'black'); //color at current cursor index
 	}
     
     
@@ -224,7 +221,6 @@ class SolarizeManager {
         
 		//update
 		G.quill.updateContents(retain, 'silent');
-		G.quill.format('color', 'black'); //color at current cursor inde
 	}
 	
 	

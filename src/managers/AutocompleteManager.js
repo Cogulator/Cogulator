@@ -62,16 +62,46 @@ class AutocompleteManager {
 		let length = caretIndex - startIndex + 1;
 		let line = G.quill.getText(startIndex, length); //from beginning of line to current caret position
 		if (line.indexOf("\*") > -1) return; //into the comments, don't bother continuing
+
+		//Once we have a regex of a given type, we're not going to try matching it for that line anymore
+		var _regexs = this.regexs;
+		if (this.hasOperator(line)) _regexs = this.regexs.filter((rgx) => (rgx.type != "operator" && rgx.type != "goal"));
+		if (this.hasGoal(line)) _regexs = []; //If this is a goal line, and we've already done the autocomplete, no other autocompletes apply.
+		if (this.hasTime(line)) _regexs = this.regexs.filter((rgx) => rgx.type != "time");
 		
 		//if one of the regexs comes up with a match on the line, try autocomplete.  If autocomplete is a go, stop
-		for (var i = 0; i < this.regexs.length; i++) {
-			let regex = this.regexs[i].exp;
-			let match = line.match(regex); //just want to find first match
-			
+		for (var i = 0; i < _regexs.length; i++) {
+			let regex = _regexs[i];
+			let match = line.match(regex.exp); //just want to find first match
 			if (match != null) {
-				if (this.getCompletion(caretIndex, length, this.regexs[i].type)) return; //if you can autocomplete, stop here
+				if (this.getCompletion(caretIndex, length, regex.type)) return; //if you can autocomplete, stop here
 			}
 		}
+	}
+
+
+	//Possibly overly simple method for identifying whether operator already exists in line
+	hasOperator(line) {
+		let operators = G.operatorsManager.operators
+		for (var i = 0; i < operators.length; i++) {
+			if (line.toLowerCase().includes(operators[i].operator.toLowerCase())) return true;
+		}
+		return false;
+	}
+
+
+	hasGoal(line) {
+		if (line.toLowerCase().includes("goal")) return true;
+		if (line.toLowerCase().includes("also")) return true;
+		return false;
+	}
+
+
+	hasTime(line) {
+		if (line.toLowerCase().includes("syllables")) return true;
+		if (line.toLowerCase().includes("seconds")) return true;
+		if (line.toLowerCase().includes("millseconds")) return true;
+		return false;
 	}
 		
 	
