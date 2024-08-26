@@ -98,6 +98,15 @@ class QuillManager {
 		
 		return index;
 	}
+
+	getSelectedText() {
+		let selection = G.quill.getSelection();
+		if (selection == null) return;
+
+		let start = Math.max(0, G.quillManager.getLineStart(selection.index));
+		let end = G.quillManager.getLineEnd(selection.index + selection.length);
+		return G.quill.getText(start, end - start);
+	}
 	
 	insertTextAtLine(text, lineNo) {
 		let index = this.getLineIndex(lineNo);

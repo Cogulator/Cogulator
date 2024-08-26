@@ -1,15 +1,15 @@
 class AnnotationManager {
 	constructor() {
 		$('#comment_button').click(function() {
-			G.annotationManager.annotate("*", "toggle");
+			G.annotationManager.annotate("*", "toggle", false);
 		});
 		
 		$('#indent_button').click(function() {
-			G.annotationManager.annotate(".", "add");
+			G.annotationManager.annotate(".", "add", false);
 		});
 		
 		$('#dedent_button').click(function() {
-			G.annotationManager.annotate(".", "remove");
+			G.annotationManager.annotate(".", "remove", false);
 		});
 		
 		
@@ -29,7 +29,8 @@ class AnnotationManager {
 	//  - add annotation to all lines
 	//  - remove annotaiton from all lines
 	//  - toggle annotation for all lines
-	annotate(annotation, type) {
+	//pressedTab is used with Quill KeyBindings to detect when tab is pressed
+	annotate(annotation, type, pressedTab) {
 		var selection = G.quill.getSelection();
 		if (selection == null) return;
 		
@@ -39,6 +40,8 @@ class AnnotationManager {
 		var selectedText = G.quill.getText(start, end - start);
 		
 		let lines = selectedText.split("\n");
+		if (pressedTab && lines.count < 2) return; //only want Tab to have an effect when multiple lines selected
+
 		for (var i = 0; i < lines.length; i++) {
 			let line = lines[i];
 			let firstCharIndex = line.indexOf(line.trim());
