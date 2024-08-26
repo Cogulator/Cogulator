@@ -17,14 +17,8 @@ var bindings = {
 	tab: {
 		key: 9,
 		handler: function() {
-			let lineCount = G.quillManager.getSelectedText().split("\n").length;
-			console.log("Jabbed the Tab", lineCount);
-
-			if (lineCount > 1) {
-				G.annotationManager.annotate(".", "add", true);
-			} else {
-				return true; // propogate to Quill's default
-			}
+			G.annotationManager.annotate(".", "add");
+			return false;
 		}
 	},
 
@@ -33,14 +27,8 @@ var bindings = {
 		key: ['Tab'],
 		shiftKey: true,
 		handler: function(range, context) {
-			let lineCount = G.quillManager.getSelectedText().split("\n").length;
-			console.log("Shifty Tab", lineCount);
-
-			if (lineCount > 1) {
-				G.annotationManager.annotate(".", "remove", true);
-			} else {
-				return true; // propogate to Quill's default
-			}
+			G.annotationManager.annotate(".", "remove");
+			return false;
 		}
 	},
 };

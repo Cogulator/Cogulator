@@ -101,7 +101,7 @@ class QuillManager {
 
 	getSelectedText() {
 		let selection = G.quill.getSelection();
-		if (selection == null) return;
+		if (selection == null) return null;
 
 		let start = Math.max(0, G.quillManager.getLineStart(selection.index));
 		let end = G.quillManager.getLineEnd(selection.index + selection.length);
