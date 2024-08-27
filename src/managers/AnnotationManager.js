@@ -69,8 +69,18 @@ class AnnotationManager {
 				]);
 			}
 
-			//G.quill.setSelection(selectedText.index, annotatedText.length); //resets the selection
 			G.modelEvents.triggerMultiline(); //forces model rerun & solarize all (until I get the event listener working properly
+		
+		//Handles the case of an empty line 
+		} else if (end - start == -1) {
+			G.quill.updateContents([
+				{retain: end},
+				{delete: 0},
+				{insert: annotation}
+			]);
+
+			G.modelEvents.triggerMultiline(); //forces model rerun & solarize all (until I get the event listener working properly
+			G.quill.setSelection(selection.index + 1, 0); //resets the selection
 		}
 	}
 	
