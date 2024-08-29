@@ -368,6 +368,8 @@ class Memory {
 	
 	getExistingChunk(operator, chunkName, stack) {			
 		//first check to see if the chunk exists in WM
+		if (this.workingmemory[stack - 1] == null) return null;
+
 		for (var i = 0; i < this.workingmemory[stack - 1].length; i++) {
 			var chunk = this.workingmemory[stack - 1][i];
 			if (chunk.chunkName == chunkName) return chunk;
