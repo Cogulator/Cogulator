@@ -29,5 +29,4 @@ This is beta software: don’t use Cogulator for critical work. Make sure your m
 If Cogulator doesn't work for your purposes (say, you wanted to plug into a sim), consider some of these alternatives
 * [GLEAN](http://web.eecs.umich.edu/~kieras/goms.html) ([repo](https://github.com/dekieras/GLEANApp)): One of the primary inspirations for Cogulator
 * [CogTool](https://github.com/cogtool/): GUI based model building
-* [Apex](http://www.ai.sri.com/project/APEX): Open source architecture
 * [ACT-R](http://act-r.psy.cmu.edu/): Hybrid production system architecture for detailed modeling and testing of cognitive theory
