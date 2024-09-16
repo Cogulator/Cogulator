@@ -7,3 +7,7 @@ package-lock.json
 package-lock.json
 src/entitlements.plist
 yarn-error.log
+src/.vs/VSWorkspaceState.json
+src/.vs/src/v17/.wsuo
+src/.vs/src/FileContentIndex/a9d963e2-c5ef-4280-b8e3-3ebfcd26a43a.vsidx
+src/.vs/slnx.sqlite

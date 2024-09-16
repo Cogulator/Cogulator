@@ -1,8 +1,8 @@
-const { Titlebar, Color } = require ('custom-electron-titlebar');
+const { Titlebar, TitlebarColor } = require ('custom-electron-titlebar');
 
 window.addEventListener('DOMContentLoaded', () => {
     new Titlebar({
-        backgroundColor: Color.fromHex('#EFEFEF'),
+        backgroundColor: TitlebarColor.fromHex('#EFEFEF'),
         drag: true
     });
 });
