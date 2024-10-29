@@ -9,6 +9,7 @@ class SolarizeManager {
 		this.timeClr = '#859900'; //green
 		this.commentClr = '#999999'; //grey
 		this.blackClr = '#000000'; //grey
+		this.highlightClr = '#B58900'; //yellow
 		this.forgotClr = 'red';
 					
 		this.setRegexs();
@@ -59,6 +60,7 @@ class SolarizeManager {
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>\n]+>/gmi, clr: this.chunkClr }); //working memory
 		this.regexs.push({ exp: /\(\s{0,15}[0-9]{1,5}\s{1,5}(syllables|seconds|milliseconds|second|ms)\s{0,15}\)/gmi, clr: this.timeClr }); //time or syllables
+		this.regexs.push({ exp: /\[[^\]\n]+\]/gmi, clr: this.highlightClr }); //highlighting
 		this.regexs.push({ exp: /\*.*/gmi, clr: this.commentClr }); //comments must be last
 	}
 		
