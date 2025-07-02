@@ -18,7 +18,7 @@ class InOutManager {
 			let filePath = path.join(pth, file);
 			let stats = fs.lstatSync(filePath);
 			if (stats.isDirectory()) directoryPaths.push({directory: file, directoryPath: filePath, files:[]});
-			else if (stats.isFile() && this.isGOMS(file)) directoryPaths[0].files.push({file: file.split(".").shift(), filePath: filePath});
+			else if (stats.isFile() && this.isGOMS(file)) directoryPaths[0].files.push({file: file.replace('.goms',''), filePath: filePath});
 		});
 		
 		//get the .goms files in the directories found on the first iteration
@@ -26,8 +26,8 @@ class InOutManager {
 			files = fs.readdirSync(directoryPaths[i].directoryPath);
 			files.forEach(file => {
 				let filePath = path.join(directoryPaths[i].directoryPath, file);
-				let stats = fs.lstatSync(filePath) 
-				if (stats.isFile() && this.isGOMS(file)) directoryPaths[i].files.push({file: file.split(".").shift(), filePath: filePath});
+				let stats = fs.lstatSync(filePath);
+				if (stats.isFile() && this.isGOMS(file)) directoryPaths[i].files.push({file: file.replace('.goms',''), filePath: filePath});
 			});
 		}
 		
@@ -43,16 +43,20 @@ class InOutManager {
 	
 	
 	loadFile(pth, callback) {
-		try {  
-			var data = fs.readFileSync(pth, 'utf8');
-		} catch(err) {
-			console.log("LOAD FILE");
-            let error = "Could not open file. Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.";
-            ipcRenderer.sendSync('dialog-error', error);
-			//dialog.showErrorBox("Could not open file.", "Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.");
+		if (this.pathExists(pth)) {
+			try {  
+				var data = fs.readFileSync(pth, 'utf8');
+			} catch(err) {
+				console.log("LOAD FILE");
+				let error = "🐟 SORRY CHARLIE - Could not read file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.";
+				ipcRenderer.sendSync('dialog-error', error);
+			}
+
+			callback(data); 
+		} else {
+			let error = "🐟 SORRY CHARLIE - Could not find file at " + pth + ". Either the file does not exist or permissions do not allow for it to be opened.";
+			ipcRenderer.sendSync('dialog-error', error);
 		}
-		
-		callback(data); 
 	}
 	
 
