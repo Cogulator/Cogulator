@@ -38,6 +38,7 @@ class ModelsManager {
 	update() {
 		this.paths = G.io.getDirectoryPaths(G.paths.models);
 		this.models = this.getModels();
+        console.log
 	}
 
 
@@ -58,7 +59,13 @@ class ModelsManager {
     /**
 	 * Select a default model (first in list).  Used when directory is deleted or models folder changed.
 	 */
-    selectDefaultModel() {
+    selectDefaultModel() {        
+        if (this.models[0].length > 0) {
+            let error = "🐟 SORRY CHARLIE - I could not find any .goms files in the directory you selected.";
+            ipcRenderer.sendSync('dialog-error', error);
+            return;
+        }
+        
         this.selected = this.models[0].filePath;
         G.modelsManager.setLastOpened();
         G.modelsManager.loadModel(this.selected);
