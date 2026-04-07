@@ -22,11 +22,15 @@ class MagicModelsManager {
 	constructor() {
 		this.selected = "desktop";
 		this.visible = false;
+        this.mode = 'wand'; // 'wand' | 'ai'
 		
 		this.fitts = new FittsLaw();
 		this.actions = [];
 		this.speechRecMode = "none";
 		this.handsPosition = "";
+
+        // add mode toggle in header (wand | AI)
+        this.initModeToggle();
 				
 		//toggle magic models on wand click
 		$('#magic_button_container').click(function() {
@@ -56,8 +60,72 @@ class MagicModelsManager {
 			$('#mm_iphone_selected').html("<img src='images/mm_selector.png'>");
 			G.magicModels.selected = "iphone";
 		});
+
+
+    //LLM functions
+        $('#ai_generate_btn').click(function(){
+            const question = $('#ai_task_description').val().trim();
+            if (!question) return;
+            console.log("🌂 SEND", question);
+            ipcRenderer.send('rag-query', question);
+        });
+
+
+        ipcRenderer.on('rag-token', (sender, token) => {
+            console.log("🌂 Token", sender, token);
+            //while tokens are coming in, make the upload button a spinner & disable
+            // let index = G.quill.getLength() + 1;
+			// G.quill.insertText(index, token);
+			// G.quillManager.lastSelection.index = index;
+        });
+
+
+        ipcRenderer.on('rag-done', (event, { fullResponse, sources }) => {
+            console.log("🌂 Done", fullResponse);
+            let index = G.quill.getLength() + 1;
+			G.quill.insertText(index, fullResponse);
+			G.quillManager.lastSelection.index = index;
+        });
+
 	}
-	
+
+    initModeToggle() {
+        $('#wand_selector').on('click', () => this.setMode('wand'));
+        $('#ai_selector').on('click', () => this.setMode('ai'));
+    }
+
+    setMode(mode) {
+        if (mode === this.mode) return;
+        this.mode = mode;
+
+        $('#wand_selector').removeClass('active');
+        $('#ai_selector').removeClass('active');
+        if (mode == "wand") $('#wand_selector').addClass('active');
+        else                $('#ai_selector').addClass('active');
+
+        console.log("🐳 Toggle");
+        $('#magic_llm_container').toggle();
+        $('#magic_wand_container').toggle();
+
+        if (mode === 'wand') {
+            $('#mm_toggle_wand').addClass('mm_mode_selected');
+            $('#mm_toggle_ai').removeClass('mm_mode_selected');
+            // resume wand interactions
+            this.run();
+        } else {
+            $('#mm_toggle_ai').addClass('mm_mode_selected');
+            $('#mm_toggle_wand').removeClass('mm_mode_selected');
+            // pause wand interactions while in AI mode
+            this.pause();
+        }
+    }
+
+    setAiStatus(msg, isError) {
+        const el = $('#ai_status');
+        el.text(msg);
+        if (isError) el.addClass('error_text'); else el.removeClass('error_text');
+    }
+
 	
 	run() {
 		G.quill.disable();
@@ -392,8 +460,13 @@ var magicModelsSketch = function(s) {
     //loop control: things get laggy while looping, so only loop when focus is on magic box
     $( "#not_gantt_but_is_magic" ).hover(
         function() { //on over
-            G.magicModels.run();
-            s.loop();
+            if (G.magicModels.mode === 'wand') {
+                G.magicModels.run();
+                s.loop();
+            } else {
+                G.magicModels.pause();
+                s.noLoop();
+            }
         }, function() {
             G.magicModels.pause();
             s.noLoop();

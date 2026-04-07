@@ -1,5 +1,4 @@
-
-
+const { registerRagHandlers } = require('./ragHandler');
 const electron = require('electron');
 const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron'); 
 const path = require('path');
@@ -16,10 +15,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 
-const createWindow = () => {
-  // Create the browser window.
-	
-	
+const createWindow = () => {	
   if (require('os').type() == "Windows_NT") {
       setupTitlebar();
 	  mainWindow = new BrowserWindow({width: 1200, 
@@ -45,6 +41,9 @@ const createWindow = () => {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools();
+
+  // For handling LLM requests
+  registerRagHandlers(mainWindow);
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {

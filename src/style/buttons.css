@@ -66,18 +66,24 @@
 	vertical-align: middle;
 }
 
-#close_magic_button_container {
-	position: relative;
-	margin-right:10px;
-	float: right;
-	height:inherit;
+ #close_magic_button_container {
+	position: absolute;
+	right: 10px;
+	height: 100%;
+	display: flex;
+	align-items: center;
 } #close_magic_button {
-	position: relative;
-	top: 50%;
-	transform: perspective(1px) translateY(-50%);
-	font-family: 'Lato-Light';
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-family: sans-serif;
 	font-size: 14px;
 	border: 1px solid;
-	color:var(--purple-color);
-	border-color:var(--purple-color);
+	cursor: pointer;
+	color: var(--purple-color);
+	border-color: var(--purple-color);
+	transition: background-color 0.2s;
 }

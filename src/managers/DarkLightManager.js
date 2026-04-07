@@ -46,6 +46,7 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#000');
         $(':root').css('--line_number-color', 'lightgray');
         $(':root').css('--auto-complete-bg-color', '#4A4A4A');
+        $(':root').css('--magic-model-text-color', '#4A4A4A');
         
         $( '#reload_model_button' ).html('<img src="images/reload.png">');
         
@@ -76,6 +77,7 @@ class DarkLightManager {
         $(':root').css('--windows-menu-font-color', '#93A1A1');
         $(':root').css('--line_number-color', '#586E75');
         $(':root').css('--auto-complete-bg-color', '#93A1A1');
+        $(':root').css('--magic-model-text-color', '#F8F8F8');
         
         $( '#reload_model_button' ).html('<img src="images/reload_dark.png">');
         

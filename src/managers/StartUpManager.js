@@ -39,7 +39,7 @@ class StartUpManager {
 				    "./interface/NewFileCHI.js",
                     "./interface/FinderCHI.js",
 				  	"./interface/InsertionCHI.js",
-				    "./interface/MagicModels.js",
+			    	"./interface/MagicModels.js",
 				  	"./managers/DragAndDropManager.js"];
 		
 		$.getScript( this.js[this.index], function(){

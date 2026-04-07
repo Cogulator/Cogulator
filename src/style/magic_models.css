@@ -1,6 +1,58 @@
-#magic_header{
-	width:100%;
-	height:60px;
+#magic_header {
+	width: 100%;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center; /* Centers the button group horizontally */
+	position: relative;
+}
+
+.btn-group-container {
+	display: inline-flex;
+	background-color:  var(--main-bg-color);
+	padding: 4px;
+	border-radius: 12px;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-group-item {
+	position: relative;
+	padding: 8px 24px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #4b5563;
+	border-radius: 8px;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	cursor: pointer;
+	border: none;
+	background: transparent;
+	outline: none;
+	user-select: none;
+}
+
+.btn-group-item:hover:not(.active) {
+	color: #111827;
+	background-color: rgba(0,0,0,0.03);
+}
+
+.btn-group-item.active {
+	background-color: var(--purple-color);
+	color: #FFF;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-group-item:focus-visible {
+	ring: 2px solid #2563eb;
+	z-index: 10;
+}
+
+#magic_wand_container {
+	height:100%;
+}
+
+#magic_llm_container{
+	height:100%;
+	display: none;
 }
 
 #magic_content{
@@ -49,3 +101,43 @@
 #magic_button{
     background-color: #FFF;
 }
+
+
+/* AI HCI */
+#magic_llm_hci_container {
+	position: relative;
+	top: -25%; /* Adjust percentage as needed */
+	width: 250px;
+	padding:10px;
+	border-radius: 10px;
+	background-color:  var(--main-bg-color);
+}
+
+    /* text area */
+#ai_task_description {
+  width: calc(100% - 10px);
+  color: var(--magic-model-text-color);
+  background-color: transparent;
+  border: none;
+  resize: vertical;
+}
+
+#ai_generate_btn {
+	width:45px;
+	height:35px;
+	display: block;  /* Buttons are inline-block by default; needs to be block for auto-margin */
+	margin-left: auto;
+	margin-top: 5px;
+	background-color: var(--model-select-bg-color);
+	border: none;
+	border-radius: 10px;
+}
+
+
+
+/* Mode toggle */
+#mm_mode_toggle{ display:flex; gap:6px; align-items:center; padding: 12px; }
+.mm_mode_tab{ padding: 6px 10px; border:1px solid var(--border-color); border-radius:6px; cursor:pointer; font-size: 12px; text-transform: uppercase; }
+.mm_mode_selected{ background: var(--purple-color); color:#fff; border-color: var(--purple-color);} 
+
+#ai_status.error_text{ color: #b00020; }

@@ -128,20 +128,48 @@
 				</div> <!-- End not_gantt_not_magic -->
 				
 				<div id='not_gantt_but_is_magic'>
+
 					<div id='magic_header'>
+						<div class="btn-group-container" id="view-toggle">
+							<button id='wand_selector' class="btn-group-item active" data-value="demo">Demo</button>
+							<button id='ai_selector' class="btn-group-item" data-value="llm">LLM</button>
+						</div>
 						<div id='close_magic_button_container'>
 							<div class='circle_button' id='close_magic_button'>X</div>
 						</div>
 					</div>
-					<div id='magic_content'>
-						<div id='magic_box'></div> <!-- P5 sketch -->
+
+					<div id='magic_wand_container'>
+						<div id='magic_content'>
+							<div id='magic_box'></div> <!-- P5 sketch -->
+						</div>
+						<div id='magic_footer'>
+							<div id='mm_selector_container'>
+								<div id='mm_desktop_chi'><img src='images/desktop_icon.png'></div>
+								<div id='mm_iphone_chi'><img src='images/iphone-icon.png'></div>
+								<div id='mm_desktop_selected' class='mm_selected_chi'><img src='images/mm_selector.png'></div>
+								<div id='mm_iphone_selected' class='mm_selected_chi'></div>
+							</div>
+						</div>
 					</div>
-					<div id='magic_footer'>
-						<div id='mm_selector_container'>
-							<div id='mm_desktop_chi'><img src='images/desktop_icon.png'></div>
-							<div id='mm_iphone_chi'><img src='images/iphone-icon.png'></div>
-							<div id='mm_desktop_selected' class='mm_selected_chi'><img src='images/mm_selector.png'></div>
-							<div id='mm_iphone_selected' class='mm_selected_chi'></div>
+
+					<div id='magic_llm_container'>
+						<div id='magic_content'>
+							<div id='magic_llm_hci_container'>
+								<textarea id="ai_task_description" placeholder="Describe the task..."></textarea>
+								<button id="ai_generate_btn">
+									<svg width="16.6481128px" height="22.2397484px" viewBox="0 0 16.6481128 22.2397484" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+										<title>Group</title>
+										<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round">
+											<g id="Group" transform="translate(1.500032, 1.500000)" stroke="#FFFFFF" stroke-width="3">
+												<line x1="6.69903029" y1="19.2397482" x2="6.69903029" y2="-8.81182617e-15" id="Path"></line>
+												<polyline id="Path-2" stroke-linejoin="round" points="0 8 6.76559499 -1.37542585e-16 13.6480549 8"></polyline>
+											</g>
+										</g>
+									</svg>
+								</button>
+								<span id="ai_status"></span>
+							</div>
 						</div>
 					</div>
 				</div> <!-- End not_gantt but is magic -->
