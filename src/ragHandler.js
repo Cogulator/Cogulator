@@ -72,21 +72,46 @@ async function retrieve(queryText) {
 
 const SYSTEM_PROMPT = `\
 You are a knowledgeable assistant embedded in Cogulator, a GOMS-based cognitive \
-task modeling tool developed by MITRE. You help human factors engineers and UX \
-researchers understand GOMS modeling concepts and write Cogulator models.
+task modeling tool developed by MITRE. You generate Cogulator-compliant models \
+from natural language task descriptions.
 
 You have access to excerpts from the Cogulator primer, operator reference, and \
 example .goms model files. Use them to give accurate, grounded answers.
 
-Guidelines:
-- When generating or editing a .goms model, always use valid Cogulator syntax \
-  (Goal:, operator names, period-based indentation, @references, chunk brackets, etc.).
-- Cite the source model or doc section when relevant (e.g. "As shown in login_flow.goms...").
-- If the retrieved context does not contain enough information to answer confidently, \
-  say so rather than guessing.
-- Keep answers concise. Prefer showing a short model snippet over a long explanation.
-- Do not invent operator names. Only use operators that appear in the context or \
-  the standard Cogulator operator set.`;
+STRICT RULES:
+- Only use operators from the ALLOWED LIST below. Do not invent new operators.
+- Do not use underscores, punctuation, or altered spelling in operator names.
+- Use period-based indentation (each child line has one more period than its parent).
+- When a domain action is described (e.g., "press power", "select band", "enter frequency"), \
+  map it to allowed operators (e.g., Look, Touch, Verify; Hands; Turn; Type/Keystroke).
+
+ALLOWED OPERATORS (canonical names):
+Look, Search, Read, Hear, Say, Think, Verify, Recall, Store, Perceptual_processor, Cognitive_processor, Motor_processor, \
+Point, Click, Drag, Grasp, Hands, Keystroke, Type, Swipe, Tap, Turn, Touch, Saccade, Attend, Initiate, Ignore, Write
+
+MAPPING CHEAT-SHEET (examples):
+- Press physical button → Look at <control>, Touch <control>, Verify outcome
+- Select on touchscreen → Look at <control>, Touch <control>, Verify selection
+- Tune via dial/knob → Hands to dial, Look at <dial>, Turn <dial>, Verify setting
+- Enter via keypad → Hands to keyboard, Type <value> (or Keystroke <key>), Verify outcome
+
+General guidance:
+- Keep models concise. Prefer short method patterns (e.g., Point and Click; Turn and Verify).
+- Use Hands when switching devices (mouse ↔ keyboard, touchscreen ↔ physical controls).
+- Precede motor actions with Look and follow with Verify where appropriate.
+- Use chunk brackets <> for memory when relevant, paired with allowed memory operators.
+
+COMMENTS AND OUTPUT FORMAT:
+- Any comments or descriptive notes must each be on their own line starting with '* ' (asterisk + space).
+- Do not include parenthetical notes on operator lines; place notes in a preceding '* ' comment line.
+- Do not output anything before the Goal line except optional '* ' comment lines.
+
+Output shape:
+* <optional comment>
+Goal: <task>
+. <Operator> ...
+. <Operator> ...
+`;
 
 function buildUserMessage(question, chunks) {
   if (chunks.length === 0) {
@@ -158,22 +183,26 @@ export function registerRagHandlers(mainWindow) {
 
     try {
       // 1. Retrieve relevant chunks
-      const chunks = await retrieve(question);
+      const baseChunks = await retrieve(question);
 
-      // 2. Build messages array (system + history + new user turn)
-      const userMessage = buildUserMessage(question, chunks);
+      // 2. Augment context with assembly rules and key operator references
+      const extras = await fetchAugmentedContext(question);
+      const combined = diversifyAndLimitContext(baseChunks, extras, MATCH_COUNT);
+
+      // 3. Build messages array (system + history + new user turn)
+      const userMessage = buildUserMessage(question, combined);
       const messages = [
         { role: 'system', content: SYSTEM_PROMPT },
         ...conversationHistory,
         { role: 'user', content: userMessage },
       ];
 
-      // 3. Stream from Groq
+      // 4. Stream from Groq (single call)
       const stream = await groq.chat.completions.create({
-        model:       'llama-3.3-70b-versatile',  // fast, high quality; swap to 'llama-3.1-8b-instant' for lower latency
+        model:       'llama-3.3-70b-versatile',
         messages,
         stream:      true,
-        temperature: 0.3,   // low temp = more faithful to retrieved context
+        temperature: 0.2,   // lower temp for stricter adherence to rules
         max_tokens:  1024,
       }, { signal });
 
@@ -193,7 +222,7 @@ export function registerRagHandlers(mainWindow) {
       pushHistory('assistant', fullResponse);
 
       // 6. Signal completion and pass source attribution to the UI
-      const sources = chunks.map(c => ({
+      const sources = combined.map(c => ({
         source:      c.source,
         source_type: c.source_type,
         model_name:  c.model_name ?? null,
@@ -228,4 +257,65 @@ export function registerRagHandlers(mainWindow) {
   ipcMain.handle('rag-clear-history', async () => {
     conversationHistory.length = 0;
   });
+}
+
+// ─── Context augmentation helpers ────────────────────────────────────────────
+
+function heuristicOperatorsForQuestion(q) {
+  const lower = (q || '').toLowerCase();
+  const ops = new Set(['Operator Reference: Look', 'Operator Reference: Verify', 'Operator Reference: Hands']);
+
+  if (/(turn|dial|tune|rotate|knob)/.test(lower)) ops.add('Operator Reference: Turn');
+  if (/(tap|touch|press|select|button)/.test(lower)) ops.add('Operator Reference: Touch');
+  if (/(click|mouse)/.test(lower)) ops.add('Operator Reference: Click');
+  if (/(type|enter|keyboard|keystroke)/.test(lower)) {
+    ops.add('Operator Reference: Type');
+    ops.add('Operator Reference: Keystroke');
+  }
+  return Array.from(ops);
+}
+
+async function fetchAugmentedContext(questionText) {
+  const extras = [];
+
+  // Assembly rules doc
+  const { data: rulesRows, error: rulesErr } = await supabase
+    .from('cogulator_chunks')
+    .select('text, source, source_type, model_name, goal_name, chunk_index')
+    .eq('source', 'Assembly_Rules.md')
+    .limit(1);
+  if (!rulesErr && rulesRows && rulesRows.length > 0) {
+    const r = rulesRows[0];
+    extras.push({ ...r, similarity: 0.95 });
+  }
+
+  // Operator references (heuristic selection)
+  const wantedSources = heuristicOperatorsForQuestion(questionText);
+  if (wantedSources.length > 0) {
+    const { data: opRows, error: opErr } = await supabase
+      .from('cogulator_chunks')
+      .select('text, source, source_type, model_name, goal_name, chunk_index')
+      .eq('source_type', 'operator_reference')
+      .in('source', wantedSources)
+      .limit(wantedSources.length);
+    if (!opErr && opRows) {
+      opRows.forEach(r => extras.push({ ...r, similarity: 0.9 }));
+    }
+  }
+
+  return extras;
+}
+
+function diversifyAndLimitContext(baseChunks, extras, limit) {
+  // Always include extras first (rules + 2–4 operator refs), then top base chunks
+  const combined = [...extras, ...baseChunks];
+  // Deduplicate by source + chunk_index to avoid repeats
+  const seen = new Set();
+  const unique = [];
+  for (const c of combined) {
+    const key = `${c.source}::${c.chunk_index ?? 'n'}`;
+    if (!seen.has(key)) { seen.add(key); unique.push(c); }
+    if (unique.length >= limit) break;
+  }
+  return unique;
 }
