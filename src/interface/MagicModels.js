@@ -66,6 +66,9 @@ class MagicModelsManager {
         $('#ai_generate_btn').click(function(){
             const question = $('#ai_task_description').val().trim();
             if (!question) return;
+
+            G.magicModels.aiWaiting();
+            
             console.log("🌂 SEND", question);
             ipcRenderer.send('rag-query', question);
         });
@@ -85,15 +88,41 @@ class MagicModelsManager {
             let index = G.quill.getLength() + 1;
 			G.quill.insertText(index, fullResponse);
 			G.quillManager.lastSelection.index = index;
+            // clear loading state
+            G.magicModels.aiReady();
+        });
+
+        // handle error state as well
+        ipcRenderer.on('rag-error', (event, message) => {
+            console.error('🌂 Error', message);
+            G.magicModels.setAiStatus(message ?? 'An error occurred', true);
+            G.magicModels.aiReady();
         });
 
 	}
+
+
+    aiReady() {
+        $('#ai_up_arrow').css("visibility", "visible");
+        $('#ai_state_container').removeClass('loader');
+        $('#ai_generate_btn').prop('disabled', false);
+    }
+
+
+    aiWaiting() {
+        $('#ai_up_arrow').css("visibility", "hidden");
+        $('#ai_state_container').addClass('loader');
+        $('#ai_generate_btn').prop('disabled', true);
+        G.magicModels.setAiStatus('');
+    }
+
 
     initModeToggle() {
         $('#wand_selector').on('click', () => this.setMode('wand'));
         $('#ai_selector').on('click', () => this.setMode('ai'));
     }
 
+    
     setMode(mode) {
         if (mode === this.mode) return;
         this.mode = mode;
@@ -357,7 +386,6 @@ class MagicModelsManager {
         })
 		//probably remove the sketch too...
 	}
-
 }
 
 G.magicModels = new MagicModelsManager();
