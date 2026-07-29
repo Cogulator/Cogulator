@@ -77,5 +77,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Cogulator/Cogulator.git"
+  },
+  "allowScripts": {
+    "electron@36.9.5": true,
+    "electron-winstaller@5.4.4": true,
+    "protobufjs@6.11.6": true,
+    "sharp@0.32.6": true
   }
 }
