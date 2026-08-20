@@ -19,6 +19,13 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 - electron-json-storage with the command "npm install --save electron-json-storage"
 - update.electron.org service with the command "npm install update-electron-app --save"
 
+## RAG configuration
+
+The in-app RAG assistant requires credentials that are intentionally not stored in
+the repository. Copy `.env.example` to `.env`, then set `SUPABASE_URL`,
+`SUPABASE_ANON_KEY`, and `GROQ_API_KEY` with the values for your project. The
+`.env` file is ignored by Git.
+
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch.
 

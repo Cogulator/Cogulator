@@ -14,20 +14,36 @@
  *   SUPABASE_ANON_KEY=your-anon-key   ← anon key is fine for read-only queries
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ipcMain } from 'electron';
 import { createClient } from '@supabase/supabase-js';
 import { pipeline } from '@xenova/transformers';
 import Groq from 'groq-sdk';
 
+// Load the development configuration from the project root.  This avoids
+// depending on Electron's current working directory, which can differ when
+// launched from an IDE or a packaged app.
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+dotenv.config({ path: resolve(projectRoot, '.env') });
+
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const groqApiKey = process.env.GROQ_API_KEY;
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+if (!supabaseUrl || !supabaseAnonKey || !groqApiKey) {
+  throw new Error(
+    'RAG configuration is missing. Copy .env.example to .env and set ' +
+    'SUPABASE_URL, SUPABASE_ANON_KEY, and GROQ_API_KEY.'
+  );
+}
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const groq = new Groq({ apiKey: groqApiKey });
 
 // ─── Embedder (singleton, lazy-loaded) ───────────────────────────────────────
 
@@ -199,23 +215,35 @@ export function registerRagHandlers(mainWindow) {
 
       // 4. Stream from Groq (single call)
       const stream = await groq.chat.completions.create({
-        model:       'llama-3.3-70b-versatile',
+        model:       'openai/gpt-oss-120b',
         messages,
         stream:      true,
         temperature: 0.2,   // lower temp for stricter adherence to rules
-        max_tokens:  1024,
+        reasoning_effort: 'medium',
+        max_completion_tokens: 4096,
       }, { signal });
 
       // 4. Forward tokens to renderer as they arrive
       let fullResponse = '';
+      let reasoningCharacters = 0;
+      let finishReason = null;
       for await (const chunk of stream) {
         if (signal.aborted) break;
-        const token = chunk.choices[0]?.delta?.content ?? '';
+        const choice = chunk.choices[0];
+        const delta = choice?.delta ?? {};
+        const token = delta.content ?? '';
+        reasoningCharacters += (delta.reasoning ?? delta.reasoning_content ?? '').length;
+        finishReason = choice?.finish_reason ?? finishReason;
         if (token) {
           fullResponse += token;
           send('rag-token', token);
         }
       }
+      console.log('[RAG] Completion:', {
+        finishReason,
+        contentCharacters: fullResponse.length,
+        reasoningCharacters,
+      });
 
       // 5. Update conversation history
       pushHistory('user', question);           // store the raw question, not the context-padded one
