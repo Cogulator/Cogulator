@@ -215,11 +215,13 @@ export function registerRagHandlers(mainWindow) {
 
       // 4. Stream from Groq (single call)
       const stream = await groq.chat.completions.create({
-        model:       'openai/gpt-oss-120b',
+        //model:       'openai/gpt-oss-120b',
+        model:       'qwen/qwen3.6-27b',
         messages,
         stream:      true,
         temperature: 0.2,   // lower temp for stricter adherence to rules
-        reasoning_effort: 'medium',
+        reasoning_effort: 'default',
+        reasoning_format: 'hidden', // keep reasoning out of the displayed model
         max_completion_tokens: 4096,
       }, { signal });
 
