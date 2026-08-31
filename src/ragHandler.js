@@ -21,6 +21,9 @@ import { ipcMain } from 'electron';
 import { createClient } from '@supabase/supabase-js';
 import { pipeline } from '@xenova/transformers';
 import Groq from 'groq-sdk';
+import gomsValidation from './gomsValidation.js';
+
+const { validateGeneratedGoms } = gomsValidation;
 
 // Load the development configuration from the project root.  This avoids
 // depending on Electron's current working directory, which can differ when
@@ -96,14 +99,15 @@ example .goms model files. Use them to give accurate, grounded answers.
 
 STRICT RULES:
 - Only use operators from the ALLOWED LIST below. Do not invent new operators.
-- Do not use underscores, punctuation, or altered spelling in operator names.
+- Use canonical operator names exactly as listed (the three processor operators retain their underscores).
 - Use period-based indentation (each child line has one more period than its parent).
 - When a domain action is described (e.g., "press power", "select band", "enter frequency"), \
   map it to allowed operators (e.g., Look, Touch, Verify; Hands; Turn; Type/Keystroke).
 
 ALLOWED OPERATORS (canonical names):
-Look, Search, Read, Hear, Say, Think, Verify, Recall, Store, Perceptual_processor, Cognitive_processor, Motor_processor, \
-Point, Click, Drag, Grasp, Hands, Keystroke, Type, Swipe, Tap, Turn, Touch, Saccade, Attend, Initiate, Ignore, Write
+Look, Perceptual_processor, Proofread, Read, Search, Saccade, Hear, Attend, Cognitive_processor, Initiate, Ignore, Mental, \
+Recall, Store, Think, Verify, Click, Drag, Grasp, Hands, Keystroke, Motor_processor, Point, Swipe, Tap, Touch, Turn, Type, \
+Write, Say, Wait, Goal, Also
 
 MAPPING CHEAT-SHEET (examples):
 - Press physical button → Look at <control>, Touch <control>, Verify outcome
@@ -116,6 +120,12 @@ General guidance:
 - Use Hands when switching devices (mouse ↔ keyboard, touchscreen ↔ physical controls).
 - Precede motor actions with Look and follow with Verify where appropriate.
 - Use chunk brackets <> for memory when relevant, paired with allowed memory operators.
+
+CHUNK-NAMING GUIDANCE:
+- Use a concise, meaningful chunk name inside <> only when a specific item should be tracked in working memory.
+- Reuse the exact same name whenever the same item is stored, recalled, inspected, or ignored: e.g., Store <frequency>, Recall <frequency>, Type <frequency>.
+- Use separate brackets for distinct items (e.g., <area-code><prefix><line-number>), but keep a familiar unit together when it is one chunk (e.g., <555-0123>).
+- Do not invent numbered placeholders such as <1> or wrap every action target merely for decoration; omit brackets when memory tracking is not relevant.
 
 COMMENTS AND OUTPUT FORMAT:
 - Any comments or descriptive notes must each be on their own line starting with '* ' (asterisk + space).
@@ -247,9 +257,19 @@ export function registerRagHandlers(mainWindow) {
         reasoningCharacters,
       });
 
+      const validation = validateGeneratedGoms(fullResponse);
+      if (validation.droppedLines.length > 0 || validation.fixes.length > 0 || validation.suggestions.length > 0 || validation.errors.length > 0) {
+        console.log('[RAG] CMN-GOMS validation:', {
+          droppedLines: validation.droppedLines,
+          repairedLines: validation.fixes,
+          suggestions: validation.suggestions,
+          errors: validation.errors,
+        });
+      }
+
       // 5. Update conversation history
       pushHistory('user', question);           // store the raw question, not the context-padded one
-      pushHistory('assistant', fullResponse);
+      pushHistory('assistant', validation.text);
 
       // 6. Signal completion and pass source attribution to the UI
       const sources = combined.map(c => ({
@@ -260,8 +280,16 @@ export function registerRagHandlers(mainWindow) {
         similarity:  c.similarity,
       }));
       send('rag-done', { 
-          fullResponse: fullResponse, 
-          sources: sources
+          fullResponse: validation.text,
+          sources: sources,
+          validation: {
+            valid: validation.valid,
+            hasGoal: validation.hasGoal,
+            repairedLines: validation.fixes,
+            droppedLines: validation.droppedLines,
+            suggestions: validation.suggestions,
+            errors: validation.errors,
+          }
       });
 
     } catch (err) {

@@ -246,4 +246,9 @@
 .mm_mode_tab{ padding: 6px 10px; border:1px solid var(--border-color); border-radius:6px; cursor:pointer; font-size: 12px; text-transform: uppercase; }
 .mm_mode_selected{ background: var(--purple-color); color:#fff; border-color: var(--purple-color);} 
 
-#ai_status.error_text{ color: #b00020; }
+#ai_status {
+	color: var(--model-select-bg-color);
+	font-family: 'Lato', sans-serif;
+}
+
+#ai_status.error_text { color: #b00020; }

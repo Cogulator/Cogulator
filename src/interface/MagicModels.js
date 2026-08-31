@@ -83,11 +83,14 @@ class MagicModelsManager {
         });
 
 
-        ipcRenderer.on('rag-done', (event, { fullResponse, sources }) => {
+        ipcRenderer.on('rag-done', (event, { fullResponse = '', sources, validation = {}, cancelled = false }) => {
             console.log("🌂 Done", fullResponse);
-            let index = G.quill.getLength() + 1;
-			G.quill.insertText(index, fullResponse);
+            if (fullResponse && validation.hasGoal !== false && !cancelled) {
+                let index = G.quill.getLength() + 1;
+			G.quill.insertText(index, fullResponse + "\n");
 			G.quillManager.lastSelection.index = index;
+            }
+            G.magicModels.showValidationStatus(validation, cancelled);
             // clear loading state
             G.magicModels.aiReady();
         });
@@ -153,6 +156,38 @@ class MagicModelsManager {
         const el = $('#ai_status');
         el.text(msg);
         if (isError) el.addClass('error_text'); else el.removeClass('error_text');
+    }
+
+
+    showValidationStatus(validation, cancelled) {
+        if (cancelled) {
+            this.setAiStatus('Generation cancelled.');
+            return;
+        }
+
+        if (validation.hasGoal === false) {
+            this.setAiStatus('No Goal line was generated, so nothing was inserted.', true);
+            return;
+        }
+
+        const errors = validation.errors || [];
+        if (errors.length > 0) {
+            this.setAiStatus(`Inserted with ${errors.length} validation warning${errors.length === 1 ? '' : 's'}; review the marked lines.`, true);
+            return;
+        }
+
+        const repairCount = (validation.repairedLines || []).length;
+        const droppedCount = (validation.droppedLines || []).length;
+        const suggestionCount = (validation.suggestions || []).length;
+        if (repairCount || droppedCount || suggestionCount) {
+            const additions = [];
+            if (repairCount) additions.push(`normalized ${repairCount} line${repairCount === 1 ? '' : 's'}`);
+            if (droppedCount) additions.push(`removed ${droppedCount} introductory line${droppedCount === 1 ? '' : 's'}`);
+            if (suggestionCount) additions.push(`applied ${suggestionCount} Cogulator suggestion${suggestionCount === 1 ? '' : 's'}`);
+            this.setAiStatus(`Validated; ${additions.join(' and ')}.`);
+        } else {
+            this.setAiStatus('Validated by Cogulator.');
+        }
     }
 
 	
@@ -985,4 +1020,3 @@ var magicModelsSketch = function(s) {
 }
 
 var magicModels = new p5(magicModelsSketch, 'magic_box');
-
