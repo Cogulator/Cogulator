@@ -37,7 +37,7 @@ function showRenameInput(path, name, type) {
 		}
 
 		G.modelsSidebar.buildSideBar();
-	}
+	} 
     
     var searchClass = ".model_label";
     if (type === 'directory') searchClass = ".directory_label .label";
