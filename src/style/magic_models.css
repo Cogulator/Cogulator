@@ -17,6 +17,9 @@
 
 .btn-group-item {
 	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 	padding: 8px 24px;
 	font-size: 0.875rem;
 	font-weight: 600;
@@ -28,6 +31,12 @@
 	background: transparent;
 	outline: none;
 	user-select: none;
+}
+
+.mode-toggle-icon {
+	width: 14px;
+	height: 14px;
+	flex: 0 0 auto;
 }
 
 .btn-group-item:hover:not(.active) {
