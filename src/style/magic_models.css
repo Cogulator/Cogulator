@@ -106,52 +106,108 @@
 /* AI HCI */
 #magic_llm_hci_container {
 	position: relative;
-	top: -25%; /* Adjust percentage as needed */
-	width: 250px;
-	padding:10px;
-	border-radius: 10px;
-	background-color:  var(--main-bg-color);
+	top: -25%;
+	width: 300px;
+	padding: 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	background-color: var(--main-bg-color);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
-    /* text area */
+/* Task prompt */
 #ai_task_description {
-  width: calc(100% - 10px);
-  color: var(--magic-model-text-color);
-  background-color: transparent;
-  border: none;
-  resize: vertical;
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	min-height: 88px;
+	padding: 10px 11px;
+	color: var(--magic-model-text-color);
+	font-family: 'Lato', sans-serif;
+	font-size: 14px;
+	line-height: 1.45;
+	background-color: var(--sidebar-left-bg-color);
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	resize: vertical;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#ai_task_description::placeholder {
+	color: var(--magic-model-text-color);
+	opacity: 0.62;
+}
+
+#ai_task_description:focus {
+	border-color: var(--model-select-bg-color);
+	box-shadow: 0 0 0 3px rgba(76, 189, 153, 0.16);
+}
+
+#ai_submit_row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 9px;
+}
+
+#ai_result_note {
+	color: var(--magic-model-text-color);
+	font-family: 'Lato', sans-serif;
+	font-size: 11px;
+	line-height: 1.45;
+	opacity: 0.62;
 }
 
 #ai_generate_btn {
-    width:45px;
-    height:35px;
-    display: block;  /* Buttons are inline-block by default; needs to be block for auto-margin */
-    margin-left: auto;
-    margin-top: 5px;
-    background-color: var(--model-select-bg-color);
-    border: none;
-    border-radius: 10px;
-    position: relative; /* allow centering spinner without changing size */
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	background-color: var(--model-select-bg-color);
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+#ai_generate_btn:hover:not(:disabled) {
+	background-color: #3eaa88;
+	transform: translateY(-1px);
+}
+
+#ai_generate_btn:focus-visible {
+	outline: 2px solid var(--model-select-bg-color);
+	outline-offset: 2px;
+}
+
+#ai_up_arrow {
+	width: 11px;
+	height: 15px;
 }
 
 /* Keep disabled state visually consistent */
 #ai_generate_btn:disabled {
-    opacity: 1;
-    cursor: default;
+	opacity: 0.85;
+	cursor: default;
 }
 
 #ai_state_container {
 	display: flex;
-	justify-content: center;  /* horizontal */
-	align-items: center;      /* vertical */
+	align-items: center;
+	justify-content: center;
 }
 
 .loader {
-	width: 100%;
-	height: 100%;
+	width: 16px;
+	height: 16px;
 	border-radius: 50%;
 	position: relative;
-	animation: rotate 1s linear infinite
+	animation: rotate 0.8s linear infinite;
 }
 .loader::before {
 	content: "";
@@ -159,8 +215,8 @@
 	position: absolute;
 	inset: 0px;
 	border-radius: 50%;
-	border: 5px solid #FFF;
-	animation: prixClipFix 2s linear infinite ;
+	border: 2px solid #fff;
+	animation: prixClipFix 1.4s linear infinite;
 }
 
 @keyframes rotate {
