@@ -252,7 +252,7 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
       // 4. Stream from Groq (single call)
       const stream = await groq.chat.completions.create({
         //model:       'openai/gpt-oss-120b',
-        model:       'qwen/qwen3.6-27b',
+        model:       'qwen/qwen3.8-27b',
         messages,
         stream:      true,
         temperature: 0.2,   // lower temp for stricter adherence to rules
