@@ -21,6 +21,10 @@ import { createClient } from '@supabase/supabase-js';
 import { pipeline } from '@xenova/transformers';
 import Groq from 'groq-sdk';
 import gomsValidation from './gomsValidation.js';
+import {
+  supabaseUrl as bundledSupabaseUrl,
+  supabaseAnonKey as bundledSupabaseAnonKey,
+} from './supabasePublicConfig.js';
 
 const { validateGeneratedGoms } = gomsValidation;
 
@@ -32,11 +36,13 @@ dotenv.config({ path: resolve(projectRoot, '.env') });
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+// A local .env may override these for development. The packaged app uses the
+// public configuration above, so Assist works without shipping a .env file.
+const supabaseUrl = process.env.SUPABASE_URL || bundledSupabaseUrl;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || bundledSupabaseAnonKey;
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'RAG configuration is missing. Set SUPABASE_URL and SUPABASE_ANON_KEY.'
+    'RAG configuration is missing. Configure the public Supabase connection.'
   );
 }
 
