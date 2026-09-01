@@ -30,6 +30,7 @@ class MagicModelsManager {
 		this.handsPosition = "";
         this.chatStarted = false;
         this.pendingQuestion = null;
+        this.activeRequestId = null;
         this.groqConfigured = false;
 
         // add mode toggle in header (wand | AI)
@@ -85,7 +86,9 @@ class MagicModelsManager {
             G.magicModels.aiWaiting();
             
             console.log("🌂 SEND", question);
-            ipcRenderer.send('rag-query', question);
+            const requestId = crypto.randomUUID();
+            G.magicModels.activeRequestId = requestId;
+            ipcRenderer.send('rag-query', { question, requestId });
         });
 
         $('#ai_open_groq_console').click(() => ipcRenderer.invoke('open-groq-console'));
@@ -104,7 +107,8 @@ class MagicModelsManager {
         });
 
 
-        ipcRenderer.on('rag-done', (event, { fullResponse = '', sources, validation = {}, cancelled = false }) => {
+        ipcRenderer.on('rag-done', (event, { fullResponse = '', sources, validation = {}, cancelled = false, requestId }) => {
+            if (requestId !== G.magicModels.activeRequestId) return;
             console.log("🌂 Done", fullResponse);
             if (fullResponse && !cancelled) {
                 G.magicModels.openChatForPendingQuestion();
@@ -116,15 +120,18 @@ class MagicModelsManager {
             }
             G.magicModels.showValidationStatus(validation, cancelled);
             G.magicModels.pendingQuestion = null;
+            G.magicModels.activeRequestId = null;
             // clear loading state
             G.magicModels.aiReady();
         });
 
         // handle error state as well
-        ipcRenderer.on('rag-error', (event, message) => {
+        ipcRenderer.on('rag-error', (event, message, requestId) => {
+            if (requestId !== G.magicModels.activeRequestId) return;
             console.error('🌂 Error', message);
             G.magicModels.openChatForPendingQuestion();
             G.magicModels.pendingQuestion = null;
+            G.magicModels.activeRequestId = null;
             G.magicModels.appendChatMessage('assistant status error', `Unable to generate a model: ${message ?? 'An error occurred'}`);
             G.magicModels.aiReady();
             if (message && message.includes('Groq is not configured')) G.magicModels.showGroqSetup();
@@ -144,6 +151,21 @@ class MagicModelsManager {
         $('#ai_up_arrow').css("visibility", "hidden");
         $('#ai_state_container').addClass('loader');
         $('#ai_generate_btn').prop('disabled', true);
+    }
+
+
+    resetChat() {
+        // A conversation belongs to the currently open Cogulator model.
+        // Cancel first so a response for the prior model cannot be appended.
+        this.activeRequestId = null;
+        this.pendingQuestion = null;
+        this.chatStarted = false;
+        $('#ai_conversation').empty();
+        $('#ai_task_description').val('');
+        $('#magic_llm_hci_container').removeClass('has_messages');
+        this.aiReady();
+        ipcRenderer.invoke('rag-cancel');
+        ipcRenderer.invoke('rag-clear-history');
     }
 
 

@@ -206,7 +206,10 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
 
   // ── rag-query ──────────────────────────────────────────────────────────────
   //ipcMain.on('rag-query', async (event, { question }) => {
-  ipcMain.on('rag-query', async (event, question) => {
+  ipcMain.on('rag-query', async (event, request) => {
+    const { question, requestId } = typeof request === 'string'
+      ? { question: request, requestId: undefined }
+      : request;
     // Cancel any in-flight request
     console.log("🌂 RAG Handler:", question);
 
@@ -216,9 +219,9 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
     currentAbortController = new AbortController();
     const { signal } = currentAbortController;
 
-    const send = (channel, payload) => {
+    const send = (channel, ...payload) => {
       if (!mainWindow.isDestroyed()) {
-        mainWindow.webContents.send(channel, payload);
+        mainWindow.webContents.send(channel, ...payload);
       }
     };
 
@@ -304,6 +307,7 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
       }));
       send('rag-done', { 
           fullResponse: validation.text,
+          requestId,
           sources: sources,
           validation: {
             valid: validation.valid,
@@ -317,10 +321,10 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
 
     } catch (err) {
       if (err.name === 'AbortError' || signal.aborted) {
-        send('rag-done', { sources: [], cancelled: true });
+        send('rag-done', { sources: [], cancelled: true, requestId });
       } else {
         console.error('[RAG] Query error:', err);
-        send('rag-error', err.message ?? 'Unknown error');
+        send('rag-error', err.message ?? 'Unknown error', requestId);
       }
     } finally {
       currentAbortController = null;

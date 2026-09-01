@@ -286,6 +286,7 @@ class ModelsManager {
 	loadModel(p) {
 		//¡IMPORTANT: The second condition prevents blanking the model on load!  Not entirely clear why this is.
 		if (this.selected != "" && this.selected != p) G.modelsManager.saveModel(); 
+		if (this.selected != p && G.magicModels) G.magicModels.resetChat();
 		
 		this.selected = p;
 		G.io.loadFile(p, this.displayModel);
