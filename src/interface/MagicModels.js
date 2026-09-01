@@ -43,6 +43,11 @@ class MagicModelsManager {
 				G.magicModels.hide();
 			}
 		});
+
+		// Make the LLM workflow discoverable directly from the code editor.
+		$('#assist_button').click(function() {
+			G.magicModels.openAssist();
+		});
 		
 		//close magic models on close button click
 		$('#close_magic_button').click(function() {
@@ -161,7 +166,7 @@ class MagicModelsManager {
     }
 
     
-    setMode(mode) {
+	setMode(mode) {
         if (mode === this.mode) return;
         this.mode = mode;
 
@@ -185,7 +190,15 @@ class MagicModelsManager {
             // pause wand interactions while in AI mode
             this.pause();
         }
-    }
+	}
+
+
+	openAssist() {
+		if (!this.visible) this.show();
+		this.setMode('ai');
+		// Focusing the prompt must not scroll the outer workspace horizontally.
+		document.getElementById('ai_task_description').focus({ preventScroll: true });
+	}
 
     showValidationStatus(validation, cancelled) {
         if (cancelled) {
@@ -424,13 +437,15 @@ class MagicModelsManager {
 	
 	show() {
 		$('#not_gantt_but_is_magic').css("visibility", "visible");
+		const magicPanelWidth = 356;
+		const availableWidth = $('#not_gantt_container').innerWidth();
         
-        $( '#not_gantt_not_magic' ).animate({ width: $( window ).width() - 356}, 500, function() {
-            $('#not_gantt_not_magic').css({ 'width': 'calc(100% - 356px'});
+        $( '#not_gantt_not_magic' ).animate({ width: availableWidth - magicPanelWidth}, 500, function() {
+            $('#not_gantt_not_magic').css({ 'width': `calc(100% - ${magicPanelWidth}px)`});
         });
         
         $('#not_gantt_but_is_magic').css("width", "0px");
-        $( '#not_gantt_but_is_magic' ).animate({ width: 356}, 500);
+		$( '#not_gantt_but_is_magic' ).animate({ width: magicPanelWidth}, 500);
 		
 		$('#magic_button').html("<img src='images/magicOff.png'>");
 		G.magicModels.visible = true;

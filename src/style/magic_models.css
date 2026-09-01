@@ -111,6 +111,46 @@
     background-color: #FFF;
 }
 
+/* A direct entry point to the AI assistant in the editor workspace. */
+#assist_button {
+	position: absolute;
+	top: 76px;
+	right: calc(var(--sidebar-right-width) + 20px);
+	z-index: 10;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 110px;
+	justify-content: center;
+	padding: 8px 15px;
+	color: #fff;
+	font-family: 'Lato-Bold', sans-serif;
+	font-size: 14px;
+	line-height: 1;
+	background: var(--purple-color);
+	border: 0;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16);
+	cursor: pointer;
+	transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#assist_button svg {
+	width: 16px;
+	height: 16px;
+}
+
+#assist_button:hover {
+	background: #704767;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#assist_button:focus-visible {
+	outline: 2px solid var(--purple-color);
+	outline-offset: 3px;
+}
+
 
 /* AI HCI */
 #magic_llm_hci_container {
