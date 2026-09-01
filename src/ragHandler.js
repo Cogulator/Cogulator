@@ -121,6 +121,12 @@ General guidance:
 - Precede motor actions with Look and follow with Verify where appropriate.
 - Use chunk brackets <> for memory when relevant, paired with allowed memory operators.
 
+GOAL DECOMPOSITION:
+- Build the model from meaningful, action-oriented Goal statements at each useful level of the method hierarchy.
+- Keep most Goals to no more than five or six direct operators or child Goals. When a sequence would be longer, group its coherent phases into descriptive child Goals.
+- Do not create trivial one-operator wrapper Goals solely to meet the limit; use nesting where it clarifies the user's method.
+- Every Goal should have a clear action label, and leaf Goals should contain the concrete Cogulator operators that accomplish it.
+
 CHUNK-NAMING GUIDANCE:
 - Use a concise, meaningful chunk name inside <> only when a specific item should be tracked in working memory.
 - Reuse the exact same name whenever the same item is stored, recalled, inspected, or ignored: e.g., Store <frequency>, Recall <frequency>, Type <frequency>.

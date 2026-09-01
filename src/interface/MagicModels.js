@@ -28,6 +28,8 @@ class MagicModelsManager {
 		this.actions = [];
 		this.speechRecMode = "none";
 		this.handsPosition = "";
+        this.chatStarted = false;
+        this.pendingQuestion = null;
 
         // add mode toggle in header (wand | AI)
         this.initModeToggle();
@@ -67,6 +69,9 @@ class MagicModelsManager {
             const question = $('#ai_task_description').val().trim();
             if (!question) return;
 
+            if (G.magicModels.chatStarted) G.magicModels.appendChatMessage('user', question);
+            else G.magicModels.pendingQuestion = question;
+            $('#ai_task_description').val('');
             G.magicModels.aiWaiting();
             
             console.log("🌂 SEND", question);
@@ -85,12 +90,16 @@ class MagicModelsManager {
 
         ipcRenderer.on('rag-done', (event, { fullResponse = '', sources, validation = {}, cancelled = false }) => {
             console.log("🌂 Done", fullResponse);
+            if (fullResponse && !cancelled) {
+                G.magicModels.openChatForPendingQuestion();
+            }
             if (fullResponse && validation.hasGoal !== false && !cancelled) {
                 let index = G.quill.getLength() + 1;
 			G.quill.insertText(index, fullResponse + "\n");
 			G.quillManager.lastSelection.index = index;
             }
             G.magicModels.showValidationStatus(validation, cancelled);
+            G.magicModels.pendingQuestion = null;
             // clear loading state
             G.magicModels.aiReady();
         });
@@ -98,7 +107,9 @@ class MagicModelsManager {
         // handle error state as well
         ipcRenderer.on('rag-error', (event, message) => {
             console.error('🌂 Error', message);
-            G.magicModels.setAiStatus(message ?? 'An error occurred', true);
+            G.magicModels.openChatForPendingQuestion();
+            G.magicModels.pendingQuestion = null;
+            G.magicModels.appendChatMessage('assistant status error', `Unable to generate a model: ${message ?? 'An error occurred'}`);
             G.magicModels.aiReady();
         });
 
@@ -116,7 +127,31 @@ class MagicModelsManager {
         $('#ai_up_arrow').css("visibility", "hidden");
         $('#ai_state_container').addClass('loader');
         $('#ai_generate_btn').prop('disabled', true);
-        G.magicModels.setAiStatus('');
+    }
+
+
+    startChat() {
+        this.chatStarted = true;
+        $('#magic_llm_hci_container').addClass('has_messages');
+    }
+
+
+    appendChatMessage(role, message) {
+        if (!message) return;
+        const bubble = $('<div>', {
+            class: `ai_chat_message ${role}`,
+            text: message,
+        });
+        const conversation = $('#ai_conversation');
+        conversation.append(bubble);
+        conversation.scrollTop(conversation.prop('scrollHeight'));
+    }
+
+
+    openChatForPendingQuestion() {
+        if (this.chatStarted) return;
+        this.startChat();
+        this.appendChatMessage('user', this.pendingQuestion || 'Generate a Cogulator model');
     }
 
 
@@ -152,27 +187,21 @@ class MagicModelsManager {
         }
     }
 
-    setAiStatus(msg, isError) {
-        const el = $('#ai_status');
-        el.text(msg);
-        if (isError) el.addClass('error_text'); else el.removeClass('error_text');
-    }
-
-
     showValidationStatus(validation, cancelled) {
         if (cancelled) {
-            this.setAiStatus('Generation cancelled.');
+            this.openChatForPendingQuestion();
+            this.appendChatMessage('assistant status', 'Generation cancelled.');
             return;
         }
 
         if (validation.hasGoal === false) {
-            this.setAiStatus('No Goal line was generated, so nothing was inserted.', true);
+            this.appendChatMessage('assistant status error', 'No Goal line was generated, so nothing was inserted.');
             return;
         }
 
         const errors = validation.errors || [];
         if (errors.length > 0) {
-            this.setAiStatus(`Inserted with ${errors.length} validation warning${errors.length === 1 ? '' : 's'}; review the marked lines.`, true);
+            this.appendChatMessage('assistant status error', `Inserted with ${errors.length} validation warning${errors.length === 1 ? '' : 's'}; review the marked lines.`);
             return;
         }
 
@@ -184,9 +213,9 @@ class MagicModelsManager {
             if (repairCount) additions.push(`normalized ${repairCount} line${repairCount === 1 ? '' : 's'}`);
             if (droppedCount) additions.push(`removed ${droppedCount} introductory line${droppedCount === 1 ? '' : 's'}`);
             if (suggestionCount) additions.push(`applied ${suggestionCount} Cogulator suggestion${suggestionCount === 1 ? '' : 's'}`);
-            this.setAiStatus(`Validated; ${additions.join(' and ')}.`);
+            this.appendChatMessage('assistant status', `Validated; ${additions.join(' and ')}.`);
         } else {
-            this.setAiStatus('Validated by Cogulator.');
+            this.appendChatMessage('assistant status', 'Validated by Cogulator.');
         }
     }
 

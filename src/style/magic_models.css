@@ -124,6 +124,83 @@
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
+#ai_conversation {
+	display: none;
+}
+
+#magic_llm_hci_container.has_messages {
+	top: 0;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding: 14px;
+	border: none;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+#magic_llm_hci_container.has_messages #ai_conversation {
+	display: flex;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	flex-direction: column;
+	gap: 10px;
+	padding: 4px max(4px, calc((100% - 620px) / 2));
+}
+
+.ai_chat_message {
+	box-sizing: border-box;
+	max-width: 82%;
+	padding: 9px 11px;
+	border-radius: 10px;
+	font-family: 'Lato', sans-serif;
+	font-size: 13px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.ai_chat_message.user {
+	align-self: flex-end;
+	color: #fff;
+	background: var(--model-select-bg-color);
+	border-bottom-right-radius: 3px;
+}
+
+.ai_chat_message.assistant {
+	align-self: flex-start;
+	color: var(--magic-model-text-color);
+	background: var(--main-bg-color);
+	border: 1px solid var(--border-color);
+	border-bottom-left-radius: 3px;
+}
+
+.ai_chat_message.assistant.status {
+	color: var(--model-select-bg-color);
+	background: color-mix(in srgb, var(--model-select-bg-color) 10%, var(--main-bg-color));
+	border-color: color-mix(in srgb, var(--model-select-bg-color) 32%, var(--border-color));
+}
+
+#magic_llm_hci_container.has_messages #ai_composer {
+	box-sizing: border-box;
+	width: min(100%, 650px);
+	margin: 0 auto;
+	padding: 14px;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	background-color: var(--main-bg-color);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+#magic_llm_hci_container.has_messages #ai_task_description {
+	min-height: 58px;
+}
+
 /* Task prompt */
 #ai_task_description {
 	box-sizing: border-box;
@@ -245,10 +322,3 @@
 #mm_mode_toggle{ display:flex; gap:6px; align-items:center; padding: 12px; }
 .mm_mode_tab{ padding: 6px 10px; border:1px solid var(--border-color); border-radius:6px; cursor:pointer; font-size: 12px; text-transform: uppercase; }
 .mm_mode_selected{ background: var(--purple-color); color:#fff; border-color: var(--purple-color);} 
-
-#ai_status {
-	color: var(--model-select-bg-color);
-	font-family: 'Lato', sans-serif;
-}
-
-#ai_status.error_text { color: #b00020; }
