@@ -2,8 +2,10 @@ const { registerRagHandlers, validateGroqApiKey } = require('./ragHandler');
 const electron = require('electron');
 const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron'); 
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const trash = require('trash').default;
 const config = require('electron-json-config').factory();
-const { setupTitlebar, attachTitlebarToWindow } = require ('custom-electron-titlebar/main');
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -15,6 +17,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 const GROQ_KEY_CONFIG = 'groqApiKeyEncrypted';
+const exportPathsByWebContentsId = new Map();
 
 function getGroqApiKey() {
   const encryptedKey = config.get(GROQ_KEY_CONFIG);
@@ -36,21 +39,21 @@ function setGroqApiKey(apiKey) {
 }
 
 const createWindow = () => {	
+	const webPreferences = {
+		nodeIntegration: false,
+		contextIsolation: true,
+		sandbox: true,
+		preload: path.join(app.getAppPath(), 'src', 'preload.js'),
+	};
   if (require('os').type() == "Windows_NT") {
-      setupTitlebar();
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-                                  webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false,
-                                                   preload: path.join(app.getAppPath(), 'src', 'preload.js')},
-                                  titleBarStyle: 'hidden',
+								  webPreferences,
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
-      attachTitlebarToWindow(mainWindow);
   } else {
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-                                  webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false},
+								  webPreferences,
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
@@ -58,6 +61,13 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
+
+  // Cogulator is a local application. Do not let renderer content navigate to
+  // another origin or create a privileged child window.
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== mainWindow.webContents.getURL()) event.preventDefault();
+  });
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools();
@@ -70,6 +80,7 @@ const createWindow = () => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
+    exportPathsByWebContentsId.delete(mainWindow.webContents.id);
     mainWindow = null;
   });
 
@@ -102,6 +113,109 @@ ipcMain.handle('groq-key-remove', () => {
 ipcMain.handle('open-groq-console', () => {
   return electron.shell.openExternal('https://console.groq.com/keys');
 });
+
+ipcMain.handle('open-cogulator-folder', () => {
+  const cogulatorPath = path.join(app.getPath('documents'), 'cogulator');
+  return electron.shell.openPath(cogulatorPath);
+});
+
+ipcMain.handle('open-cogulator-website', () => electron.shell.openExternal('https://cogulator.io'));
+
+const windowCommands = new Set(['undo', 'redo', 'cut', 'copy', 'paste', 'selectAll']);
+ipcMain.on('window-command', (event, command) => {
+  if (!windowCommands.has(command)) throw new Error('Unsupported window command.');
+  mainWindow.webContents[command]();
+  event.returnValue = true;
+});
+
+ipcMain.on('window-is-fullscreen', (event) => {
+  event.returnValue = mainWindow.isFullScreen();
+});
+
+ipcMain.on('window-set-fullscreen', (event, value) => {
+  mainWindow.setFullScreen(Boolean(value));
+  event.returnValue = true;
+});
+
+function managedRoots() {
+  return [
+    path.join(app.getPath('documents'), 'cogulator'),
+    config.get('cogModelsPath'),
+  ].filter(Boolean).map((root) => path.resolve(root));
+}
+
+function isManagedPath(candidate) {
+  if (typeof candidate !== 'string') return false;
+  const resolved = path.resolve(candidate);
+  return managedRoots().some((root) => {
+    const relative = path.relative(root, resolved);
+    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+  });
+}
+
+function assertManagedPath(candidate, { allowExportPath = false, event } = {}) {
+  const resolved = typeof candidate === 'string' ? path.resolve(candidate) : null;
+  const permittedExportPath = allowExportPath && exportPathsByWebContentsId.get(event?.sender?.id);
+  if (!resolved || (!isManagedPath(resolved) && resolved !== permittedExportPath)) {
+    throw new Error('Cogulator can only access its model folders and the file selected for export.');
+  }
+  return resolved;
+}
+
+const pathOperations = new Set(['basename', 'dirname', 'extname', 'join', 'resolve']);
+ipcMain.on('path-operation', (event, operation, ...args) => {
+  if (!pathOperations.has(operation) || !args.every((arg) => typeof arg === 'string')) {
+    throw new Error('Unsupported path operation.');
+  }
+  event.returnValue = path[operation](...args);
+});
+
+ipcMain.on('platform-info', (event) => {
+  event.returnValue = { type: os.type(), EOL: os.EOL, pathSeparator: path.sep };
+});
+
+ipcMain.on('file-operation', (event, operation, ...args) => {
+  let result;
+  switch (operation) {
+    case 'mkdir':
+      result = fs.mkdirSync(assertManagedPath(args[0]));
+      break;
+    case 'readdir':
+      result = fs.readdirSync(assertManagedPath(args[0]));
+      break;
+    case 'stat': {
+      const stat = fs.lstatSync(assertManagedPath(args[0]));
+      result = { isDirectory: stat.isDirectory(), isFile: stat.isFile() };
+      break;
+    }
+    case 'read':
+      result = fs.readFileSync(assertManagedPath(args[0]), args[1]);
+      break;
+    case 'rename':
+      result = fs.renameSync(assertManagedPath(args[0]), assertManagedPath(args[1]));
+      break;
+    case 'exists':
+      result = isManagedPath(args[0]) && fs.existsSync(args[0]);
+      break;
+    case 'write':
+      result = fs.writeFileSync(assertManagedPath(args[0], { allowExportPath: true, event }), args[1]);
+      break;
+    case 'append':
+      result = fs.appendFileSync(assertManagedPath(args[0]), args[1]);
+      break;
+    case 'copy':
+      if (!isManagedPath(args[0]) && path.extname(args[0]).toLowerCase() !== '.goms') {
+        throw new Error('Only .goms files may be imported from outside Cogulator folders.');
+      }
+      result = fs.copyFileSync(args[0], assertManagedPath(args[1]));
+      break;
+    default:
+      throw new Error('Unsupported file operation.');
+  }
+  event.returnValue = result;
+});
+
+ipcMain.handle('file-trash', async (event, target) => trash(assertManagedPath(target, { event })));
 
 
 // Quit when all windows are closed.
@@ -441,6 +555,7 @@ ipcMain.on('dialog-export-path', (event, name) => {
     });
     
     console.log(">>>",fullPath,"<<<");
+	if (fullPath) exportPathsByWebContentsId.set(event.sender.id, path.resolve(fullPath));
     event.returnValue = fullPath; //if cancel, this will return undefined
 });
 
@@ -509,4 +624,3 @@ ipcMain.on('directory-context-menu', (event, path, name) => {
     directoryContextMenu.popup();
     event.returnValue = "";
 });
-

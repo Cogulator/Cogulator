@@ -19,11 +19,12 @@ class DragAndDropManager {
             e.preventDefault();
 
             for (let f of e.dataTransfer.files) {
-				let fileName = path.basename(f.path);
+				let filePath = appWindow.getPathForFile(f);
+				let fileName = path.basename(filePath);
 				let extension = path.extname(fileName);
 				console.log(fileName, extension);
 				
-				if (extension == ".goms") G.modelsManager.copyModel(f.path);
+				if (extension == ".goms") G.modelsManager.copyModel(filePath);
 				else 					  alert("Can't load " + fileName + ".  It's not a .goms file");
             }
             

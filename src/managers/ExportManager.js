@@ -1,6 +1,6 @@
 class ExportManager {
 	constructor() {
-		this.EOL = require('os').EOL;
+		this.EOL = os.EOL;
 		
 		ipcRenderer.on('File->Export Model', (sender, arg) => {
 			G.exportManager.exportModel();

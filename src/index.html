@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
 		<title>Cogulator</title>
         <link rel="icon" type="image/x-icon" href="./icons/1024x1024.ico">
 		<link rel="stylesheet" type="text/css" href="./style/quill.core.css">
@@ -14,7 +15,7 @@
 		<link rel="stylesheet" type="text/css" href="./style/errors_tips.css">
 		<link rel="stylesheet" type="text/css" href="./style/magic_models.css">
 		<link rel="stylesheet" type="text/css" href="./style/help_screen.css">
-		<script>window.$ = window.jQuery = require('jquery');</script> <!--	 install jquery in project with npm install jquery --save    -->
+		<script type='text/javascript' src='../node_modules/jquery/dist/jquery.min.js'></script>
 		<script type='text/javascript' src='./libraries/quill.min.js'></script>
 		<script type='text/javascript' src='./libraries/p5.min.js'></script>
 	</head>
@@ -229,16 +230,6 @@
 		</div>
         
         
-        <script>
-           function isWindows() {
-                var platform = window.navigator.platform;
-                var windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
-
-                if (windowsPlatforms.indexOf(platform) > -1) return true;
-                return false;
-            }
-        </script>
-				
 		<script type='text/javascript' src='./utilities/Globals.js'></script>
         <script type='text/javascript' src='./utilities/Remove_Draggable_Titlebar.js'></script>
 		<script type='text/javascript' src='./managers/FilePathManager.js'></script>

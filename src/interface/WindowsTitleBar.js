@@ -1,16 +1,19 @@
 
-const { webFrame} = require('electron');
-
-
 class WindowsTitleBar {
     constructor() {
     }
     
 	
     build() {
-		require('electron-titlebar');
-		this.currentWindow = remote.getCurrentWindow();
-		this.webContents = this.currentWindow.webContents;
+		this.currentWindow = appWindow;
+		this.webContents = {
+			undo: () => appWindow.command('undo'),
+			redo: () => appWindow.command('redo'),
+			cut: () => appWindow.command('cut'),
+			copy: () => appWindow.command('copy'),
+			paste: () => appWindow.command('paste'),
+			selectAll: () => appWindow.command('selectAll'),
+		};
 		
         let height = 20;
         let halfHeight = height / 2;
@@ -136,8 +139,8 @@ class WindowsTitleBar {
 	
 	
 	handleMenuButtonClick(evt) {
-		let currentZoomFactor = webFrame.getZoomFactor();
-		let fullScreen = G.windowsTitleBar.currentWindow.isFullScreen();
+		let currentZoomFactor = appWindow.getZoomFactor();
+		let fullScreen = appWindow.isFullScreen();
 		
         let documentPath = ipcRenderer.sendSync('read-documents-path');
 		let cogulatorPath = path.join(documentPath, "cogulator");
@@ -146,7 +149,7 @@ class WindowsTitleBar {
 		if 		(rowTxt == "SaveCtrl+S") G.modelsManager.saveModel();
 		else if (rowTxt == "Export Model") G.exportManager.exportModel();
 		else if (rowTxt == "Export Working Memory") G.exportManager.exportWM();
-		else if (rowTxt == "Open Cogulator Folder") require('electron').shell.openExternal("file://" + cogulatorPath);
+		else if (rowTxt == "Open Cogulator Folder") appWindow.openCogulatorFolder();
 		
 		else if (rowTxt == "UndoCtrl+Z")  G.windowsTitleBar.webContents.undo();
 		else if (rowTxt == "RedoCtrl+Y") G.windowsTitleBar.webContents.redo();
@@ -158,19 +161,19 @@ class WindowsTitleBar {
 
         else if (rowTxt == "Dark") G.darkLightManager.youWantItDarker();
         else if (rowTxt == "Light") G.darkLightManager.youWantItBright();
-		else if (rowTxt == "Actual Size Ctrl+O") webFrame.setZoomFactor(1);
-		else if (rowTxt == "Zoom InCtrl+Shift+=") webFrame.setZoomFactor(currentZoomFactor + .2);
-		else if (rowTxt == "Zoom OutCtrl+-") webFrame.setZoomFactor(Math.max(0, currentZoomFactor - .2));
-		else if (rowTxt == "Toggle Full ScreenF11") G.windowsTitleBar.currentWindow.setFullScreen(!fullScreen);
+		else if (rowTxt == "Actual Size Ctrl+O") appWindow.setZoomFactor(1);
+		else if (rowTxt == "Zoom InCtrl+Shift+=") appWindow.setZoomFactor(currentZoomFactor + .2);
+		else if (rowTxt == "Zoom OutCtrl+-") appWindow.setZoomFactor(Math.max(0, currentZoomFactor - .2));
+		else if (rowTxt == "Toggle Full ScreenF11") appWindow.setFullScreen(!fullScreen);
         else if (rowTxt == "Toggle Line Numbers") G.qutterManager.handleToggleMarkers();
 		
 		else if (rowTxt == "Quick Start") G.helpScreen.show();
-		else if (rowTxt == "Learn More") require('electron').shell.openExternal('http://cogulator.io');
+		else if (rowTxt == "Learn More") appWindow.openWebsite();
 	}
 }
 
 G.windowsTitleBar = new WindowsTitleBar();
-if (require('os').type() == "Windows_NT") G.windowsTitleBar.build();
+if (os.type == "Windows_NT") G.windowsTitleBar.build();
 
 $(document).ready(function() {
     $('html[electron-titlebar-platform=win32] #electron-titlebar > .button').css('width', '30px');

@@ -1,7 +1,3 @@
-const fs = require('fs');
-const trash = require('trash');
-const http = require('http');
-
 class InOutManager {
 	
 	makeDirectory(pth) {
@@ -16,9 +12,9 @@ class InOutManager {
 		var files = fs.readdirSync(pth);
 		files.forEach(file => {
 			let filePath = path.join(pth, file);
-			let stats = fs.lstatSync(filePath);
-			if (stats.isDirectory()) directoryPaths.push({directory: file, directoryPath: filePath, files:[]});
-			else if (stats.isFile() && this.isGOMS(file)) directoryPaths[0].files.push({file: file.replace('.goms',''), filePath: filePath});
+			let stats = fs.stat(filePath);
+			if (stats.isDirectory) directoryPaths.push({directory: file, directoryPath: filePath, files:[]});
+			else if (stats.isFile && this.isGOMS(file)) directoryPaths[0].files.push({file: file.replace('.goms',''), filePath: filePath});
 		});
 		
 		//get the .goms files in the directories found on the first iteration
@@ -26,8 +22,8 @@ class InOutManager {
 			files = fs.readdirSync(directoryPaths[i].directoryPath);
 			files.forEach(file => {
 				let filePath = path.join(directoryPaths[i].directoryPath, file);
-				let stats = fs.lstatSync(filePath);
-				if (stats.isFile() && this.isGOMS(file)) directoryPaths[i].files.push({file: file.replace('.goms',''), filePath: filePath});
+				let stats = fs.stat(filePath);
+				if (stats.isFile && this.isGOMS(file)) directoryPaths[i].files.push({file: file.replace('.goms',''), filePath: filePath});
 			});
 		}
 		
@@ -67,21 +63,7 @@ class InOutManager {
 	
 	copyFile(sourcePth, targetPth, callback) {
 		try {
-			const BUF_LENGTH = 64*1024;
-			const buff = new Buffer(BUF_LENGTH);
-			const fdr = fs.openSync(sourcePth, 'r');
-			const fdw = fs.openSync(targetPth, 'w');
-			let bytesRead = 1;
-			let pos = 0;
-
-			while (bytesRead > 0) {
-				bytesRead = fs.readSync(fdr, buff, 0, BUF_LENGTH, pos);
-				fs.writeSync(fdw,buff,0,bytesRead);
-				pos += bytesRead;
-			}
-
-			fs.closeSync(fdr);
-			fs.closeSync(fdw);
+			fs.copyFileSync(sourcePth, targetPth);
 		} catch (err) {
 			//dialog.showErrorBox("Could not copy file.", "Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened.");
             let error = "Could not copy file. Could not copy file at " + sourcePth + ". Either the file does not exist or permissions do not allow for it to be opened."
@@ -98,14 +80,7 @@ class InOutManager {
 		let fullPath = path.join(pth, filename);
 		
 		try {  
-			let file = fs.openSync(fullPath, 'w');
-            fs.close(file, (err) => {
-                if (err)
-                    console.error('Failed to close file', err);
-                else {
-                    console.log("\n> File Closed successfully");
-                }
-            });
+			fs.writeFileSync(fullPath, '');
 		} catch(err) {
             console.log("CREATE ERROR", err);
             //dialog.showErrorBox("Could not create file.", "Could not create file at " + pth + ". This can be caused by permissions that do not allow for writing the file.");
@@ -150,7 +125,7 @@ class InOutManager {
 	
 	
 	delete(pth, callback = 0) {
-		trash(pth).then(() => {
+		fs.trash(pth).then(() => {
 			if (typeof callback === 'function') callback();
 		});
 	}

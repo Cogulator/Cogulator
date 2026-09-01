@@ -42,19 +42,23 @@ class StartUpManager {
 			    	"./interface/MagicModels.js",
 				  	"./managers/DragAndDropManager.js"];
 		
-		$.getScript( this.js[this.index], function(){
-			G.startUp.getNext();
-		});
+		this.loadScript(this.js[this.index]);
 	}
 	
+	loadScript(source) {
+		const script = document.createElement('script');
+		script.src = source;
+		script.onload = () => G.startUp.getNext();
+		script.onerror = () => console.error(`Unable to load ${source}`);
+		document.head.appendChild(script);
+	}
+
 	
 	getNext() {
 		G.startUp.index++;
 		
 		if (G.startUp.index < G.startUp.js.length) {
-			$.getScript( this.js[this.index], function(){
-				G.startUp.getNext();
-			});
+			this.loadScript(this.js[this.index]);
 		} else {
 			G.modelsManager.loadLastModel();
             if (G.darkLightManager.isDark) G.darkLightManager.youWantItDarker(true); //true indicates this is happening on startup
@@ -64,4 +68,3 @@ class StartUpManager {
 
 
 G.startUp = new StartUpManager();
-
