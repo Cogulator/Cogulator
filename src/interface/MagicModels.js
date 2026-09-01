@@ -30,6 +30,7 @@ class MagicModelsManager {
 		this.handsPosition = "";
         this.chatStarted = false;
         this.pendingQuestion = null;
+        this.groqConfigured = false;
 
         // add mode toggle in header (wand | AI)
         this.initModeToggle();
@@ -71,6 +72,10 @@ class MagicModelsManager {
 
     //LLM functions
         $('#ai_generate_btn').click(function(){
+            if (!G.magicModels.groqConfigured) {
+                G.magicModels.showGroqSetup();
+                return;
+            }
             const question = $('#ai_task_description').val().trim();
             if (!question) return;
 
@@ -82,6 +87,12 @@ class MagicModelsManager {
             console.log("🌂 SEND", question);
             ipcRenderer.send('rag-query', question);
         });
+
+        $('#ai_open_groq_console').click(() => ipcRenderer.invoke('open-groq-console'));
+        $('#ai_manage_key_btn').click(() => this.showGroqSetup());
+        $('#ai_cancel_groq_setup').click(() => this.hideGroqSetup());
+        $('#ai_remove_groq_key').click(() => this.removeGroqKey());
+        $('#ai_save_groq_key').click(() => this.saveGroqKey());
 
 
         ipcRenderer.on('rag-token', (sender, token) => {
@@ -116,6 +127,7 @@ class MagicModelsManager {
             G.magicModels.pendingQuestion = null;
             G.magicModels.appendChatMessage('assistant status error', `Unable to generate a model: ${message ?? 'An error occurred'}`);
             G.magicModels.aiReady();
+            if (message && message.includes('Groq is not configured')) G.magicModels.showGroqSetup();
         });
 
 	}
@@ -167,7 +179,10 @@ class MagicModelsManager {
 
     
 	setMode(mode) {
-        if (mode === this.mode) return;
+        if (mode === this.mode) {
+            if (mode === 'ai') this.refreshGroqStatus();
+            return;
+        }
         this.mode = mode;
 
         $('#wand_selector').removeClass('active');
@@ -189,6 +204,7 @@ class MagicModelsManager {
             $('#mm_toggle_wand').removeClass('mm_mode_selected');
             // pause wand interactions while in AI mode
             this.pause();
+            this.refreshGroqStatus();
         }
 	}
 
@@ -196,9 +212,62 @@ class MagicModelsManager {
 	openAssist() {
 		if (!this.visible) this.show();
 		this.setMode('ai');
-		// Focusing the prompt must not scroll the outer workspace horizontally.
-		document.getElementById('ai_task_description').focus({ preventScroll: true });
 	}
+
+    async refreshGroqStatus() {
+        try {
+            const status = await ipcRenderer.invoke('groq-key-status');
+            this.groqConfigured = status.configured;
+            if (!status.configured) this.showGroqSetup(status.secureStorageAvailable);
+            else this.hideGroqSetup();
+        } catch (error) {
+            this.showGroqSetup(false, error.message);
+        }
+    }
+
+    showGroqSetup(secureStorageAvailable = true, errorMessage = '') {
+        $('#magic_llm_hci_container').addClass('needs_setup showing_setup');
+        $('#ai_remove_groq_key').toggle(this.groqConfigured);
+        const status = $('#ai_key_status').removeClass('error');
+        if (errorMessage) status.addClass('error').text(errorMessage);
+        else if (!secureStorageAvailable) status.addClass('error').text('Secure credential storage is unavailable on this computer.');
+        else status.text(this.groqConfigured ? 'Replace or remove the key saved on this computer.' : '');
+        document.getElementById('ai_groq_api_key').focus({ preventScroll: true });
+    }
+
+    hideGroqSetup() {
+        if (!this.groqConfigured) return;
+        $('#magic_llm_hci_container').removeClass('needs_setup showing_setup');
+        $('#ai_key_status').removeClass('error').text('');
+        document.getElementById('ai_task_description').focus({ preventScroll: true });
+    }
+
+    async saveGroqKey() {
+        const key = $('#ai_groq_api_key').val().trim();
+        const status = $('#ai_key_status').removeClass('error').text('Checking your key…');
+        $('#ai_save_groq_key').prop('disabled', true);
+        try {
+            await ipcRenderer.invoke('groq-key-save', key);
+            this.groqConfigured = true;
+            $('#ai_groq_api_key').val('');
+            status.text('Groq is connected. Your key is encrypted on this computer.');
+            this.hideGroqSetup();
+        } catch (error) {
+            const message = (error.message || 'Unable to save that key.')
+                .replace(/^Error invoking remote method '[^']+': Error: /, '');
+            status.addClass('error').text(message);
+        } finally {
+            $('#ai_save_groq_key').prop('disabled', false);
+        }
+    }
+
+    async removeGroqKey() {
+        await ipcRenderer.invoke('groq-key-remove');
+        this.groqConfigured = false;
+        $('#ai_groq_api_key').val('');
+        this.showGroqSetup();
+        $('#ai_key_status').text('The saved Groq key was removed.');
+    }
 
     showValidationStatus(validation, cancelled) {
         if (cancelled) {

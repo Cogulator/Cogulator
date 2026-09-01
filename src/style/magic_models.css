@@ -168,6 +168,110 @@
 	display: none;
 }
 
+#ai_setup_container {
+	display: none;
+	color: var(--magic-model-text-color);
+	font-family: 'Lato', sans-serif;
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+#magic_llm_hci_container.needs_setup #ai_setup_container,
+#magic_llm_hci_container.showing_setup #ai_setup_container {
+	display: block;
+}
+
+#magic_llm_hci_container.needs_setup #ai_composer,
+#magic_llm_hci_container.showing_setup #ai_composer {
+	display: none;
+}
+
+#ai_setup_container h2 {
+	margin: 0 0 8px;
+	font-family: 'Lato-Bold', sans-serif;
+	font-size: 18px;
+}
+
+#ai_setup_container p,
+#ai_setup_container ol {
+	margin: 0 0 14px;
+}
+
+#ai_setup_container ol {
+	padding-left: 20px;
+}
+
+#ai_groq_api_key {
+	box-sizing: border-box;
+	width: 100%;
+	margin-top: 5px;
+	padding: 9px 10px;
+	color: var(--magic-model-text-color);
+	font: inherit;
+	background: var(--sidebar-left-bg-color);
+	border: 1px solid var(--border-color);
+	border-radius: 7px;
+	outline: none;
+}
+
+#ai_groq_api_key:focus {
+	border-color: var(--model-select-bg-color);
+	box-shadow: 0 0 0 3px rgba(76, 189, 153, 0.16);
+}
+
+#ai_key_actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+#ai_key_actions button,
+#ai_open_groq_console,
+#ai_manage_key_btn {
+	padding: 6px 9px;
+	color: var(--purple-color);
+	font: 12px 'Lato-Bold', sans-serif;
+	background: transparent;
+	border: 1px solid var(--purple-color);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+#ai_save_groq_key {
+	color: #fff !important;
+	background: var(--purple-color) !important;
+}
+
+#ai_key_status {
+	min-height: 20px;
+	margin-top: 12px;
+}
+
+#ai_key_status.error {
+	color: #b54747;
+}
+
+#ai_manage_key_btn {
+	margin-left: auto;
+	flex: 0 0 28px;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border-color: var(--border-color);
+	color: var(--magic-model-text-color);
+}
+
+#ai_manage_key_btn svg {
+	width: 15px;
+	height: 15px;
+	vertical-align: middle;
+}
+
+#ai_generate_btn {
+	flex: 0 0 32px;
+}
+
 #magic_llm_hci_container.has_messages {
 	top: 0;
 	box-sizing: border-box;

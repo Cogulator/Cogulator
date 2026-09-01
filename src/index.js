@@ -1,4 +1,4 @@
-const { registerRagHandlers } = require('./ragHandler');
+const { registerRagHandlers, validateGroqApiKey } = require('./ragHandler');
 const electron = require('electron');
 const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron'); 
 const path = require('path');
@@ -14,6 +14,26 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
+const GROQ_KEY_CONFIG = 'groqApiKeyEncrypted';
+
+function getGroqApiKey() {
+  const encryptedKey = config.get(GROQ_KEY_CONFIG);
+  if (!encryptedKey || !electron.safeStorage.isEncryptionAvailable()) return null;
+
+  try {
+    return electron.safeStorage.decryptString(Buffer.from(encryptedKey, 'base64'));
+  } catch (error) {
+    console.warn('Unable to read the saved Groq API key.', error.message);
+    return null;
+  }
+}
+
+function setGroqApiKey(apiKey) {
+  if (!electron.safeStorage.isEncryptionAvailable()) {
+    throw new Error('Secure credential storage is unavailable on this computer.');
+  }
+  config.set(GROQ_KEY_CONFIG, electron.safeStorage.encryptString(apiKey).toString('base64'));
+}
 
 const createWindow = () => {	
   if (require('os').type() == "Windows_NT") {
@@ -43,7 +63,7 @@ const createWindow = () => {
   //mainWindow.webContents.openDevTools();
 
   // For handling LLM requests
-  registerRagHandlers(mainWindow);
+  registerRagHandlers(mainWindow, getGroqApiKey);
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -61,6 +81,27 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
+
+ipcMain.handle('groq-key-status', () => ({
+  configured: Boolean(getGroqApiKey()),
+  secureStorageAvailable: electron.safeStorage.isEncryptionAvailable(),
+}));
+
+ipcMain.handle('groq-key-save', async (_event, apiKey) => {
+  const normalizedKey = String(apiKey || '').trim();
+  await validateGroqApiKey(normalizedKey);
+  setGroqApiKey(normalizedKey);
+  return { configured: true };
+});
+
+ipcMain.handle('groq-key-remove', () => {
+  config.delete(GROQ_KEY_CONFIG);
+  return { configured: false };
+});
+
+ipcMain.handle('open-groq-console', () => {
+  return electron.shell.openExternal('https://console.groq.com/keys');
+});
 
 
 // Quit when all windows are closed.
@@ -468,5 +509,4 @@ ipcMain.on('directory-context-menu', (event, path, name) => {
     directoryContextMenu.popup();
     event.returnValue = "";
 });
-
 

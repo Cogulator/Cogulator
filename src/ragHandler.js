@@ -8,8 +8,7 @@
  * Prerequisites:
  *   npm install @supabase/supabase-js @xenova/transformers groq-sdk dotenv
  *
- * .env additions (same file as ingest.js):
- *   GROQ_API_KEY=gsk_...
+ * Development .env additions:
  *   SUPABASE_URL=https://your-project.supabase.co
  *   SUPABASE_ANON_KEY=your-anon-key   ← anon key is fine for read-only queries
  */
@@ -35,18 +34,22 @@ dotenv.config({ path: resolve(projectRoot, '.env') });
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
-const groqApiKey = process.env.GROQ_API_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey || !groqApiKey) {
+if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'RAG configuration is missing. Copy .env.example to .env and set ' +
-    'SUPABASE_URL, SUPABASE_ANON_KEY, and GROQ_API_KEY.'
+    'RAG configuration is missing. Set SUPABASE_URL and SUPABASE_ANON_KEY.'
   );
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const groq = new Groq({ apiKey: groqApiKey });
+export async function validateGroqApiKey(apiKey) {
+  if (!/^gsk_[A-Za-z0-9_-]+$/.test(apiKey || '')) {
+    throw new Error('That does not look like a Groq API key. Keys begin with gsk_.');
+  }
+
+  const client = new Groq({ apiKey });
+  await client.models.list();
+}
 
 // ─── Embedder (singleton, lazy-loaded) ───────────────────────────────────────
 
@@ -193,7 +196,7 @@ let currentAbortController = null;
  *   ipcRenderer.on('rag-done',   (_, { sources }) => showSources(sources))
  *   ipcRenderer.on('rag-error',  (_, message) => showError(message))
  */
-export function registerRagHandlers(mainWindow) {
+export function registerRagHandlers(mainWindow, getGroqApiKey) {
 
   // ── rag-query ──────────────────────────────────────────────────────────────
   //ipcMain.on('rag-query', async (event, { question }) => {
@@ -214,6 +217,14 @@ export function registerRagHandlers(mainWindow) {
     };
 
     try {
+      const groqApiKey = getGroqApiKey();
+      if (!groqApiKey) {
+        const error = new Error('Groq is not configured. Add your API key in Assist settings.');
+        error.code = 'GROQ_NOT_CONFIGURED';
+        throw error;
+      }
+      const groq = new Groq({ apiKey: groqApiKey });
+
       // 1. Retrieve relevant chunks
       const baseChunks = await retrieve(question);
 

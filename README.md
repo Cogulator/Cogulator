@@ -21,10 +21,18 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 
 ## RAG configuration
 
-The in-app RAG assistant requires credentials that are intentionally not stored in
-the repository. Copy `.env.example` to `.env`, then set `SUPABASE_URL`,
-`SUPABASE_ANON_KEY`, and `GROQ_API_KEY` with the values for your project. The
+For local development, copy `.env.example` to `.env`, then set
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` with the values for your project. The
 `.env` file is ignored by Git.
+
+## AI Assist
+
+AI Assist uses a Groq API key supplied by the person using Cogulator. The first
+time they open Assist, Cogulator guides them to create a free Groq account and
+API key, validates it, and stores it with the operating system's secure
+credential storage. The key is never written to the project `.env` file or
+included in release packages. They can replace or remove the key from **Groq
+settings** in Assist.
 
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch.

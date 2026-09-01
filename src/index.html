@@ -166,11 +166,30 @@
 					<div id='magic_llm_container'>
 						<div id='magic_content'>
 							<div id='magic_llm_hci_container'>
+								<div id="ai_setup_container" aria-live="polite">
+									<h2>Connect Groq to use Assist</h2>
+									<p>Assist uses your own Groq account and API key. Your key stays encrypted on this computer.</p>
+									<ol>
+										<li><button id="ai_open_groq_console" type="button">Create a free Groq account</button></li>
+										<li>Create an API key in Groq, then paste it below.</li>
+									</ol>
+									<label for="ai_groq_api_key">Groq API key</label>
+									<input id="ai_groq_api_key" type="password" autocomplete="off" spellcheck="false" placeholder="gsk_..." />
+									<div id="ai_key_actions">
+										<button id="ai_save_groq_key" type="button">Save and test key</button>
+										<button id="ai_remove_groq_key" type="button">Remove saved key</button>
+										<button id="ai_cancel_groq_setup" type="button">Cancel</button>
+									</div>
+									<p id="ai_key_status" role="status"></p>
+								</div>
 								<div id="ai_conversation" aria-live="polite"></div>
 								<div id="ai_composer">
 								<textarea id="ai_task_description" rows="4" placeholder="Describe the task..."></textarea>
 								<div id="ai_submit_row">
 									<em id="ai_result_note">Result will be appended to the open model</em>
+									<button id="ai_manage_key_btn" type="button" aria-label="Groq settings" title="Groq settings">
+										<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.7 1.2h2.6l.4 1.6c.4.2.8.4 1.1.6l1.6-.5 1.3 2.2-1.2 1.1c.1.4.1.8 0 1.3l1.2 1.1-1.3 2.2-1.6-.5c-.3.3-.7.5-1.1.6l-.4 1.6H6.7l-.4-1.6c-.4-.2-.8-.4-1.1-.6l-1.6.5-1.3-2.2 1.2-1.1a5 5 0 0 1 0-1.3L2.3 5l1.3-2.2 1.6.5c.3-.3.7-.5 1.1-.6l.4-1.6Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"></path><circle cx="8" cy="6.75" r="2" fill="none" stroke="currentColor" stroke-width="1.2"></circle></svg>
+									</button>
 									<button id="ai_generate_btn" type="button" aria-label="Generate model steps" title="Generate model steps">
 										<div id="ai_state_container">
 											<svg id="ai_up_arrow" width="16.6481128px" height="22.2397484px" viewBox="0 0 16.6481128 22.2397484" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
