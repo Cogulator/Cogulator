@@ -22,7 +22,11 @@
     "forge": {
       "packagerConfig": {
         "packageManager": "npm",
-        "icon": "./src/icons/1024x1024"
+        "icon": "./src/icons/1024x1024",
+        "ignore": [
+          "(^|[\\/])\\.env(?:\\..*)?$",
+          "(^|[\\/])src[\\/]RAG(?:[\\/]|$)"
+        ]
       },
       "makers": [
         {
