@@ -40,8 +40,8 @@ const createWindow = () => {
       setupTitlebar();
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-                                  webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false,
+                                  webPreferences: {nodeIntegration: false, 
+                                                   contextIsolation: true,
                                                    preload: path.join(app.getAppPath(), 'src', 'preload.js')},
                                   titleBarStyle: 'hidden',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
@@ -49,8 +49,9 @@ const createWindow = () => {
   } else {
 	  mainWindow = new BrowserWindow({width: 1200, 
 								  height: 1000, 
-                                  webPreferences: {nodeIntegration: true, 
-                                                   contextIsolation: false},
+                                  webPreferences: {nodeIntegration: false, 
+                                                   contextIsolation: true,
+                                                   preload: path.join(app.getAppPath(), 'src', 'preload.js')},
 								  titleBarStyle: 'hiddenInset',
 								  icon: path.join(__dirname, 'src/icons/png/64x64.png')});
   }
