@@ -22,10 +22,20 @@
  * limitations under the License.
  ******************************************************************************/
 
+const LineParserModel = typeof module !== 'undefined' ? require('./LineParser') : LineParser;
+const TimeObjectModel = typeof module !== 'undefined' ? require('../objects/TimeObject') : TimeObject;
+const StepModel = typeof module !== 'undefined' ? require('../objects/Step') : Step;
+const OperatorModel = typeof module !== 'undefined' ? require('../objects/Operator') : Operator;
+
 class GomsProcessor {
 	
-	constructor() {
-		this.parser = new LineParser();
+	constructor(options = {}) {
+		this.getModelText = options.getModelText || (() => G.quill.getText());
+		this.getOperators = options.getOperators || (() => G.operatorsManager.operators);
+		this.errors = options.errors || null;
+		this.createError = options.createError || ((type, lineNo, hint = '', chunkName = '') => new GomsError(type, lineNo, hint, chunkName));
+		this.emit = options.emit || ((event, payload) => $(document).trigger(event, payload));
+		this.parser = new LineParserModel(this.getOperators);
 		
 		this.steps = [];
 		this.intersteps = []; //interleaved steps
@@ -45,24 +55,22 @@ class GomsProcessor {
         
         this.lineTracker = []; //array, where index is the actual line and the value is the line in the nonreferenced GOMS
 				
-		$( document ).on( "Model_Update_MultiLine", function() {
-			G.gomsProcessor.process();
-		});
-		
-		
-		$( document ).on( "Model_Update_SingleLine", function() {
-			G.gomsProcessor.process();
-		});
-		
-		
-		$( document ).on( "Error_Count_Change", function() {
-			G.gomsProcessor.process();
-		});
+		if (!options.standalone && typeof $ !== 'undefined') {
+			$( document ).on( "Model_Update_MultiLine", function() { G.gomsProcessor.process(); });
+			$( document ).on( "Model_Update_SingleLine", function() { G.gomsProcessor.process(); });
+			$( document ).on( "Error_Count_Change", function() { G.gomsProcessor.process(); });
+		}
+	}
+
+	addError(type, lineNo, hint = '', chunkName = '') {
+		const error = this.createError(type, lineNo, hint, chunkName);
+		if (this.errors) this.errors.push(error);
+		else G.errorManager.errors.push(error);
 	}
 	
 
 	process() {
-		$( document ).trigger( "GOMS_Process_Started" );
+		this.emit("GOMS_Process_Started");
 		
 		this.maxEndTime = 0;
 		this.cycleTime = 0; //ms. 50 ms Based on production rule cycle time.  Bovair & Kieras/Card, Moran & Newell
@@ -79,7 +87,7 @@ class GomsProcessor {
         this.lineTracker.length = 0;
 
 		//(<resource name>, <time resource comes available>)
-		var to = new TimeObject(0, 0);
+		var to = new TimeObjectModel(0, 0);
 		var verbalcomsArray = [to];
 		var seeArray = [to];
 		var cognitiveArray = [to];
@@ -94,7 +102,7 @@ class GomsProcessor {
 		if (this.steps.length > 0) this.processStepsArray(); //processes and then interleaves steps
 		
 		this.totalTaskTime = Math.max.apply(Math, this.intersteps.map(function(o){ return o.endTime; }));
-		$( document ).trigger( "GOMS_Processed", [this.totalTaskTime] );
+		this.emit("GOMS_Processed", [this.totalTaskTime]);
 	}
     
     removeComments(line) {
@@ -111,7 +119,7 @@ class GomsProcessor {
     generateReferencelessGOMS(){
         var currentLine = 0;
         
-        var referencedLines = G.quill.getText().split("\n");
+        var referencedLines = this.getModelText().split("\n");
         var codeLines = [];
         for (var i = 0; i < referencedLines.length; i++) {
             var line = this.removeComments(referencedLines[i]);
@@ -156,7 +164,7 @@ class GomsProcessor {
                             if (lineIndents > goalIndents) {
                                 // Make sure this isn't a nested reference
                                 if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) {
-                                    G.errorManager.errors.push(new GomsError("nested_reference", i));
+									this.addError("nested_reference", i);
                                     break;
                                 }
                                 
@@ -174,7 +182,7 @@ class GomsProcessor {
                 }
             
                 
-                if (!found) G.errorManager.errors.push(new GomsError("reference_not_found", i));
+				if (!found) this.addError("reference_not_found", i);
                 
             } else {
                 codeLines.push(line);
@@ -293,58 +301,58 @@ class GomsProcessor {
 	//		  GenerateStepsArray when GoTo is processed.
 	//		  Empty (whitespace) tokens are removed before processing so that no field will be empty
 	hasError(tokens, lineNum, jumps = 0) {
-		var lines = G.quill.getText().split("\n");
+		var lines = this.getModelText().split("\n");
         var operator = this.trimColon(tokens[0].toLowerCase());
         lineNum = this.lineTracker[lineNum]
 		
         if (operator == "createstate") {
 			// Expected: CreateState name value
 			if (tokens.length != 3) {
-				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				this.addError("invalid_args_create", lineNum);
 				return true;
 			} else if (this.stateTable[tokens[1]] != undefined) {
-				G.errorManager.errors.push(new GomsError("invalid_var_create", lineNum));
+				this.addError("invalid_var_create", lineNum);
 				return true;
 			}
 		} else if (operator == "setstate") {
 			// Expected: SetState name value
 			if(tokens.length != 3){
-				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				this.addError("invalid_args_create", lineNum);
 				return true;
 			} else if(this.stateTable[tokens[1]] == undefined){
-				G.errorManager.errors.push(new GomsError("invalid_var_dne", lineNum));
+				this.addError("invalid_var_dne", lineNum);
 				return true;
 			} 
 		} 
 		else if (operator == "if") {
 			// Expected: If state value
 			if (tokens.length != 3) {
-				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				this.addError("invalid_args_create", lineNum);
 				return true;
 			} else if (this.stateTable[tokens[1]] == undefined){
-				G.errorManager.errors.push(new GomsError("invalid_var_dne", lineNum));
+				this.addError("invalid_var_dne", lineNum);
 				return true;
 			} else {
 				// Check if it's missing an endif
 				if (this.findMatchingEndIf(lines, lineNum) == lines.length) {
-					G.errorManager.errors.push(new GomsError("invalid_if_unclosed", lineNum));
+					this.addError("invalid_if_unclosed", lineNum);
 					return true;
 				}
 			}
 		} else if (operator == "endif") {
 			if (tokens.length != 1) {
-				G.errorManager.errors.push(new GomsError("invalid_endif", lineNum));
+				this.addError("invalid_endif", lineNum);
 				return true;
 			}
 		} else if (operator == "goto") {
 			// Expected: GoTo Goal: value (case can be lower and colon optional)
 			if (tokens.length <= 2) {
-				G.errorManager.errors.push(new GomsError("invalid_args_create", lineNum));
+				this.addError("invalid_args_create", lineNum);
 				return true;
 			}
 			tokens[1] = this.trimColon(tokens[1]);
 			if (tokens.slice(0, 2).join(" ").toLowerCase() != "goto goal") {
-				G.errorManager.errors.push(new GomsError("invalid_goto", lineNum));
+				this.addError("invalid_goto", lineNum);
 				return true;
 			}
 			// Index all goals defined and check if goal exists
@@ -352,11 +360,11 @@ class GomsProcessor {
 			var goalLabel = tokens.slice(2, tokens.length).join(" ");
 			var goalLine = this.goalTable[goalLabel];
 			if (goalLine == undefined) {
-				G.errorManager.errors.push(new GomsError("invalid_goal_dne", lineNum));
+				this.addError("invalid_goal_dne", lineNum);
 				return true;
 			}
 			if (jumps > 25) {
-				G.errorManager.errors.push(new GomsError("infinite_loop", lineNum));
+				this.addError("infinite_loop", lineNum);
 				return true;
 			}
 		}
@@ -399,7 +407,7 @@ class GomsProcessor {
 	//Output: none
 	//Notes: created for Cog+ functionality.  Code was extracted from processStepArray.
 	processBaseCogulatorLine(lineCompoments, lineIndex) {
-		if (lineCompoments.error != null) G.errorManager.errors.push(new GomsError(lineCompoments.error, this.lineTracker[lineIndex]));
+		if (lineCompoments.error != null) this.addError(lineCompoments.error, this.lineTracker[lineIndex]);
 		if (lineCompoments.components == null || lineCompoments.error != null) return; 
 		
 		let components = lineCompoments.components;
@@ -428,7 +436,7 @@ class GomsProcessor {
 		}
 
 		if (stepOperator.length > 0) { //if there are no errors in the line and an operator exists...
-			var s = new Step(indentCount, 
+			var s = new StepModel(indentCount,
 								   methodGoal, 
 								   methodThread,
 								   methodIndex,
@@ -515,7 +523,7 @@ class GomsProcessor {
 		var method = step.goal
 		var stepTime = step.time
 
-		var zerodTO = new TimeObject(0, 0);
+		var zerodTO = new TimeObjectModel(0, 0);
 		var resourceTO;
 		var threadTO;
 		var methodTO;
@@ -542,7 +550,7 @@ class GomsProcessor {
 		}
 
 		//store the results for the next go round
-		this.threadAvailability[thread] = new TimeObject(startTime, endTime);
+		this.threadAvailability[thread] = new TimeObjectModel(startTime, endTime);
 
 		var reslt = [];
 		reslt[0] = startTime;
@@ -572,7 +580,7 @@ class GomsProcessor {
 			if (resourceArray[i].et < resourceArray[i + 1].st) { //this means there's a gap - it's worth digging further
 				if (startTime >= resourceArray[i].et) { //if the resource availability occurs after the earliest possible start time, it's worth digging further
 					if (endTime <= resourceArray[i + 1].st) { //... check to see if there's a gap large enough to insert the operator
-						var gapTO = new TimeObject(Math.max(startTime, resourceArray[i].et), Math.max(endTime, resourceArray[i].et + stepTime + this.cycleTime));
+						var gapTO = new TimeObjectModel(Math.max(startTime, resourceArray[i].et), Math.max(endTime, resourceArray[i].et + stepTime + this.cycleTime));
 						resourceArray.splice(i, 0, gapTO);
 						return (Math.max(gapTO.st, startTime));
 					}
@@ -581,7 +589,7 @@ class GomsProcessor {
 		}
 
 
-		var to = new TimeObject(Math.max(startTime, resourceArray[resourceArray.length - 1].et), Math.max(endTime, resourceArray[resourceArray.length - 1].et + stepTime + this.cycleTime));
+		var to = new TimeObjectModel(Math.max(startTime, resourceArray[resourceArray.length - 1].et), Math.max(endTime, resourceArray[resourceArray.length - 1].et + stepTime + this.cycleTime));
 		resourceArray.push(to);
 		return (Math.max(to.st, startTime));
 	}
@@ -619,7 +627,8 @@ class GomsProcessor {
 
 	itIsAStepOperator(stepOperator) {
 		//if the operator exists, return true
-		for (var i = 0; i < G.operatorsManager.operators.length; i++) {
+		const operators = this.getOperators();
+		for (var i = 0; i < operators.length; i++) {
 			if (stepOperator.toLowerCase() == operators[i].operator.toLowerCase()) return true;
 		}
 		return false; //could not find a match
@@ -628,10 +637,11 @@ class GomsProcessor {
 
 	getOperatorTime(operatorStr, customTime, lbl) {
 		//match the operator string to a defined operator
-		var operatorObj = new Operator();
+		var operatorObj = new OperatorModel();
 		
-		for (var i = 0; i < G.operatorsManager.operators.length; i++) {
-			let oprtr = G.operatorsManager.operators[i];
+		const operators = this.getOperators();
+		for (var i = 0; i < operators.length; i++) {
+			let oprtr = operators[i];
 			if (operatorStr.toLowerCase() == oprtr.operator.toLowerCase()) {
 				operatorObj = oprtr
 				break;
@@ -655,11 +665,11 @@ class GomsProcessor {
 			  }
 			}
 						
-			if (G.stringUtils.trim(parts[1]) == "ms" || G.stringUtils.trim(parts[1]) == "milliseconds") {
+			if (String(parts[1]).trim() == "ms" || String(parts[1]).trim() == "milliseconds") {
 				return Number(parts[0]);
-			} else if (G.stringUtils.trim(parts[1]) == "seconds") {
+			} else if (String(parts[1]).trim() == "seconds") {
 				return Number(parts[0] * 1000);
-			} else if (G.stringUtils.trim(parts[1]) == "syllables") {
+			} else if (String(parts[1]).trim() == "syllables") {
 				rslt = Number(parts[0] / 2); //syllable time should be half of whole word time, which is used for op.time
 			}
 		} else if (operatorStr == "say" || operatorStr == "hear" || labelUse.indexOf("count_label_words") > -1) { //if there's no customTime, use the number of words in the lbl
@@ -688,8 +698,9 @@ class GomsProcessor {
 
 	getOperatorResource(operator) {
 		//if the custom exists, use it, otherwise look up the time in the operators arrays
-		for (var i = 0; i < G.operatorsManager.operators.length; i++) {
-			let op = G.operatorsManager.operators[i];
+		const operators = this.getOperators();
+		for (var i = 0; i < operators.length; i++) {
+			let op = operators[i];
 			if (operator.toLowerCase() == op.operator.toLowerCase()) {
 				return op.resource.toLowerCase();
 			}
@@ -804,4 +815,5 @@ class GomsProcessor {
 
 }
 
-G.gomsProcessor = new GomsProcessor();
+if (typeof G !== 'undefined') G.gomsProcessor = new GomsProcessor();
+if (typeof module !== 'undefined') module.exports = GomsProcessor;

@@ -2,7 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const { profileModel } = require('../packages/modeling-engine');
+const { profileWithLegacyRuntime } = require('../packages/modeling-engine/src/legacy-runtime');
 
 test('profiles source through the package API without a Cogulator UI', () => {
   const result = profileModel({
@@ -40,4 +43,30 @@ test('returns a serializable zero-duration result for an empty model', () => {
   assert.equal(result.totalTaskTime, 0);
   assert.equal(result.steps.length, 0);
   assert.equal(result.memory.averageLoad, 0);
+});
+
+test('native modules preserve the compatibility results across corpus models', () => {
+  const models = [
+    'parallel_monitor_and_respond.goms',
+    'parallel_navigation_and_conversation.goms',
+    'remember_contact_and_call.goms',
+    'mental_addition_with_chunks.goms',
+    'nested_reusable_form_entry.goms',
+    'touchscreen_phone_message.goms',
+  ];
+
+  for (const model of models) {
+    const source = fs.readFileSync(path.join(__dirname, '../src/RAG/corpus/models', model), 'utf8');
+    const nativeResult = profileModel({ source });
+    const compatibilityResult = profileWithLegacyRuntime({
+      source,
+      sourceRoot: path.join(__dirname, '../src'),
+    });
+
+    assert.equal(nativeResult.totalTaskTime, compatibilityResult.totalTaskTime, model);
+    assert.deepEqual(nativeResult.steps, compatibilityResult.steps, model);
+    assert.equal(nativeResult.memory.averageLoad, compatibilityResult.memory.averageLoad, model);
+    assert.equal(nativeResult.workload.max, compatibilityResult.workload.max, model);
+    assert.deepEqual(nativeResult.errors, compatibilityResult.errors, model);
+  }
 });

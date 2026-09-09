@@ -7,3 +7,5 @@ class Operator{
 		this.timeModifier = "";
 	}
 }
+
+if (typeof module !== 'undefined') module.exports = Operator;

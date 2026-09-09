@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
-const defaultOperatorText = require('./default-operators');
+const { parseOperators } = require('./operators');
 
 const LEGACY_SOURCES = [
   'objects/Components.js',
@@ -16,17 +16,6 @@ const LEGACY_SOURCES = [
   'cognition/Memory.js',
   'cognition/SubjectiveWorkload.js',
 ];
-
-function parseOperators(operatorText = defaultOperatorText) {
-  return String(operatorText).split(/\r?\n/).flatMap((line) => {
-    const [resource, operator, time, description, timeModifier] = line.trim().split(/\s+/);
-    if (!resource || !operator || !Number.isFinite(Number(time))) return [];
-    // Cogulator's full operators.txt has a description before timeModifier.
-    // Compact definitions are convenient for API callers, so accept the fourth
-    // token as a modifier too; unrecognized descriptions are harmless here.
-    return [{ resource, operator, time: Number(time), timeModifier: timeModifier || description || '' }];
-  });
-}
 
 function createEventShim() {
   return () => ({ on() {}, trigger() {} });
@@ -80,7 +69,7 @@ function profileWithLegacyRuntime({ source, operatorText, sourceRoot }) {
 
   return {
     totalTaskTime,
-    steps: G.gomsProcessor.intersteps.map(step => ({
+    steps: Array.from(G.gomsProcessor.intersteps, step => ({
       indentCount: step.indentCount, goal: step.goal, thread: step.thread,
       operator: step.operator, resource: step.resource, label: step.label,
       startTime: step.startTime, endTime: step.endTime, time: step.time,
@@ -89,14 +78,14 @@ function profileWithLegacyRuntime({ source, operatorText, sourceRoot }) {
     threadOrder: [...G.gomsProcessor.thrdOrdr],
     memory: {
       averageLoad: G.memory.averageLoad,
-      workingMemory: G.memory.workingmemory.map(stack => stack.map(chunk => ({
+      workingMemory: Array.from(G.memory.workingmemory, stack => Array.from(stack, chunk => ({
         chunkName: chunk.chunkName, addedAt: chunk.addedAt, recallProbability: chunk.recallProbability,
         lineNumber: chunk.lineNumber,
       }))),
     },
-    workload: { max: G.workload.maxWorkload, timeline: G.workload.workload.map(item => ({ ...item })) },
-    errors: runtime.errors.map(error => ({ type: error.type, lineNo: error.lineNo, hint: error.hint, chunkName: error.chunkName })),
+    workload: { max: G.workload.maxWorkload, timeline: Array.from(G.workload.workload, item => ({ ...item })) },
+    errors: Array.from(runtime.errors, error => ({ type: error.type, lineNo: error.lineNo, hint: error.hint, chunkName: error.chunkName })),
   };
 }
 
-module.exports = { parseOperators, profileWithLegacyRuntime };
+module.exports = { profileWithLegacyRuntime };

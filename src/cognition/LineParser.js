@@ -1,12 +1,16 @@
+const ComponentsModel = typeof module !== 'undefined' ? require('../objects/Components') : Components;
+
 class LineParser {
-	constructor() {}
+	constructor(getOperators) {
+		this.getOperators = getOperators || (() => G.operatorsManager.operators);
+	}
 
 	parseControl(line) {
 		//if this line is empty, return null
 		if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 		
 		//components to return
-		var components = new Components();
+		var components = new ComponentsModel();
 		
 		//remove comments
 		if (line.indexOf("*") > -1) line = line.substring(0, line.indexOf("*"));
@@ -42,7 +46,7 @@ class LineParser {
 		if (line.match(/[a-z]/gmi) == null) return {components: null, error: null};
 		
 		//components to return
-		var components = new Components();
+		var components = new ComponentsModel();
 		
 		//remove comments
 		if (line.indexOf("*") > -1) line = line.substring(0, line.indexOf("*"));
@@ -138,9 +142,10 @@ class LineParser {
 		var operatorsStr = "^(goal:?|also:?|";
 		let suffix = ")\\b";
 		
-		for (var i = 0; i < G.operatorsManager.operators.length; i++) {
-			operatorsStr += G.operatorsManager.operators[i].operator.toLowerCase();
-			if (i != G.operatorsManager.operators.length - 1) operatorsStr += "|";
+		const operators = this.getOperators();
+		for (var i = 0; i < operators.length; i++) {
+			operatorsStr += operators[i].operator.toLowerCase();
+			if (i != operators.length - 1) operatorsStr += "|";
 		}
 		// console.log("regex "+operatorsStr)
 
@@ -157,5 +162,6 @@ class LineParser {
 
 }
 
+if (typeof module !== 'undefined') module.exports = LineParser;
 
 

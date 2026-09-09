@@ -24,13 +24,14 @@
 
 class SubjectiveMentalWorkload {
 	//{chunkName: chunkName, activation: activation, stack: chunkStack}) from WorkingMemory
-	constructor() {
+	constructor(options = {}) {
+		this.emit = options.emit || ((event, payload) => $(document).trigger(event, payload));
 		this.workload = [];
 		this.maxWorkload = 1;
 		
-		$( document ).on( "Memory_Processed", function(evt, taskTimeMS) {
-		  G.workload.setMentalWorkload(G.memory.rehearsals);
-		});
+		if (!options.standalone && typeof $ !== 'undefined') {
+			$( document ).on( "Memory_Processed", function(evt, taskTimeMS) { G.workload.setMentalWorkload(G.memory.rehearsals); });
+		}
 	}
 
 	setMentalWorkload(recalledChunks) {
@@ -44,7 +45,7 @@ class SubjectiveMentalWorkload {
 			this.maxWorkload = Math.max(this.maxWorkload, load);
 		}
 		
-		$( document ).trigger( "Subjective_Workload_Processed", [this.maxWorkload] ); //if max workload is 0, indicates there are no workload estimates in stack
+		this.emit("Subjective_Workload_Processed", [this.maxWorkload]); //if max workload is 0, indicates there are no workload estimates in stack
 	}
 
 	getWorkload(activation) {
@@ -57,5 +58,6 @@ class SubjectiveMentalWorkload {
 
 }
 
-G.workload = new SubjectiveMentalWorkload();
+if (typeof G !== 'undefined') G.workload = new SubjectiveMentalWorkload();
+if (typeof module !== 'undefined') module.exports = SubjectiveMentalWorkload;
 	

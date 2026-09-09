@@ -10,3 +10,5 @@ class Components {
 		this.chunkNames = [];
 	}
 }
+
+if (typeof module !== 'undefined') module.exports = Components;

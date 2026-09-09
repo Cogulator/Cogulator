@@ -4,3 +4,5 @@ class TimeObject {
 		this.et = endTime;
 	}
 }
+
+if (typeof module !== 'undefined') module.exports = TimeObject;

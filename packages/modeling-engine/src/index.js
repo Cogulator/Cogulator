@@ -1,23 +1,18 @@
 'use strict';
 
-const path = require('path');
-const { parseOperators, profileWithLegacyRuntime } = require('./legacy-runtime');
+const { parseOperators } = require('./operators');
+const { profileWithNativeModules } = require('./native-runtime');
 
 /**
  * Profile GOMS source without an editor, DOM, Electron, or global Cogulator
  * UI state. Result fields are JSON-safe so callers may use a worker process.
  *
- * This first API release deliberately uses a compatibility runtime over the
- * existing Cogulator algorithms. Moving those algorithms into native package
- * modules is the next extraction step; the public result contract stays fixed.
+ * The processor, memory, and workload modules run natively with injected
+ * inputs. Cogulator's browser lifecycle remains a thin adapter around them.
  */
-function profileModel({ source, operatorText, sourceRoot } = {}) {
+function profileModel({ source, operatorText } = {}) {
   if (typeof source !== 'string') throw new TypeError('profileModel requires GOMS source text.');
-  return profileWithLegacyRuntime({
-    source,
-    operatorText,
-    sourceRoot: sourceRoot || path.resolve(__dirname, '../../../src'),
-  });
+  return profileWithNativeModules({ source, operatorText });
 }
 
 module.exports = { profileModel, parseOperators };

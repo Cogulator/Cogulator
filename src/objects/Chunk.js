@@ -9,3 +9,5 @@
         this.lineNumber = lineNo;
 	}
 }
+
+if (typeof module !== 'undefined') module.exports = Chunk;

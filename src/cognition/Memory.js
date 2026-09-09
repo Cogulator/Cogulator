@@ -22,13 +22,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-$(function() {
-    G.memory = new Memory();
-});
+const ChunkModel = typeof module !== 'undefined' ? require('../objects/Chunk') : Chunk;
+
+if (typeof $ !== 'undefined') $(function() { G.memory = new Memory(); });
 
 class Memory {
 	
-	constructor() {
+	constructor(options = {}) {
+		this.getIntersteps = options.getIntersteps || (() => G.gomsProcessor.intersteps);
+		this.errors = options.errors || null;
+		this.createError = options.createError || ((type, lineNo, hint = '', chunkName = '') => new GomsError(type, lineNo, hint, chunkName));
+		this.emit = options.emit || ((event, payload) => $(document).trigger(event, payload));
 		this.initialRehearsal = 3;
 		this.recallThreshold = 0.5;
 		this.chunkThreshold = 7;
@@ -43,13 +47,19 @@ class Memory {
 		this.averageLoad = 0.0
 		this.overloadedStacks = [];
 		
-		$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) {
-		  G.memory.fire(taskTimeMS);
-		});
+		if (!options.standalone && typeof $ !== 'undefined') {
+			$( document ).on( "GOMS_Processed", function(evt, taskTimeMS) { G.memory.fire(taskTimeMS); });
+		}
+	}
+
+	addError(type, lineNo, hint = '', chunkName = '') {
+		const error = this.createError(type, lineNo, hint, chunkName);
+		if (this.errors) this.errors.push(error);
+		else G.errorManager.errors.push(error);
 	}
 
 
-	fire(taskTimeMS) {
+	fire(taskTimeMS, intersteps = this.getIntersteps()) {
         //reset everything
 		this.interleavedSteps.length = 0;
 		this.colorPalette = ['#2AA198', '#268BD2', '#6C71C4', '#D33682', '#DC322F', '#CB4B16', '#CB4B16', '#B58900'];
@@ -61,11 +71,9 @@ class Memory {
 		this.overloadedStacks.length = 0;
         
 		//start processing
-		var intersteps = G.gomsProcessor.intersteps;
-
 		var totalCycles = (Math.round(taskTimeMS / 50) * 50) / 50;
 		if (totalCycles == 0) {
-			$( document ).trigger( "Memory_Processed", [this.averageLoad] );
+			this.emit("Memory_Processed", [this.averageLoad]);
 			return;
 		}
 		
@@ -135,7 +143,7 @@ class Memory {
 		}
 
 		this.averageLoad = this.getAverageLoad();
-		$( document ).trigger( "Memory_Processed", [this.averageLoad] );
+		this.emit("Memory_Processed", [this.averageLoad]);
 	}
 
 
@@ -151,7 +159,7 @@ class Memory {
         if (existingChunk == null) existingChunk = this.getExistingChunk(operator, chunkName, chunkStack + 1); //Temporary solution. Memory is only modeled on 50ms cycles.  But steps can happen at in time.  This prevents a memory error from off-cycle steps
 
 		if (chunkName == "" || (!existingChunk && isWmOperator)) {
-			var chunk = new Chunk(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
+			var chunk = new ChunkModel(chunkName, atTime, -1, rehearsals, 1, this.colorPalette[0], step.lineNo); //name, addTime, stackHeight, rehearsals, recallProb, color
 			chunk.activation = this.getActivation(chunkStack, this.getTimeChunkInMemoryInSeconds(chunkStack, atTime), rehearsals);
 			chunk.goal = step.goal;
 			chunk.goalMap = step.goalMap;
@@ -178,7 +186,7 @@ class Memory {
             chunkAction = "pushed_rehearsals";
 			existingChunk.goalMap = step.goalMap;
 		} else if (!existingChunk) {
-			G.errorManager.errors.push(new GomsError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName));
+			this.addError("forgetting_error", step.lineNo, "Trying to recall " + chunkName + ", but it is not in memory. It was either never put in memory, or forgotten.  You can add to memory with Store operator.", chunkName);
 		}
 
 		return chunkAction;
@@ -213,7 +221,7 @@ class Memory {
 					if (recallProbability > 1) recallProbability = 0.999; //rounding time sometimes results in recall > 1
 
 					if (recallProbability > this.recallThreshold) {
-						var updatedChunk = new Chunk(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color, chunk.lineNumber); //name, addTime, stackHeight, accessCount, recallProb, color
+						var updatedChunk = new ChunkModel(chunk.chunkName, chunk.addedAt, chunk.stackDepthAtPush, chunk.rehearsals, recallProbability, chunk.color, chunk.lineNumber); //name, addTime, stackHeight, accessCount, recallProb, color
 						updatedChunk.activation = this.getActivation(chunk.stackDepthAtPush, timeChunkInMemoryInSeconds, chunk.rehearsals);
 						updatedChunk.goal = chunk.goal;
 						updatedChunk.goalMap = chunk.goalMap
@@ -395,3 +403,4 @@ class Memory {
 
 }
 
+if (typeof module !== 'undefined') module.exports = Memory;
