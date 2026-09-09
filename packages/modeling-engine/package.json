@@ -1,0 +1,8 @@
+{
+  "name": "@cogulator/modeling-engine",
+  "version": "0.1.0",
+  "description": "Programmatic Cogulator model profiling API.",
+  "main": "src/index.js",
+  "private": true,
+  "license": "Apache-2.0"
+}
