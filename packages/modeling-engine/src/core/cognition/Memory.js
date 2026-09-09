@@ -403,4 +403,6 @@ class Memory {
 
 }
 
-if (typeof module !== 'undefined') module.exports = Memory;
+if (typeof module !== 'undefined') {
+  module.exports = Memory;
+}

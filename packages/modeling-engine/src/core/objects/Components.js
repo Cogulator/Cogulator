@@ -11,4 +11,6 @@ class Components {
 	}
 }
 
-if (typeof module !== 'undefined') module.exports = Components;
+if (typeof module !== 'undefined') {
+  module.exports = Components;
+}

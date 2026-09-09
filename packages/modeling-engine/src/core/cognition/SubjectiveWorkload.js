@@ -59,5 +59,7 @@ class SubjectiveMentalWorkload {
 }
 
 if (typeof G !== 'undefined') G.workload = new SubjectiveMentalWorkload();
-if (typeof module !== 'undefined') module.exports = SubjectiveMentalWorkload;
+if (typeof module !== 'undefined') {
+  module.exports = SubjectiveMentalWorkload;
+}
 	

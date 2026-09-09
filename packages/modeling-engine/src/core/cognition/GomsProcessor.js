@@ -816,4 +816,6 @@ class GomsProcessor {
 }
 
 if (typeof G !== 'undefined') G.gomsProcessor = new GomsProcessor();
-if (typeof module !== 'undefined') module.exports = GomsProcessor;
+if (typeof module !== 'undefined') {
+  module.exports = GomsProcessor;
+}

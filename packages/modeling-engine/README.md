@@ -17,4 +17,4 @@ console.log(result.totalTaskTime, result.memory.averageLoad, result.workload.max
 
 `profileModel` runs the Cogulator processor, working-memory model, and subjective-workload model as native CommonJS modules. The package injects model text, operator definitions, error collection, and callbacks; it does not create a DOM, Electron process, Quill editor, or mutable application `G` state. Cogulator continues to load the same classes in the browser through its existing lifecycle adapter.
 
-For this migration stage, the package imports those canonical modules from Cogulator's `src/` directory. The next extraction step moves their physical ownership beneath this package and changes Cogulator's script loader to consume them from there. The public `profileModel` contract and its parity fixtures are already in place, so that move can be made without changing consumers.
+The package is now the canonical home for those modules under `src/core/`. Cogulator's startup loader consumes the same files as browser scripts, while the package API imports them directly. The public `profileModel` contract and parity fixtures protect both paths from drifting apart.

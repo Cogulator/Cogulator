@@ -10,4 +10,6 @@
 	}
 }
 
-if (typeof module !== 'undefined') module.exports = Chunk;
+if (typeof module !== 'undefined') {
+  module.exports = Chunk;
+}

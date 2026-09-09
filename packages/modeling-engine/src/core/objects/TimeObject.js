@@ -5,4 +5,6 @@ class TimeObject {
 	}
 }
 
-if (typeof module !== 'undefined') module.exports = TimeObject;
+if (typeof module !== 'undefined') {
+  module.exports = TimeObject;
+}

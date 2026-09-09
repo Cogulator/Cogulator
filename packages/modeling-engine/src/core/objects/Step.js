@@ -47,4 +47,6 @@ class Step {
 	}
 }
 
-if (typeof module !== 'undefined') module.exports = Step;
+if (typeof module !== 'undefined') {
+  module.exports = Step;
+}

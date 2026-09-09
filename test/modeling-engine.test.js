@@ -60,7 +60,7 @@ test('native modules preserve the compatibility results across corpus models', (
     const nativeResult = profileModel({ source });
     const compatibilityResult = profileWithLegacyRuntime({
       source,
-      sourceRoot: path.join(__dirname, '../src'),
+      sourceRoot: path.join(__dirname, '../packages/modeling-engine/src/core'),
     });
 
     assert.equal(nativeResult.totalTaskTime, compatibilityResult.totalTaskTime, model);

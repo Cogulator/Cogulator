@@ -162,6 +162,7 @@ class LineParser {
 
 }
 
-if (typeof module !== 'undefined') module.exports = LineParser;
-
+if (typeof module !== 'undefined') {
+  module.exports = LineParser;
+}
 

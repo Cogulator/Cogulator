@@ -8,4 +8,6 @@ class Operator{
 	}
 }
 
-if (typeof module !== 'undefined') module.exports = Operator;
+if (typeof module !== 'undefined') {
+  module.exports = Operator;
+}

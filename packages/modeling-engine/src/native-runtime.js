@@ -1,8 +1,8 @@
 'use strict';
 
-const GomsProcessor = require('../../../src/cognition/GomsProcessor');
-const Memory = require('../../../src/cognition/Memory');
-const SubjectiveMentalWorkload = require('../../../src/cognition/SubjectiveWorkload');
+const GomsProcessor = require('./core/cognition/GomsProcessor');
+const Memory = require('./core/cognition/Memory');
+const SubjectiveMentalWorkload = require('./core/cognition/SubjectiveWorkload');
 const { parseOperators } = require('./operators');
 
 function toProfileResult({ processor, memory, workload, errors }) {
