@@ -74,13 +74,17 @@ const createWindow = () => {
 
   // For handling LLM requests
   registerRagHandlers(mainWindow, getGroqApiKey);
+  // Electron may have already torn down webContents by the time `closed` is
+  // delivered (notably when the app is force-quit). Retain the identifier while
+  // the window is alive instead of reading it during teardown.
+  const webContentsId = mainWindow.webContents.id;
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    exportPathsByWebContentsId.delete(mainWindow.webContents.id);
+    exportPathsByWebContentsId.delete(webContentsId);
     mainWindow = null;
   });
 
