@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { profileModel } = require('../packages/modeling-engine');
+const { profileModel, profileScenario } = require('../packages/modeling-engine');
 const { profileWithLegacyRuntime } = require('../packages/modeling-engine/src/legacy-runtime');
 
 test('profiles source through the package API without a Cogulator UI', () => {
@@ -69,4 +69,21 @@ test('native modules preserve the compatibility results across corpus models', (
     assert.equal(nativeResult.workload.max, compatibilityResult.workload.max, model);
     assert.deepEqual(nativeResult.errors, compatibilityResult.errors, model);
   }
+});
+
+test('profiles scheduled task instances against shared resources', () => {
+  const source = 'Goal: Review\n.Look at <display>\n.Think of <response>';
+  const result = profileScenario({
+    tasks: [
+      { id: 'first', source, startTime: 0 },
+      { id: 'second', source, startTime: 0 },
+    ],
+  });
+
+  const firstLook = result.steps.find(step => step.taskId === 'first' && step.operator === 'look');
+  const secondLook = result.steps.find(step => step.taskId === 'second' && step.operator === 'look');
+  assert.equal(firstLook.startTime, 0);
+  assert.equal(secondLook.startTime, firstLook.endTime);
+  assert.equal(result.taskInstances[1].scheduledStartTime, 0);
+  assert.ok(result.taskInstances[1].endTime > result.taskInstances[0].endTime);
 });
