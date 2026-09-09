@@ -28,13 +28,17 @@ function toProfileResult({ processor, memory, workload, errors }) {
 }
 
 function profileWithNativeModules({ source, operatorText }) {
+  // Cogulator models may have been created on older systems that use CR-only
+  // line endings. The processor operates on newline-delimited source, so keep
+  // the standalone API consistent with the editor's normalized text input.
+  const normalizedSource = source.replace(/\r\n?/g, '\n');
   const errors = [];
   const createError = (type, lineNo, hint = '', chunkName = '') => ({
     type, lineNo, hint, chunkName, id: `${lineNo}_${type}`,
   });
   const processor = new GomsProcessor({
     standalone: true,
-    getModelText: () => source,
+    getModelText: () => normalizedSource,
     getOperators: () => parseOperators(operatorText),
     errors,
     createError,
