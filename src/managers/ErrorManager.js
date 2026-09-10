@@ -15,6 +15,10 @@ class GomsError {
 	
 	getHint(type) {
 		switch(type) {
+			case "task_syntax_error":
+                return "Use a top-level Task: Label as task_id starting_at 10 seconds, or starting_after other_id starts/finishes.";
+            case "task_structure_error":
+                return "Check Task IDs, dependencies, and indentation.";
 			case "operator_error":
 				return "I couldn&#39;t find an operator at the start of this line."
 			case "time_modifier_error":

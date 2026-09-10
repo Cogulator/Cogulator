@@ -1,0 +1,15 @@
+* Task offsets and shared resources
+* Both tasks become eligible at 2 seconds. Their Look operators share vision.
+* Expected: button Look 2-3s; button Point and status Look overlap at 3-4s.
+* Button Click runs 4-5s while status Think runs 4-6s.
+
+Task: Push a button as button starting_at 2 seconds
+. Goal: Accomplish A Button Push
+. . Look at Button (1 seconds)
+. . Point to Button (1 seconds)
+. . Click on Button (1 seconds)
+
+Task: Read status as status starting_at 2 seconds
+. Goal: Check Status
+. . Look at Status (1 seconds)
+. . Think about Status (2 seconds)

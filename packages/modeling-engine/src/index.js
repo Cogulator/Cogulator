@@ -17,3 +17,5 @@ function profileModel({ source, operatorText } = {}) {
 
 module.exports = { profileModel, parseOperators };
 module.exports.profileScenario = require('./scenario').profileScenario;
+
+module.exports.compileScenario = require('./scenario-compiler').compileScenario;

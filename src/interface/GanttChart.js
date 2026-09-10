@@ -378,6 +378,12 @@ var ganttSketch = function(s) {
             return step.indentCount == 1; 
         });
 
+        if (G.gomsProcessor.taskMode) {
+            methodsToAnnotate = G.gomsProcessor.taskInstances.map(task => ({
+                goal: task.id + ': ' + task.label, goalIndex: task.id, startTime: task.startTime
+            })).sort((a, b) => a.startTime - b.startTime);
+        }
+
         var indexes = [];
         for (var i = 0; i < methodsToAnnotate.length; i++) { //second, remove methods that aren't unique
             let method = methodsToAnnotate[i]; //this is actually a step, but all we care about is the method
@@ -640,7 +646,7 @@ var ganttSketch = function(s) {
             for (var j = 0; j < threadSteps.length; j++) { //second, remove methods that aren't unique
                 let method = threadSteps[j]; //this is actually a step, but all we care about is the method
                 if (!indexes.includes(method.goalIndex)) {
-                    methodsToAnnotate.push({name:method.goal, startTime:method.startTime, threadNum: parseInt(key)});
+                    methodsToAnnotate.push({name:method.taskId ? method.taskId + ": " + method.goal : method.goal, startTime:method.startTime, threadNum: parseInt(key)});
                     indexes.push(method.goalIndex);
                 }
             }

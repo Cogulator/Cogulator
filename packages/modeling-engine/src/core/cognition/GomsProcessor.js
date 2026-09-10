@@ -85,6 +85,11 @@ class GomsProcessor {
 		this.threadAvailability = []; //dictionary
         
         this.lineTracker.length = 0;
+        this.taskDefinitions = new Map();
+        this.taskInstances = [];
+        this.taskScopes = [];
+        this.activeTask = null;
+        this.taskInvalid = false;
 
 		//(<resource name>, <time resource comes available>)
 		var to = new TimeObjectModel(0, 0);
@@ -98,10 +103,13 @@ class GomsProcessor {
 		this.resourceAvailability["hands"] = handsArray;
         
         let codeLines = this.generateReferencelessGOMS(); //takes references (functions) and puts into full code.  Calls generate
+        this.taskMode = codeLines.some(line => /^[.\s]*task\b/i.test(line));
+        if (this.taskMode) this.threadAvailability = Object.create(null);
 		this.generateStepsArray(codeLines);
-		if (this.steps.length > 0) this.processStepsArray(); //processes and then interleaves steps
+		if (this.taskMode) this.processTaskSteps();
+		else if (this.steps.length > 0) this.processStepsArray(); //processes and then interleaves steps
 		
-		this.totalTaskTime = Math.max.apply(Math, this.intersteps.map(function(o){ return o.endTime; }));
+		this.totalTaskTime = Math.max(0, ...this.intersteps.map(step => step.endTime), ...this.taskInstances.map(task => task.endTime));
 		this.emit("GOMS_Processed", [this.totalTaskTime]);
 	}
     
@@ -121,8 +129,10 @@ class GomsProcessor {
         
         var referencedLines = this.getModelText().split("\n");
         var codeLines = [];
+        let taskSourceStart = 0;
         for (var i = 0; i < referencedLines.length; i++) {
             var line = this.removeComments(referencedLines[i]);
+            if (/^task\b/i.test(line)) taskSourceStart = i + 1;
                         
             //If this is a @Reference, find it's match earlier in the code and replace with full code
             if (line.toLowerCase().includes("@goal") || line.toLowerCase().includes("@also")) { //this is a reference line
@@ -133,7 +143,7 @@ class GomsProcessor {
                                 
                 //look for the goal that the reference points to
                 var found = false
-                for (var j = 0; j < i; j++) {
+                for (var j = taskSourceStart; j < i; j++) {
                     let testLine = this.removeComments(referencedLines[j]);
                                         
                     //This might be the referenced goal.  Will test further if "if" is true
@@ -248,6 +258,14 @@ class GomsProcessor {
 			if (parsed.components != null && parsed.error == null) {
 				var components = parsed.components;
 
+                if (this.taskMode && (!this.activeTask || components.indents === 0)) {
+                    this.taskError(this.lineTracker[lineIndex], 'Put control statements inside a Task.');
+                    continue;
+                }
+                if (this.taskMode && components.operator === 'goto') {
+                    this.taskError(this.lineTracker[lineIndex], 'GoTo is not supported inside Task containers yet.');
+                    continue;
+                }
                 var tokens = components.label.split(' ').filter(String);
 				tokens.unshift(components.operator)
 
@@ -407,6 +425,10 @@ class GomsProcessor {
 	//Output: none
 	//Notes: created for Cog+ functionality.  Code was extracted from processStepArray.
 	processBaseCogulatorLine(lineCompoments, lineIndex) {
+        if (this.taskMode) {
+            this.processTaskLine(lineCompoments, lineIndex);
+            return;
+        }
 		if (lineCompoments.error != null) this.addError(lineCompoments.error, this.lineTracker[lineIndex]);
 		if (lineCompoments.components == null || lineCompoments.error != null) return; 
 		
@@ -451,6 +473,153 @@ class GomsProcessor {
 		}
 	}
 
+
+    taskError(lineNo, hint) {
+        this.taskInvalid = true;
+        this.addError('task_structure_error', lineNo, hint);
+    }
+
+    processTaskLine(parsed, lineIndex) {
+        const lineNo = this.lineTracker[lineIndex];
+        if (parsed.error) {
+            this.taskInvalid = true;
+            this.addError(parsed.error, lineNo);
+            return;
+        }
+        const c = parsed.components;
+        if (!c) return;
+        if (c.operator === 'task') {
+            if (this.taskDefinitions.has(c.task.id)) {
+                this.taskError(lineNo, 'Each Task must have a unique ID.');
+                return;
+            }
+            const task = { ...c.task, lineNo, threads: new Map(), lastStep: null };
+            this.taskDefinitions.set(task.id, task);
+            this.activeTask = task;
+            this.taskScopes = [{ indent: 0, thread: task.id, goal: task.label, goalIndex: lineIndex }];
+            task.threads.set(task.id, { name: task.id, steps: [], cursor: 0, anchor: null });
+            // Control variables belong to this invocation, not to neighboring tasks.
+            this.stateTable = [];
+            return;
+        }
+        const task = this.activeTask;
+        if (!task || c.indents === 0) {
+            this.taskError(lineNo, 'In a Task model, put every Goal, Also, and operator inside a top-level Task.');
+            return;
+        }
+        while (this.taskScopes.length && this.taskScopes[this.taskScopes.length - 1].indent >= c.indents) this.taskScopes.pop();
+        const parent = this.taskScopes[this.taskScopes.length - 1];
+        if (!parent || c.indents !== parent.indent + 1) {
+            this.taskError(lineNo, 'Indent one level beneath the enclosing Task, Goal, or Also.');
+            return;
+        }
+        if (c.operator === 'goal' || c.operator === 'also') {
+            let thread = parent.thread;
+            if (c.operator === 'also') {
+                const label = c.threadLabel === '!X!X!' ? `also_${this.newThreadNumber++}` : c.threadLabel;
+                thread = `${task.id}:${label}`;
+                if (task.threads.has(thread)) {
+                    this.taskError(lineNo, 'Use a unique Also thread name within each Task.');
+                    return;
+                }
+                // Preserve Also's branch point: the preceding operator's start.
+                task.threads.set(thread, { name: thread, steps: [], cursor: 0, anchor: task.lastStep });
+            }
+            this.taskScopes.push({ indent: c.indents, thread, goal: c.label, goalIndex: lineIndex });
+            return;
+        }
+        const step = new StepModel(c.indents, parent.goal, parent.thread, parent.goalIndex,
+            c.operator, this.getOperatorTime(c.operator, c.parenthetical, c.label),
+            this.getOperatorResource(c.operator), c.label, lineNo, 0,
+            c.chunkNames.map(name => `<${task.id}:${name.slice(1, -1)}>`));
+        step.taskId = task.id;
+        step.taskLabel = task.label;
+        task.threads.get(parent.thread).steps.push(step);
+        task.lastStep = step;
+        this.steps.push(step);
+    }
+
+    processTaskSteps() {
+        // Validate the dependency graph before reserving resources or emitting results.
+        const visiting = new Set(), visited = new Set();
+        const visit = task => {
+            if (visited.has(task.id)) return;
+            if (visiting.has(task.id)) {
+                this.taskError(task.lineNo, 'Task timing dependencies must not form a cycle.');
+                return;
+            }
+            visiting.add(task.id);
+            if (task.after) {
+                const dependency = this.taskDefinitions.get(task.after);
+                if (!dependency) this.taskError(task.lineNo, 'The referenced Task ID does not exist.');
+                else visit(dependency);
+            }
+            visiting.delete(task.id);
+            visited.add(task.id);
+        };
+        for (const task of this.taskDefinitions.values()) visit(task);
+        if (this.taskInvalid) { this.steps = []; return; }
+
+        const scheduled = new Set();
+        let unfinished = true;
+        while (unfinished) {
+            unfinished = false;
+            let chosen = null;
+            // All tasks participate in one scheduling pass. Source order breaks ties.
+            for (const task of this.taskDefinitions.values()) {
+                if (task.done) continue;
+                unfinished = true;
+                if (task.release == null) {
+                    const dependency = task.after && this.taskDefinitions.get(task.after);
+                    if (dependency && (task.afterEvent === 'starts' ? dependency.startTime == null && !dependency.done : !dependency.done)) continue;
+                    const base = dependency ? (task.afterEvent === 'starts' ? dependency.startTime ?? dependency.release : dependency.endTime) : 0;
+                    task.release = task.offset + base;
+                }
+                const threads = [...task.threads.values()];
+                if (threads.every(thread => thread.cursor === thread.steps.length)) {
+                    task.done = true;
+                    task.endTime = Math.max(task.release, ...threads.map(thread => thread.availableAt || task.release));
+                    continue;
+                }
+                for (const thread of threads) {
+                    const step = thread.steps[thread.cursor];
+                    if (!step || (thread.anchor && !scheduled.has(thread.anchor))) continue;
+                    const earliest = thread.availableAt == null
+                        ? Math.max(task.release, thread.anchor ? thread.anchor.startTime : task.release)
+                        : thread.availableAt;
+                    const resource = step.resource === 'speech' || step.resource === 'hear' ? 'verbalcoms' : step.resource;
+                    const duration = step.time + this.cycleTime;
+                    const start = resource === 'system' ? earliest
+                        : this.getResourceAvailability(resource, earliest, earliest + duration, step.time, false);
+                    if (!chosen || start < chosen.start) chosen = { task, thread, step, earliest, start };
+                }
+            }
+            if (!chosen) {
+                if ([...this.taskDefinitions.values()].every(task => task.done)) break;
+                // Completing a task can release a dependency declared earlier in the source.
+                continue;
+            }
+            const { task, thread, step, earliest } = chosen;
+            this.threadAvailability[thread.name] = new TimeObjectModel(earliest, earliest);
+            const [start, end] = this.findStartEndTime(step);
+            step.startTime = start;
+            step.endTime = end;
+            thread.availableAt = end;
+            thread.cursor++;
+            task.startTime = task.startTime == null ? start : Math.min(task.startTime, start);
+            scheduled.add(step);
+            this.intersteps.push(step);
+        }
+        this.intersteps.sort((a, b) => a.startTime - b.startTime || a.lineNo - b.lineNo);
+        this.thrdOrdr = [...this.taskDefinitions.values()].flatMap(task =>
+            [...task.threads.values()].filter(thread => thread.steps.length).map(thread => thread.name));
+        this.taskInstances = [...this.taskDefinitions.values()].map(task => ({
+            id: task.id, label: task.label, lineNo: task.lineNo,
+            scheduledStartTime: task.release, startTime: task.startTime == null ? task.release : task.startTime,
+            endTime: task.endTime,
+        }));
+        this.steps = [];
+    }
 
 	removeGoalSteps() {
 		for (var i = this.steps.length - 1; i > -1; i--) {
@@ -573,26 +742,20 @@ class GomsProcessor {
 		return 0;
 	}
 
-	getResourceAvailability(resource, startTime, endTime, stepTime) {
-		//pull the resource array of TimeObjects associated with the resource
-		var resourceArray = this.resourceAvailability[resource]; //time the resource becomes available
-		for (var i = 0; i < resourceArray.length - 1; i++) {
-			if (resourceArray[i].et < resourceArray[i + 1].st) { //this means there's a gap - it's worth digging further
-				if (startTime >= resourceArray[i].et) { //if the resource availability occurs after the earliest possible start time, it's worth digging further
-					if (endTime <= resourceArray[i + 1].st) { //... check to see if there's a gap large enough to insert the operator
-						var gapTO = new TimeObjectModel(Math.max(startTime, resourceArray[i].et), Math.max(endTime, resourceArray[i].et + stepTime + this.cycleTime));
-						resourceArray.splice(i, 0, gapTO);
-						return (Math.max(gapTO.st, startTime));
-					}
-				}
-			}
-		}
-
-
-		var to = new TimeObjectModel(Math.max(startTime, resourceArray[resourceArray.length - 1].et), Math.max(endTime, resourceArray[resourceArray.length - 1].et + stepTime + this.cycleTime));
-		resourceArray.push(to);
-		return (Math.max(to.st, startTime));
-	}
+	getResourceAvailability(resource, startTime, endTime, stepTime, reserve = true) {
+        const intervals = this.resourceAvailability[resource];
+        const duration = stepTime + this.cycleTime;
+        let start = startTime;
+        for (const interval of intervals) {
+            if (start + duration <= interval.st) break;
+            if (start < interval.et) start = interval.et;
+        }
+        if (reserve) {
+            intervals.push(new TimeObjectModel(start, start + duration));
+            intervals.sort((a, b) => a.st - b.st || a.et - b.et);
+        }
+        return start;
+    }
 
 
 	findGoalAndThread(indents) {

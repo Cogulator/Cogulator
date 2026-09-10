@@ -6,7 +6,7 @@ class AutocompleteManager {
 		this.codeLeft = parseInt( $( '#code' ).css('left').replace("px", "") );
 		
 		//arrays for autocomplete matches (operators taken from OperatorsManager global)
-		this.controls = ["goal", "operator"];
+		this.controls = ["goal", "also", "task", "operator"];
 		this.times = ["syllables)", "seconds)", "ms)", "milliseconds)"];
 		this.setRegExs();
 
@@ -35,7 +35,7 @@ class AutocompleteManager {
 	//regexs to determine whether autocomplete should be offered
 	setRegExs() {
 		this.regexs = [];
-		this.regexs.push({ exp: /^[\.| ]{0,15}(go?a?\b|al?s?\b)/i,  type: "goal" }); //goals 
+		this.regexs.push({ exp: /^[\.| ]{0,15}(go?a?\b|al?s?\b|ta?s?\b)/i,  type: "goal" }); //goals
 		this.regexs.push({ exp: this.operatorRegEx(), type: "operator" }); //operators
 		this.regexs.push({ exp: /\([0-9]{1,5} (sy?l?l?a?b?le?\b|mi?l?l?i?s?e?c?o?n?d?s?\b|se?c?o?n?\b|m\b)/i, type: "time" }); //time or syllables
 	}
@@ -93,6 +93,7 @@ class AutocompleteManager {
 	hasGoal(line) {
 		if (line.toLowerCase().includes("goal")) return true;
 		if (line.toLowerCase().includes("also")) return true;
+		if (/^[.\s]*task\b/i.test(line)) return true;
 		return false;
 	}
 

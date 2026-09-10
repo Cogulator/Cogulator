@@ -8,11 +8,13 @@ const { parseOperators } = require('./operators');
 function toProfileResult({ processor, memory, workload, errors }) {
   return {
     totalTaskTime: Number.isFinite(processor.totalTaskTime) ? processor.totalTaskTime : 0,
+    ...(processor.taskMode ? { taskInstances: processor.taskInstances.map(task => ({ ...task })) } : {}),
     steps: processor.intersteps.map(step => ({
       indentCount: step.indentCount, goal: step.goal, thread: step.thread,
       operator: step.operator, resource: step.resource, label: step.label,
       startTime: step.startTime, endTime: step.endTime, time: step.time,
       lineNo: step.lineNo, chunkNames: [...step.chunkNames],
+      ...(step.taskId ? { taskId: step.taskId, taskLabel: step.taskLabel } : {}),
     })),
     threadOrder: [...processor.thrdOrdr],
     memory: {
@@ -20,6 +22,7 @@ function toProfileResult({ processor, memory, workload, errors }) {
       workingMemory: memory.workingmemory.map(stack => stack.map(chunk => ({
         chunkName: chunk.chunkName, addedAt: chunk.addedAt, recallProbability: chunk.recallProbability,
         lineNumber: chunk.lineNumber,
+        ...(processor.taskMode ? { color: chunk.color } : {}),
       }))),
     },
     workload: { max: workload.maxWorkload, timeline: workload.workload.map(item => ({ ...item })) },

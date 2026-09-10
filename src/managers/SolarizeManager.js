@@ -54,8 +54,9 @@ class SolarizeManager {
 	setRegexs() {
 		this.regexs = [];
         this.regexs.push({ exp: /^[\.| ]{0,15}(@goal|@also)\b/gmi, clr: this.referenceClr }); //references 
-		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also)\b/gmi, clr: this.goalClr }); //goals 
+		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also|task)\b/gmi, clr: this.goalClr }); //goals
         this.regexs.push({ exp: / as /gmi, clr: this.goalClr }); //as for thread label);
+        this.regexs.push({ exp: /(?<=^[ \t]*task\b[^\n]*)\b(starting_at|starting_after|finishes|starts|plus)\b/gmi, clr: this.goalClr }); //task timing
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>\n]+>/gmi, clr: this.chunkClr }); //working memory
@@ -84,7 +85,7 @@ class SolarizeManager {
 			while( (match = regex.exec(text)) != null ) {
                 if (regex.toString() === "/ as /gim") { //only include "as" matches if on a goal or also line
                     let line = G.quillManager.getLine(match.index).toLowerCase();
-                    if (line.includes("also") || line.includes("goal")) {
+                    if (line.includes("also") || line.includes("goal") || line.includes("task")) {
                         matches.push( {index: match.index, length: match[0].length, color: clr} );
                     }
                 } else {

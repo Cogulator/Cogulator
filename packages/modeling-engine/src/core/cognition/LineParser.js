@@ -56,6 +56,8 @@ class LineParser {
 		components.indents = indentCountAndRemove.indents;
 		line = indentCountAndRemove.line;
 		
+		if (/^task\b/i.test(line)) return this.parseTask(line, components);
+
 		//look to see if this is a control or reference line
 		let cntrlRegex = this.controlRegEx();
 		if (line.match(cntrlRegex) != null) return {components: null, error: null}; // if it's a control line, pack up your bags
@@ -116,6 +118,18 @@ class LineParser {
 	}
 	
 	
+	parseTask(line, components) {
+		// Task timing is a release time, not an operator duration.
+		const match = line.match(/^task:?\s+(.+?)\s+as\s+([A-Za-z_][\w-]*)(?:\s+starting_at\s+(\d+(?:\.\d+)?)\s+(seconds?|ms|milliseconds)|\s+starting_after\s+([A-Za-z_][\w-]*)\s+(finishes|starts)(?:\s+plus\s+(\d+(?:\.\d+)?)\s+(seconds?|ms|milliseconds))?)?\s*$/i);
+		if (!match || components.indents !== 0) return { components: null, error: 'task_syntax_error' };
+		const offset = Number(match[3] || match[7] || 0) * (/^second/i.test(match[4] || match[8] || '') ? 1000 : 1);
+		if (!Number.isFinite(offset)) return { components: null, error: 'task_syntax_error' };
+		components.operator = 'task';
+		components.label = match[1];
+		components.task = { id: match[2], label: match[1], offset, after: match[5] || null, afterEvent: (match[6] || 'finishes').toLowerCase() };
+		return { components, error: null };
+	}
+
 	removeAndCountIndents(line) {
 		var rtrn = line;
 		var count = 0;
@@ -139,7 +153,7 @@ class LineParser {
 	
 	operatorRegEx() {
 		// /^(goal:?|also:?|look|point|click|ignore|cognitive_processor)\b/mi;
-		var operatorsStr = "^(goal:?|also:?|";
+		var operatorsStr = "^(task:?|goal:?|also:?|";
 		let suffix = ")\\b";
 		
 		const operators = this.getOperators();
