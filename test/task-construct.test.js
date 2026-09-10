@@ -1,11 +1,43 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
 const { profileModel } = require('../packages/modeling-engine');
 const { profileWithLegacyRuntime } = require('../packages/modeling-engine/src/legacy-runtime');
-const example = name => fs.readFileSync(path.join(__dirname, '../Docs/Examples', name + '.goms'), 'utf8');
+// Keep model fixtures with the tests so documentation examples are optional.
+const examples = {
+  'Task-Offsets': `Task: Push a button as button starting_at 2 seconds
+. Goal: Accomplish A Button Push
+. . Look at Button (1 seconds)
+. . Point to Button (1 seconds)
+. . Click on Button (1 seconds)
+
+Task: Read status as status starting_at 2 seconds
+. Goal: Check Status
+. . Look at Status (1 seconds)
+. . Think about Status (2 seconds)`,
+  'Task-Dependencies': `Task: Respond as response starting_after monitor finishes plus 1 seconds
+. Goal: Announce completion
+. . Say Complete (1 seconds)
+
+Task: Monitor as monitor starting_at 0 seconds
+. Goal: Check system
+. . Think about System (1 seconds)
+. . Also: Watch display as visual
+. . . Goal: Observe display
+. . . . Look at Display (4 seconds)
+. . Click Acknowledge (1 seconds)`,
+  'Task-Parallel-Waits': `Task: Visual task as visual starting_at 0 seconds
+. Wait (3 seconds)
+. Goal: Inspect
+. . Look at Display (1 seconds)
+
+Task: Verbal task as verbal starting_at 0 seconds
+. Wait (3 seconds)
+. Goal: Respond
+. . Say Ready (1 seconds)`,
+};
+const example = name => examples[name];
 const times = result => result.steps.map(s => [s.taskId, s.operator, s.startTime, s.endTime]);
 
 test('task offsets share resources at operator level and nested Goals retain task threads', () => {
