@@ -10,20 +10,17 @@
  *
  * Development .env additions:
  *   SUPABASE_URL=https://your-project.supabase.co
- *   SUPABASE_ANON_KEY=your-anon-key   ← anon key is fine for read-only queries
  */
 
 import dotenv from 'dotenv';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ipcMain } from 'electron';
-import { createClient } from '@supabase/supabase-js';
 import { pipeline } from '@xenova/transformers';
 import Groq from 'groq-sdk';
 import gomsValidation from './gomsValidation.js';
 import {
   supabaseUrl as bundledSupabaseUrl,
-  supabaseAnonKey as bundledSupabaseAnonKey,
 } from './supabasePublicConfig.js';
 
 const { validateGeneratedGoms } = gomsValidation;
@@ -36,17 +33,18 @@ dotenv.config({ path: resolve(projectRoot, '.env') });
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
-// A local .env may override these for development. The packaged app uses the
+// A local .env may override this for development. The packaged app uses the
 // public configuration above, so Assist works without shipping a .env file.
 const supabaseUrl = process.env.SUPABASE_URL || bundledSupabaseUrl;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || bundledSupabaseAnonKey;
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'RAG configuration is missing. Configure the public Supabase connection.'
-  );
-}
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getRetrievalEndpoint() {
+  if (!supabaseUrl) {
+    throw new Error(
+      'Assist is temporarily unavailable because its retrieval endpoint is not configured.'
+    );
+  }
+  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/rag-retrieve`;
+}
 
 export async function validateGroqApiKey(apiKey) {
   if (!/^gsk_[A-Za-z0-9_-]+$/.test(apiKey || '')) {
@@ -86,14 +84,24 @@ const SIMILARITY_THRESHOLD = 0.3;
 async function retrieve(queryText) {
   const embedding = await embedQuery(queryText);
 
-  const { data, error } = await supabase.rpc('match_cogulator_chunks', {
-    query_embedding:      embedding,
-    match_count:          MATCH_COUNT,
-    similarity_threshold: SIMILARITY_THRESHOLD,
+  const response = await fetch(getRetrievalEndpoint(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query_embedding: embedding }),
   });
 
-  if (error) throw new Error(`Retrieval error: ${error.message}`);
-  return data ?? [];
+  if (!response.ok) {
+    const detail = await response.text();
+    if (response.status === 429) {
+      throw new Error('Assist is receiving too many requests from this network. Please try again in a few minutes.');
+    }
+    throw new Error(`Retrieval error (${response.status}): ${detail || response.statusText}`);
+  }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
 }
 
 // ─── Prompt assembly ──────────────────────────────────────────────────────────
@@ -237,9 +245,8 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
       // 1. Retrieve relevant chunks
       const baseChunks = await retrieve(question);
 
-      // 2. Augment context with assembly rules and key operator references
-      const extras = await fetchAugmentedContext(question);
-      const combined = diversifyAndLimitContext(baseChunks, extras, MATCH_COUNT);
+      // Keep retrieval to one bounded database call per Assist request.
+      const combined = diversifyAndLimitContext(baseChunks, [], MATCH_COUNT);
 
       // 3. Build messages array (system + history + new user turn)
       const userMessage = buildUserMessage(question, combined);
@@ -256,9 +263,9 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
         messages,
         stream:      true,
         temperature: 0.2,   // lower temp for stricter adherence to rules
-        reasoning_effort: 'default',
+        reasoning_effort: 'none', // keeps hidden reasoning from consuming the free-tier output budget
         reasoning_format: 'hidden', // keep reasoning out of the displayed model
-        max_completion_tokens: 4096,
+        max_completion_tokens: 768,
       }, { signal });
 
       // 4. Forward tokens to renderer as they arrive
@@ -346,53 +353,7 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
 
 // ─── Context augmentation helpers ────────────────────────────────────────────
 
-function heuristicOperatorsForQuestion(q) {
-  const lower = (q || '').toLowerCase();
-  const ops = new Set(['Operator Reference: Look', 'Operator Reference: Verify', 'Operator Reference: Hands']);
-
-  if (/(turn|dial|tune|rotate|knob)/.test(lower)) ops.add('Operator Reference: Turn');
-  if (/(tap|touch|press|select|button)/.test(lower)) ops.add('Operator Reference: Touch');
-  if (/(click|mouse)/.test(lower)) ops.add('Operator Reference: Click');
-  if (/(type|enter|keyboard|keystroke)/.test(lower)) {
-    ops.add('Operator Reference: Type');
-    ops.add('Operator Reference: Keystroke');
-  }
-  return Array.from(ops);
-}
-
-async function fetchAugmentedContext(questionText) {
-  const extras = [];
-
-  // Assembly rules doc
-  const { data: rulesRows, error: rulesErr } = await supabase
-    .from('cogulator_chunks')
-    .select('text, source, source_type, model_name, goal_name, chunk_index')
-    .eq('source', 'Assembly_Rules.md')
-    .limit(1);
-  if (!rulesErr && rulesRows && rulesRows.length > 0) {
-    const r = rulesRows[0];
-    extras.push({ ...r, similarity: 0.95 });
-  }
-
-  // Operator references (heuristic selection)
-  const wantedSources = heuristicOperatorsForQuestion(questionText);
-  if (wantedSources.length > 0) {
-    const { data: opRows, error: opErr } = await supabase
-      .from('cogulator_chunks')
-      .select('text, source, source_type, model_name, goal_name, chunk_index')
-      .eq('source_type', 'operator_reference')
-      .in('source', wantedSources)
-      .limit(wantedSources.length);
-    if (!opErr && opRows) {
-      opRows.forEach(r => extras.push({ ...r, similarity: 0.9 }));
-    }
-  }
-
-  return extras;
-}
-
 function diversifyAndLimitContext(baseChunks, extras, limit) {
-  // Always include extras first (rules + 2–4 operator refs), then top base chunks
   const combined = [...extras, ...baseChunks];
   // Deduplicate by source + chunk_index to avoid repeats
   const seen = new Set();

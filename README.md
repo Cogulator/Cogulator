@@ -22,8 +22,12 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 ## RAG configuration
 
 For local development, copy `.env.example` to `.env`, then set
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` with the values for your project. The
-`.env` file is ignored by Git.
+`SUPABASE_URL` with the value for your project. The `.env` file is ignored by
+Git.
+
+For an existing database, run `supabase_hardening.sql` in the Supabase SQL
+Editor before configuring a replacement publishable key. It removes anonymous
+table reads and limits the public retrieval RPC to six results.
 
 ## AI Assist
 
