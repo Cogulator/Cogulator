@@ -303,8 +303,29 @@ class ModelsManager {
 	loadLastModel() {
 		G.io.loadFile(G.paths.configFile, this.setLastModelPath);
 	} setLastModelPath(p) {
-		G.modelsManager.selected = p;
-		G.modelsManager.loadModel(p);
+		const lastModelPath = typeof p === "string" ? p.trim() : "";
+		if (G.io.pathExists(lastModelPath)) {
+			G.modelsManager.loadModel(lastModelPath);
+			return;
+		}
+
+		G.modelsManager.loadRandomModel();
+	}
+
+	/**
+	 * Opens a random available model. Used when the model saved in config.txt
+	 * has been deleted since Cogulator was last closed.
+	 */
+	loadRandomModel() {
+		this.update();
+		if (this.models.length === 0) {
+			const error = "🐟 SORRY CHARLIE - I could not find any .goms files in the selected models directory.";
+			ipcRenderer.sendSync('dialog-error', error);
+			return;
+		}
+
+		const randomIndex = Math.floor(Math.random() * this.models.length);
+		G.modelsManager.loadModel(this.models[randomIndex].filePath);
 	}
 	
 	
