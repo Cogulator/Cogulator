@@ -28,16 +28,34 @@ fi
 readonly version="$(node -p "require('./package.json').version")"
 readonly app_path="$project_dir/out/Cogulator-darwin-$architecture/Cogulator.app"
 readonly release_dir="$project_dir/out/release"
-readonly artifact_name="Cogulator-$architecture_label-$version.zip"
+readonly artifact_name="Cogulator-$architecture_label-$version.dmg"
 readonly artifact_path="$release_dir/$artifact_name"
 
 mkdir -p "$release_dir"
 readonly work_dir="$(mktemp -d "$release_dir/.notarization.XXXXXX")"
-trap 'rm -rf "$work_dir"' EXIT
+readonly mount_path="$work_dir/mount"
+is_mounted=false
+cleanup() {
+  if [[ "$is_mounted" == true ]]; then
+    hdiutil detach "$mount_path" -quiet || true
+  fi
+  rm -rf "$work_dir"
+}
+trap cleanup EXIT
+
+verify_disk_image_contents() {
+  mkdir -p "$mount_path"
+  hdiutil attach "$artifact_path" -readonly -nobrowse -mountpoint "$mount_path"
+  is_mounted=true
+  codesign --verify --deep --strict --verbose=2 "$mount_path/Cogulator.app"
+  hdiutil detach "$mount_path"
+  is_mounted=false
+  rmdir "$mount_path"
+}
 
 cd "$project_dir"
 
-echo "Building and signing Cogulator $version for $architecture..."
+echo "Building Cogulator $version for $architecture..."
 npm run make -- --arch="$architecture"
 
 if [[ ! -d "$app_path" ]]; then
@@ -45,28 +63,39 @@ if [[ ! -d "$app_path" ]]; then
   exit 1
 fi
 
+echo "Signing finished app with the Developer ID certificate..."
+./node_modules/.bin/electron-osx-sign "$app_path" --hardened-runtime
+
 echo "Verifying Developer ID signature..."
 codesign --verify --deep --strict --verbose=2 "$app_path"
 echo "Signature verification passed. Notarization will perform Apple's Developer ID validation."
 
-readonly submission_zip="$work_dir/Cogulator-$architecture-$version-notarization.zip"
-echo "Creating notarization archive..."
-ditto -c -k --keepParent "$app_path" "$submission_zip"
+readonly developer_id_identity="$(security find-identity -v -p codesigning | sed -n '/"Developer ID Application:/ {s/.*"\(Developer ID Application:.*\)"/\1/p; q;}')"
+if [[ -z "$developer_id_identity" ]]; then
+  echo "No Developer ID Application signing identity was found." >&2
+  exit 1
+fi
+
+echo "Creating signed disk image..."
+rm -f "$artifact_path" "$artifact_path.sha256"
+hdiutil create -volname "Cogulator" -srcfolder "$app_path" -format UDZO -ov "$artifact_path"
+codesign --force --sign "$developer_id_identity" --timestamp "$artifact_path"
+codesign --verify --verbose=2 "$artifact_path"
+echo "Verifying app inside disk image..."
+verify_disk_image_contents
 
 echo "Submitting to Apple's notary service..."
-xcrun notarytool submit "$submission_zip" --keychain-profile "$notary_profile" --wait
+xcrun notarytool submit "$artifact_path" --keychain-profile "$notary_profile" --wait
 
-echo "Stapling notarization ticket..."
-xcrun stapler staple "$app_path"
-xcrun stapler validate "$app_path"
+echo "Stapling notarization ticket to disk image..."
+xcrun stapler staple "$artifact_path"
+xcrun stapler validate "$artifact_path"
 
-echo "Confirming Gatekeeper acceptance..."
-spctl --assess --type execute --verbose=2 "$app_path"
+echo "Verifying stapled disk image..."
+codesign --verify --verbose=2 "$artifact_path"
+verify_disk_image_contents
 
-echo "Creating final release archive..."
-rm -f "$artifact_path" "$artifact_path.sha256"
-ditto -c -k --keepParent "$app_path" "$artifact_path"
 shasum -a 256 "$artifact_path" > "$artifact_path.sha256"
 
-echo "Release artifact: $artifact_path"
+echo "Release disk image: $artifact_path"
 echo "Checksum: $artifact_path.sha256"

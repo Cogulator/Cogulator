@@ -22,11 +22,11 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "osxSign": {
-          "hardenedRuntime": true
-        },
         "packageManager": "npm",
-        "icon": "./src/icons/1024x1024",
+        "icon": [
+          "./src/icons/1024x1024.icns",
+          "./src/icons/1024x1024.icon"
+        ],
         "ignore": [
           "(^|[\\/])\\.env(?:\\..*)?$",
           "(^|[\\/])src[\\/]RAG(?:[\\/]|$)"
