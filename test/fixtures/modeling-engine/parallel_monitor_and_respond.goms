@@ -1,0 +1,13 @@
+* Parallelism: monitor a display while composing a spoken response.
+Goal: Monitor a system and respond
+. Goal: Monitor display
+.. Also: Watch status display as visual
+... Look at <status display>
+... Verify <status display> is normal
+. Goal: Prepare response
+.. Also: Prepare spoken response as speech
+... Think of <response>
+... Say <response>
+. Goal: Acknowledge completion
+.. Hear <acknowledgement>
+.. Verify task is complete

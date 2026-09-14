@@ -56,7 +56,7 @@ test('native modules preserve the compatibility results across corpus models', (
   ];
 
   for (const model of models) {
-    const source = fs.readFileSync(path.join(__dirname, '../src/RAG/corpus/models', model), 'utf8');
+    const source = fs.readFileSync(path.join(__dirname, 'fixtures/modeling-engine', model), 'utf8');
     const nativeResult = profileModel({ source });
     const compatibilityResult = profileWithLegacyRuntime({
       source,

@@ -290,6 +290,15 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
         reasoningCharacters,
       });
 
+      // Only a completed response may enter the editor or conversation history.
+      if (signal.aborted) throw Object.assign(new Error('Request cancelled'), { name: 'AbortError' });
+      if (finishReason === 'length') {
+        throw new Error('The model exceeded the response length limit and was not inserted. Please request a smaller task or split it into separate models.');
+      }
+      if (finishReason !== 'stop') {
+        throw new Error('The model response did not complete and was not inserted. Please try again.');
+      }
+
       const validation = validateGeneratedGoms(fullResponse);
       if (validation.droppedLines.length > 0 || validation.fixes.length > 0 || validation.suggestions.length > 0 || validation.errors.length > 0) {
         console.log('[RAG] CMN-GOMS validation:', {
