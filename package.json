@@ -8,6 +8,7 @@
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
+    "release:mac": "bash ./scripts/release-macos.sh",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "test": "node --test test/*.test.js"
@@ -21,6 +22,9 @@
   "config": {
     "forge": {
       "packagerConfig": {
+        "osxSign": {
+          "hardenedRuntime": true
+        },
         "packageManager": "npm",
         "icon": "./src/icons/1024x1024",
         "ignore": [
