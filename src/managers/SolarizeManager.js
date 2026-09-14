@@ -57,6 +57,7 @@ class SolarizeManager {
 		this.regexs.push({ exp: /^[\.| ]{0,15}(goal|also|task)\b/gmi, clr: this.goalClr }); //goals
         this.regexs.push({ exp: / as /gmi, clr: this.goalClr }); //as for thread label);
         this.regexs.push({ exp: /(?<=^[ \t]*task\b[^\n]*)\b(starting_at|starting_after|finishes|starts|plus)\b/gmi, clr: this.goalClr }); //task timing
+        this.regexs.push({ exp: /(?<=^[ \t]*task\b[^\n*]*\b(?:starting_at|plus)[ \t]+)\d+(?:\.\d+)?[ \t]+(?:seconds?|milliseconds|ms)\b/gmi, clr: this.timeClr }); //unparenthesized Task duration
 		this.regexs.push({ exp: this.controlRegEx(), clr: this.goalClr }); // control
 		this.regexs.push({ exp: this.operatorRegEx(), clr: this.operatorClr }); //operators
 		this.regexs.push({ exp: /<[^>\n]+>/gmi, clr: this.chunkClr }); //working memory
