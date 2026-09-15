@@ -17,6 +17,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
 const GROQ_KEY_CONFIG = 'groqApiKeyEncrypted';
+const TRUSTED_CA_BUNDLE_CONFIG = 'trustedCaBundlePath';
 const exportPathsByWebContentsId = new Map();
 
 function getGroqApiKey() {
@@ -36,6 +37,32 @@ function setGroqApiKey(apiKey) {
     throw new Error('Secure credential storage is unavailable on this computer.');
   }
   config.set(GROQ_KEY_CONFIG, electron.safeStorage.encryptString(apiKey).toString('base64'));
+}
+
+function getTrustedCaBundle() {
+  const certificatePath = config.get(TRUSTED_CA_BUNDLE_CONFIG);
+  if (!certificatePath) return null;
+
+  try {
+    const certificate = fs.readFileSync(certificatePath, 'utf8');
+    if (!certificate.includes('-----BEGIN CERTIFICATE-----')) {
+      throw new Error('The selected file does not contain a PEM certificate.');
+    }
+    return certificate;
+  } catch (error) {
+    throw new Error(`Unable to read the trusted CA bundle: ${error.message}`);
+  }
+}
+
+function getTrustedCaStatus() {
+  const certificatePath = config.get(TRUSTED_CA_BUNDLE_CONFIG);
+  if (!certificatePath) return { configured: false };
+  try {
+    getTrustedCaBundle();
+    return { configured: true, name: path.basename(certificatePath) };
+  } catch (error) {
+    return { configured: false, error: error.message };
+  }
 }
 
 const createWindow = () => {	
@@ -73,7 +100,7 @@ const createWindow = () => {
   //mainWindow.webContents.openDevTools();
 
   // For handling LLM requests
-  registerRagHandlers(mainWindow, getGroqApiKey);
+  registerRagHandlers(mainWindow, getGroqApiKey, getTrustedCaBundle);
   // Electron may have already torn down webContents by the time `closed` is
   // delivered (notably when the app is force-quit). Retain the identifier while
   // the window is alive instead of reading it during teardown.
@@ -104,7 +131,7 @@ ipcMain.handle('groq-key-status', () => ({
 
 ipcMain.handle('groq-key-save', async (_event, apiKey) => {
   const normalizedKey = String(apiKey || '').trim();
-  await validateGroqApiKey(normalizedKey);
+  await validateGroqApiKey(normalizedKey, getTrustedCaBundle());
   setGroqApiKey(normalizedKey);
   return { configured: true };
 });
@@ -112,6 +139,30 @@ ipcMain.handle('groq-key-save', async (_event, apiKey) => {
 ipcMain.handle('groq-key-remove', () => {
   config.delete(GROQ_KEY_CONFIG);
   return { configured: false };
+});
+
+ipcMain.handle('trusted-ca-status', () => getTrustedCaStatus());
+
+ipcMain.handle('trusted-ca-select', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Choose a trusted CA bundle',
+    properties: ['openFile'],
+    filters: [{ name: 'Certificates', extensions: ['pem', 'crt', 'cer'] }],
+  });
+  if (result.canceled || !result.filePaths[0]) return getTrustedCaStatus();
+
+  const certificatePath = result.filePaths[0];
+  const certificate = fs.readFileSync(certificatePath, 'utf8');
+  if (!certificate.includes('-----BEGIN CERTIFICATE-----')) {
+    throw new Error('Choose a PEM certificate bundle (.pem or .crt).');
+  }
+  config.set(TRUSTED_CA_BUNDLE_CONFIG, certificatePath);
+  return getTrustedCaStatus();
+});
+
+ipcMain.handle('trusted-ca-clear', () => {
+  config.delete(TRUSTED_CA_BUNDLE_CONFIG);
+  return getTrustedCaStatus();
 });
 
 ipcMain.handle('open-groq-console', () => {

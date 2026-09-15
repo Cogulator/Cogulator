@@ -8,6 +8,7 @@ const syncChannels = new Set([
 const sendChannels = new Set(['rag-query']);
 const invokeChannels = new Set([
   'groq-key-status', 'groq-key-save', 'groq-key-remove', 'open-groq-console',
+  'trusted-ca-status', 'trusted-ca-select', 'trusted-ca-clear',
   'rag-cancel', 'rag-clear-history',
 ]);
 const receiveChannels = new Set([

@@ -16,6 +16,8 @@ import dotenv from 'dotenv';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ipcMain } from 'electron';
+import https from 'node:https';
+import nodeFetch from 'node-fetch';
 import { pipeline } from '@xenova/transformers';
 import Groq from 'groq-sdk';
 import gomsValidation from './gomsValidation.js';
@@ -46,12 +48,21 @@ function getRetrievalEndpoint() {
   return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/rag-retrieve`;
 }
 
-export async function validateGroqApiKey(apiKey) {
+function createTrustedFetch(caBundle) {
+  if (!caBundle) return globalThis.fetch;
+
+  // Keep normal TLS validation enabled, while extending it with the CA supplied
+  // by the user (for example, an organization's TLS-inspection proxy CA).
+  const agent = new https.Agent({ ca: caBundle });
+  return (url, options = {}) => nodeFetch(url, { ...options, agent });
+}
+
+export async function validateGroqApiKey(apiKey, caBundle = null) {
   if (!/^gsk_[A-Za-z0-9_-]+$/.test(apiKey || '')) {
     throw new Error('That does not look like a Groq API key. Keys begin with gsk_.');
   }
 
-  const client = new Groq({ apiKey });
+  const client = new Groq({ apiKey, fetch: createTrustedFetch(caBundle) });
   await client.models.list();
 }
 
@@ -81,10 +92,10 @@ const SIMILARITY_THRESHOLD = 0.3;
  * Returns the top-K chunks from Supabase most similar to the query.
  * Calls the match_cogulator_chunks SQL function created during setup.
  */
-async function retrieve(queryText) {
+async function retrieve(queryText, requestFetch = globalThis.fetch) {
   const embedding = await embedQuery(queryText);
 
-  const response = await fetch(getRetrievalEndpoint(), {
+  const response = await requestFetch(getRetrievalEndpoint(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -210,7 +221,7 @@ let currentAbortController = null;
  *   ipcRenderer.on('rag-done',   (_, { sources }) => showSources(sources))
  *   ipcRenderer.on('rag-error',  (_, message) => showError(message))
  */
-export function registerRagHandlers(mainWindow, getGroqApiKey) {
+export function registerRagHandlers(mainWindow, getGroqApiKey, getTrustedCaBundle = () => null) {
 
   // ── rag-query ──────────────────────────────────────────────────────────────
   //ipcMain.on('rag-query', async (event, { question }) => {
@@ -240,10 +251,11 @@ export function registerRagHandlers(mainWindow, getGroqApiKey) {
         error.code = 'GROQ_NOT_CONFIGURED';
         throw error;
       }
-      const groq = new Groq({ apiKey: groqApiKey });
+      const trustedFetch = createTrustedFetch(getTrustedCaBundle());
+      const groq = new Groq({ apiKey: groqApiKey, fetch: trustedFetch });
 
       // 1. Retrieve relevant chunks
-      const baseChunks = await retrieve(question);
+      const baseChunks = await retrieve(question, trustedFetch);
 
       // Keep retrieval to one bounded database call per Assist request.
       const combined = diversifyAndLimitContext(baseChunks, [], MATCH_COUNT);

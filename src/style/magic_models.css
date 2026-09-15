@@ -252,6 +252,40 @@
 	color: #b54747;
 }
 
+#ai_ca_settings {
+	margin-top: 18px;
+	padding-top: 14px;
+	border-top: 1px solid var(--border-color);
+}
+
+#ai_ca_settings p {
+	margin-bottom: 8px;
+}
+
+#ai_ca_actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+#ai_ca_actions button {
+	padding: 6px 9px;
+	color: var(--purple-color);
+	font: 12px 'Lato-Bold', sans-serif;
+	background: transparent;
+	border: 1px solid var(--purple-color);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+#ai_ca_status {
+	min-height: 18px;
+}
+
+#ai_ca_status.error {
+	color: #b54747;
+}
+
 #ai_manage_key_btn {
 	margin-left: auto;
 	flex: 0 0 28px;

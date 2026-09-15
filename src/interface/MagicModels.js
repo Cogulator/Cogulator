@@ -96,6 +96,8 @@ class MagicModelsManager {
         $('#ai_cancel_groq_setup').click(() => this.hideGroqSetup());
         $('#ai_remove_groq_key').click(() => this.removeGroqKey());
         $('#ai_save_groq_key').click(() => this.saveGroqKey());
+        $('#ai_select_ca_bundle').click(() => this.selectTrustedCaBundle());
+        $('#ai_clear_ca_bundle').click(() => this.clearTrustedCaBundle());
 
 
         ipcRenderer.on('rag-token', (sender, token) => {
@@ -240,11 +242,39 @@ class MagicModelsManager {
         try {
             const status = await ipcRenderer.invoke('groq-key-status');
             this.groqConfigured = status.configured;
+            await this.refreshTrustedCaStatus();
             if (!status.configured) this.showGroqSetup(status.secureStorageAvailable);
             else this.hideGroqSetup();
         } catch (error) {
             this.showGroqSetup(false, error.message);
         }
+    }
+
+    async refreshTrustedCaStatus() {
+        try {
+            const status = await ipcRenderer.invoke('trusted-ca-status');
+            const message = $('#ai_ca_status').removeClass('error');
+            $('#ai_clear_ca_bundle').toggle(status.configured);
+            if (status.error) message.addClass('error').text(status.error);
+            else if (status.configured) message.text(`Using trusted CA bundle: ${status.name}`);
+            else message.text('No additional CA bundle selected.');
+        } catch (error) {
+            $('#ai_ca_status').addClass('error').text(error.message || 'Unable to check trusted CA settings.');
+        }
+    }
+
+    async selectTrustedCaBundle() {
+        try {
+            await ipcRenderer.invoke('trusted-ca-select');
+            await this.refreshTrustedCaStatus();
+        } catch (error) {
+            $('#ai_ca_status').addClass('error').text(error.message || 'Unable to save the trusted CA bundle.');
+        }
+    }
+
+    async clearTrustedCaBundle() {
+        await ipcRenderer.invoke('trusted-ca-clear');
+        await this.refreshTrustedCaStatus();
     }
 
     showGroqSetup(secureStorageAvailable = true, errorMessage = '') {
