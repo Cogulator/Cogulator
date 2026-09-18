@@ -16,7 +16,7 @@ function harness() {
     dirname: path.dirname, resolve: path.resolve, fileURLToPath: () => __filename,
     bundledSupabaseUrl: 'https://retrieval.invalid', gomsValidation,
     ipcMain: { on: (name, fn) => handlers[name] = fn, handle: (name, fn) => handlers[name] = fn },
-    pipeline: async () => async () => ({ data: [0] }),
+    embeddingService: { embed: async () => [0] },
     fetch: async () => ({ ok: true, json: async () => [] }),
     Groq: class {
       constructor() {

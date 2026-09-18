@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { ipcMain } from 'electron';
 import https from 'node:https';
 import nodeFetch from 'node-fetch';
-import { pipeline } from '@xenova/transformers';
+import embeddingService from './embeddings/service.js';
 import Groq from 'groq-sdk';
 import gomsValidation from './gomsValidation.js';
 import {
@@ -68,19 +68,8 @@ export async function validateGroqApiKey(apiKey, caBundle = null) {
 
 // ─── Embedder (singleton, lazy-loaded) ───────────────────────────────────────
 
-let _embedder = null;
-
-async function getEmbedder() {
-  if (!_embedder) {
-    _embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-  }
-  return _embedder;
-}
-
 async function embedQuery(text) {
-  const fn = await getEmbedder();
-  const out = await fn(text, { pooling: 'mean', normalize: true });
-  return Array.from(out.data);
+  return embeddingService.embed(text);
 }
 
 // ─── Retrieval ────────────────────────────────────────────────────────────────
