@@ -1,0 +1,7 @@
+*User points and clicks something on screen
+Goal: Point and Click
+. Look at <target>
+. Point to <target>
+. Cognitive_processor verify cursor over <target>
+. Click <target>
+. Ignore <target>

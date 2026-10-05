@@ -1,0 +1,16 @@
+* Decision pattern: scanning and manual entry are represented as distinct, reviewable subgoals.
+Goal: Enter an inventory identifier
+. Goal: Scan identifier
+.. Look at <barcode>
+.. Grasp scanner
+.. Touch scanner trigger
+.. Verify <identifier> is displayed
+. Goal: Enter identifier manually
+.. Look at <identifier field>
+.. Touch <identifier field>
+.. Hands to keyboard
+.. Type <identifier>
+.. Verify <identifier> is displayed
+. Goal: Confirm identifier
+.. Read <identifier>
+.. Verify <identifier> is correct

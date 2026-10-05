@@ -1,0 +1,19 @@
+* Hierarchy and references: reuse one selection goal for several controls.
+Goal: Purchase an item online
+. Goal: Select control <search field>
+.. Look at <search field>
+.. Point to <search field>
+.. Click <search field>
+. Goal: Find item
+.. @Goal Select control <search field>
+.. Hands to keyboard
+.. Type <item name>
+.. Keystroke Enter
+.. Search for <item name>
+.. @Goal Select control <item name>
+. Goal: Add item to cart
+.. @Goal Select control <add to cart button>
+.. Verify item is in cart
+. Goal: Complete purchase
+.. @Goal Select control <checkout button>
+.. Verify order is submitted

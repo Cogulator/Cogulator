@@ -1,0 +1,16 @@
+* Mixed devices: mouse to keyboard, then back to mouse.
+Goal: Edit and save a document
+. Goal: Select text with mouse
+.. Look at <text>
+.. Point to <text>
+.. Click <text>
+. Goal: Replace text with keyboard
+.. Hands to keyboard
+.. Type <replacement text>
+.. Verify <replacement text> is displayed
+. Goal: Save document with mouse
+.. Hands to mouse
+.. Look at <save button>
+.. Point to <save button>
+.. Click <save button>
+.. Verify document is saved

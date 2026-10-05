@@ -1,0 +1,8 @@
+* User touches a physical button to make an interphone call
+Goal: Initiate Interphone Call <callee>
+.Cognitive_processor line is available
+.Look at phone
+.Hands to phone
+.Recall  <callee> (50 ms) *similar to cognitive_processor time
+.Touch to initiate call to <callee>
+.Ignore <callee>

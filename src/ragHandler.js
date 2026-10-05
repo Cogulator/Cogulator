@@ -5,48 +5,20 @@
  *   "rag-query"  — takes a user question, retrieves context, streams LLM tokens back
  *   "rag-cancel" — cancels an in-flight request
  *
- * Prerequisites:
- *   npm install @supabase/supabase-js @xenova/transformers groq-sdk dotenv
- *
- * Development .env additions:
- *   SUPABASE_URL=https://your-project.supabase.co
+ * Reference retrieval uses the bundled corpus and local embedding worker.
  */
 
-import dotenv from 'dotenv';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { ipcMain } from 'electron';
 import https from 'node:https';
 import nodeFetch from 'node-fetch';
 import embeddingService from './embeddings/service.js';
 import Groq from 'groq-sdk';
 import gomsValidation from './gomsValidation.js';
-import {
-  supabaseUrl as bundledSupabaseUrl,
-} from './supabasePublicConfig.js';
+import localRetrieval from './localRetrieval.js';
 
 const { validateGeneratedGoms } = gomsValidation;
 
-// Load the development configuration from the project root.  This avoids
-// depending on Electron's current working directory, which can differ when
-// launched from an IDE or a packaged app.
-const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-dotenv.config({ path: resolve(projectRoot, '.env') });
-
 // ─── Clients ──────────────────────────────────────────────────────────────────
-
-// A local .env may override this for development. The packaged app uses the
-// public configuration above, so Assist works without shipping a .env file.
-const supabaseUrl = process.env.SUPABASE_URL || bundledSupabaseUrl;
-
-function getRetrievalEndpoint() {
-  if (!supabaseUrl) {
-    throw new Error(
-      'Assist is temporarily unavailable because its retrieval endpoint is not configured.'
-    );
-  }
-  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/rag-retrieve`;
-}
 
 function createTrustedFetch(caBundle) {
   if (!caBundle) return globalThis.fetch;
@@ -75,33 +47,13 @@ async function embedQuery(text) {
 // ─── Retrieval ────────────────────────────────────────────────────────────────
 
 const MATCH_COUNT = 6;
-const SIMILARITY_THRESHOLD = 0.3;
 
 /**
- * Returns the top-K chunks from Supabase most similar to the query.
- * Calls the match_cogulator_chunks SQL function created during setup.
+ * Returns the closest reference chunks without a network request.
  */
-async function retrieve(queryText, requestFetch = globalThis.fetch) {
+async function retrieve(queryText) {
   const embedding = await embedQuery(queryText);
-
-  const response = await requestFetch(getRetrievalEndpoint(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query_embedding: embedding }),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text();
-    if (response.status === 429) {
-      throw new Error('Assist is receiving too many requests from this network. Please try again in a few minutes.');
-    }
-    throw new Error(`Retrieval error (${response.status}): ${detail || response.statusText}`);
-  }
-
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  return localRetrieval.findMatches(embedding);
 }
 
 // ─── Prompt assembly ──────────────────────────────────────────────────────────
@@ -244,9 +196,9 @@ export function registerRagHandlers(mainWindow, getGroqApiKey, getTrustedCaBundl
       const groq = new Groq({ apiKey: groqApiKey, fetch: trustedFetch });
 
       // 1. Retrieve relevant chunks
-      const baseChunks = await retrieve(question, trustedFetch);
+      const baseChunks = await retrieve(question);
 
-      // Keep retrieval to one bounded database call per Assist request.
+      // Keep the same six-result context limit as hosted retrieval.
       const combined = diversifyAndLimitContext(baseChunks, [], MATCH_COUNT);
 
       // 3. Build messages array (system + history + new user turn)

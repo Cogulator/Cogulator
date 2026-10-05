@@ -1,0 +1,17 @@
+* Chunk naming: retain intermediate values while performing mental arithmetic.
+Goal: Add two numbers mentally
+. Goal: Hear problem
+.. Hear <27>
+.. Hear plus <15>
+. Goal: Add ones digits
+.. Think <7> plus <5>
+.. Store <12>
+. Goal: Add tens digits
+.. Recall <27>
+.. Recall <15>
+.. Think <2> plus <1> plus <1>
+.. Store <4>
+. Goal: Report answer
+.. Recall <4>
+.. Recall <12>
+.. Say <42>

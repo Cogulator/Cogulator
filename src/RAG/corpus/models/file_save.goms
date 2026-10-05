@@ -1,0 +1,24 @@
+
+*User saves a file using File > Save As Dialogue"
+Goal: File Save As
+.Goal: Select File Button
+..Look at <file-button>
+..Point to <file-button>
+..Cognitive_processor verify cursor over <file-button>
+..Click <file-button>
+..Ignore <file-button>
+.Goal: Select Save As Button
+..Look at <save-as>
+..Point to <save-as>
+..Cognitive_processor verify cursor over <save-as>
+..Click <save-as>
+..Ignore <save-as>
+.Goal: Enter File Name
+..Think of <file-name>
+..Look at <file name field>
+..Hands to keyboard
+..Type <file-name>
+..Cognitive_processor verify <file-name> is correct
+..Keystroke Enter
+..Ignore  <file name field>
+   

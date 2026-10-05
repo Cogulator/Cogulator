@@ -1,0 +1,15 @@
+* Decision pattern: confirmation is modeled as a separate verification subgoal.
+Goal: Delete a selected file
+. Goal: Select file
+.. Look at <file name>
+.. Point to <file name>
+.. Click <file name>
+. Goal: Request deletion
+.. Look at <delete button>
+.. Click <delete button>
+. Goal: Confirm deletion
+.. Read <confirmation message>
+.. Verify <file name> should be deleted
+.. Look at <confirm delete button>
+.. Click <confirm delete button>
+.. Verify <file name> is deleted

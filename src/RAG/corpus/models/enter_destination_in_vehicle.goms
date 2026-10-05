@@ -1,0 +1,18 @@
+* Mixed devices: touchscreen selection followed by physical dial adjustment.
+Goal: Enter a vehicle destination
+. Goal: Open navigation
+.. Look at <navigation button>
+.. Touch <navigation button>
+. Goal: Enter address
+.. Hands to keyboard
+.. Type <destination address>
+.. Verify <destination address> is displayed
+. Goal: Select suggested destination
+.. Hands to touchscreen
+.. Look at <destination suggestion>
+.. Touch <destination suggestion>
+. Goal: Set guidance volume
+.. Hands to volume dial
+.. Look at <volume dial>
+.. Turn <volume dial>
+.. Verify guidance volume is set

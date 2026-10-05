@@ -1,0 +1,15 @@
+* Mixed devices: physical phone controls followed by keypad entry.
+Goal: Transfer a call
+. Goal: Start transfer
+.. Look at <transfer button>
+.. Touch <transfer button>
+. Goal: Enter extension
+.. Hands to keypad
+.. Recall <extension>
+.. Type <extension>
+.. Verify <extension> is displayed
+. Goal: Complete transfer
+.. Hands to phone controls
+.. Look at <complete transfer button>
+.. Touch <complete transfer button>
+.. Verify call is transferred

@@ -1,0 +1,16 @@
+* Chunk naming: remember a short code until it is entered.
+Goal: Enter a one time code
+. Goal: Receive code
+.. Hear <482913>
+. Goal: Open verification field
+.. Look at <verification field>
+.. Touch <verification field>
+. Goal: Enter code
+.. Recall <482913>
+.. Hands to keyboard
+.. Type <482913>
+.. Verify <482913> is displayed
+. Goal: Submit code
+.. Look at <submit button>
+.. Touch <submit button>
+.. Verify verification is complete

@@ -1,0 +1,14 @@
+* Chunk naming: retain a route instruction while checking the road.
+Goal: Follow a remembered route instruction
+. Goal: Acquire instruction
+.. Hear Turn at <Oak Street>
+. Goal: Monitor road
+.. Look at <traffic ahead>
+.. Verify lane is clear
+. Goal: Find turn
+.. Recall <Oak Street>
+.. Search for <Oak Street>
+. Goal: Turn onto street
+.. Hands to steering wheel
+.. Turn steering wheel
+.. Verify vehicle is on <Oak Street>

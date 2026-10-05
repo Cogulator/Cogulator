@@ -1,0 +1,7 @@
+*User sets a car handbrake
+*Generic example of interaction with a physical object
+*The Grasp operator comes from Codein– A New Notation for GOMS to Handle Evaluations of Reality Based Interaction Style Interfaces by Georgios Christou, Frank Ritter, and Robert Jacob
+Goal: Set Car Handbrake
+. Grasp handbrake *Reach accounts for reaching and grasping.
+. Hands pull the handbrake up *Using the hands operator to model movement of the handbrake. This may or may not be a reasonable operator to use here, as its original intent is movement of the hands between a mouse and keyboard. This is the sort of informed guess you'll sometimes have to make in creating models
+. Verify handbrake set

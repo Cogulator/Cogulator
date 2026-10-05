@@ -1,0 +1,16 @@
+* Speech interface: make a request, confirm the recognized details, and correct if needed.
+Goal: Set a reminder with a speech interface
+. Goal: Initiate voice interaction
+.. Look at <voice assistant button>
+.. Touch <voice assistant button>
+.. Verify speech interface is listening
+. Goal: State reminder request
+.. Recall <task> and <time>
+.. Say Remind me to <task> at <time>
+. Goal: Confirm recognized reminder
+.. Hear <recognized task> at <recognized time>
+.. Verify <recognized task> matches <task> and <recognized time> matches <time>
+. Goal: Confirm reminder
+.. Say Yes
+.. Hear <reminder confirmation>
+.. Verify reminder is set

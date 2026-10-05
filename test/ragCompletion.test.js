@@ -5,6 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const gomsValidation = require('../src/gomsValidation');
+const localRetrieval = require('../src/localRetrieval');
+const corpus = require('../src/assist/corpus.json');
 
 // Run the actual IPC handler with local service doubles; no API keys or network.
 function harness() {
@@ -14,10 +16,11 @@ function harness() {
     console: { log() {}, error() {} }, AbortController,
     process: { env: {} }, dotenv: { config() {} },
     dirname: path.dirname, resolve: path.resolve, fileURLToPath: () => __filename,
-    bundledSupabaseUrl: 'https://retrieval.invalid', gomsValidation,
+    gomsValidation,
     ipcMain: { on: (name, fn) => handlers[name] = fn, handle: (name, fn) => handlers[name] = fn },
-    embeddingService: { embed: async () => [0] },
-    fetch: async () => ({ ok: true, json: async () => [] }),
+    embeddingService: { embed: async () => corpus.chunks[0].embedding },
+    localRetrieval,
+    fetch: async () => { throw new Error('Retrieval must not use the network'); },
     Groq: class {
       constructor() {
         this.chat = { completions: { create: async options => {
@@ -62,4 +65,16 @@ test('a stream that ends without a completion reason is not accepted', async () 
   await h.query(null, 'interrupted');
   assert.ok(h.sent.some(event => event[0] === 'rag-error' && /did not complete/.test(event[1])));
   assert.ok(!h.sent.some(event => event[0] === 'rag-done'));
+});
+
+test('Assist includes bundled reference context and returns source attribution without fetching retrieval', async () => {
+  const h = harness();
+  await h.query('stop', 'local');
+  const message = h.requests[0].messages.find(message => message.role === 'user');
+  assert.ok(message.content.includes(corpus.chunks[0].text));
+  const done = h.sent.find(event => event[0] === 'rag-done');
+  assert.equal(done[1].requestId, 'local');
+  assert.ok(done[1].sources.length > 0 && done[1].sources.length <= 6);
+  assert.ok(done[1].sources.some(source => source.source === corpus.chunks[0].source));
+  assert.ok(done[1].sources.every(source => source.similarity > 0.3));
 });

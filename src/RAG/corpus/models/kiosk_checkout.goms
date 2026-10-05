@@ -1,0 +1,15 @@
+* Mixed devices: touchscreen selection and physical card insertion.
+Goal: Complete a kiosk checkout
+. Goal: Select payment method
+.. Look at <card payment button>
+.. Touch <card payment button>
+. Goal: Insert card
+.. Hands to payment terminal
+.. Look at <card slot>
+.. Grasp <payment card>
+.. Touch <card slot>
+. Goal: Confirm purchase
+.. Hands to touchscreen
+.. Look at <confirm button>
+.. Touch <confirm button>
+.. Verify purchase is complete

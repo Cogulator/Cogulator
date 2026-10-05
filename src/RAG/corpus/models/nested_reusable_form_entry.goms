@@ -1,0 +1,16 @@
+* Nested reusable goal: apply the same field-entry pattern to multiple fields.
+Goal: Complete a profile form
+. Goal: Enter field <name field> <full name>
+.. Look at <name field>
+.. Click <name field>
+.. Hands to keyboard
+.. Type <full name>
+.. Verify <full name> is displayed
+. Goal: Enter profile details
+.. @Goal Enter field <name field> <full name>
+.. @Goal Enter field <email field> <email address>
+.. @Goal Enter field <phone field> <phone number>
+. Goal: Save profile
+.. Look at <save button>
+.. Click <save button>
+.. Verify profile is saved

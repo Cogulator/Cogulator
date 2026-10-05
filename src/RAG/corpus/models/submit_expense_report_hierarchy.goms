@@ -1,0 +1,28 @@
+* Three-level hierarchy with separate data-entry and review subgoals.
+Goal: Submit an expense report
+. Goal: Open expense report
+.. Look at <expense report link>
+.. Point to <expense report link>
+.. Click <expense report link>
+. Goal: Enter expense
+.. Goal: Enter amount
+... Look at <amount field>
+... Point to <amount field>
+... Click <amount field>
+... Hands to keyboard
+... Recall <amount>
+... Type <amount>
+.. Goal: Enter category
+... Look at <category menu>
+... Point to <category menu>
+... Click <category menu>
+... Search for <category>
+... Point to <category>
+... Click <category>
+. Goal: Review and submit
+.. Verify <amount> is correct
+.. Verify <category> is correct
+.. Look at <submit button>
+.. Point to <submit button>
+.. Click <submit button>
+.. Verify report is submitted

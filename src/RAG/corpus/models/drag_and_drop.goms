@@ -1,0 +1,10 @@
+*User drags an object across a screen",
+Goal Drag and Forget <drag_from> <drag-to>
+.Look at <drag_from>
+.Point to <drag_from>
+.Click <drag_from> *mouse_down
+.Look at <drag_to>
+.Drag to <drag_to>
+.Cognitive_processor verify cursor over <drag_to>
+.Click <drag_to>  *release the mouse
+.Ignore <drag_from> <drag_to>

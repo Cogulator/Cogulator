@@ -1,0 +1,19 @@
+* Decision pattern: review is explicit instead of treating submission as immediate.
+Goal: Submit a completed form
+. Goal: Review entered information
+.. Read <entered name>
+.. Recall <actual name>
+.. Verify <entered name> matches <actual name>
+.. Read <entered address>
+.. Recall <actual address>
+.. Verify <entered address> matches <actual address>
+. Goal: Correct information if needed
+.. Look at <field to correct>
+.. Click <field to correct>
+.. Hands to keyboard
+.. Type <corrected value>
+. Goal: Submit form
+.. Hands to mouse
+.. Look at <submit button>
+.. Click <submit button>
+.. Verify form is submitted

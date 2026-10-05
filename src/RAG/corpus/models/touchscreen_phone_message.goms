@@ -1,0 +1,19 @@
+* Touchscreen phone: navigate to a conversation, compose a message, and send it.
+Goal: Send a message from a touchscreen phone
+. Goal: Open messaging application
+.. Look at <messaging application>
+.. Touch <messaging application>
+.. Verify messaging application is open
+. Goal: Select conversation
+.. Search for <recipient name>
+.. Touch <recipient name>
+.. Verify conversation with <recipient name> is open
+. Goal: Compose message
+.. Look at <message field>
+.. Touch <message field>
+.. Type <message text>
+.. Verify <message text> is displayed
+. Goal: Send message
+.. Look at <send button>
+.. Touch <send button>
+.. Verify message is sent

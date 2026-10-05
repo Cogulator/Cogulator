@@ -1,0 +1,28 @@
+*  User copies and pastes text
+Goal: Copy and Paste
+.Goal: Start of Selection
+..Look at <start-target>
+..Point to <start-target>
+..Cognitive_processor  verify cursor over <start-target>
+..Click down on <start-target> (150 milliseconds) *half of a click
+..Ignore <start-target>
+.Goal: End of Selection
+..Look at <end-target>
+..Point to <end-target>
+..Cognitive_processor cursor over <end-target>
+..Click up on <end-target> (150 milliseconds) *half of a click
+..Ignore <end-target>
+.Goal: Copy Keystrokes
+..Hands to Keyboard
+..Keystroke CONTROL
+..Keystroke C
+.Goal: Point to Destination
+* Assuming hand was left on mouse while selecting CTRL+C
+..Look at <destination-target>
+..Point to <destination-target>
+..Cognitive_processor <destination-target>
+..Click on <destination-target>
+..Ignore <destination-target>
+.Cognitive_processor text pasted correctly
+
+        

@@ -1,0 +1,22 @@
+* Three-level hierarchy: open a calendar, select a time, and send an invitation.
+Goal: Schedule a meeting
+. Goal: Open calendar application
+.. Look at <calendar application>
+.. Point to <calendar application>
+.. Click <calendar application>
+.. Verify calendar is open
+. Goal: Create meeting
+.. Goal: Select time slot
+... Search for <available time>
+... Look at <available time>
+... Point to <available time>
+... Click <available time>
+.. Goal: Add meeting details
+... Hands to keyboard
+... Type <meeting title>
+... Type <attendee name>
+.. Goal: Send invitation
+... Look at <send invitation button>
+... Point to <send invitation button>
+... Click <send invitation button>
+... Verify invitation is sent

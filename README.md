@@ -19,15 +19,17 @@ Cogulator is developed with electron.  If you'd like to modify or expand Cogulat
 - electron-json-storage with the command "npm install --save electron-json-storage"
 - update.electron.org service with the command "npm install update-electron-app --save"
 
-## RAG configuration
+## Assist reference corpus
 
-For local development, copy `.env.example` to `.env`, then set
-`SUPABASE_URL` with the value for your project. The `.env` file is ignored by
-Git.
+Assist searches a bundled reference corpus locally, using the same MiniLM
+embedding model already included with Cogulator. Retrieval needs no hosted
+database, Supabase configuration, or additional packages. Groq generation still
+requires an internet connection and the user's API key.
 
-For an existing database, run `supabase_hardening.sql` in the Supabase SQL
-Editor before configuring a replacement publishable key. It removes anonymous
-table reads and limits the public retrieval RPC to six results.
+The search corpus is `src/assist/corpus.json` (approximately 2.1 MB). To update
+it after editing reference material in `src/RAG/corpus/`, install dependencies
+in `src/RAG` and run `npm run embed` from that directory. Commit the regenerated
+corpus with the source changes; app releases include it automatically.
 
 ## AI Assist
 

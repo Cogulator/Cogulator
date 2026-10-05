@@ -1,0 +1,6 @@
+*User Hears a question and responds verbally
+Goal: Hear and Respond
+.Hear Hello. How are you?
+.Perceptual_processor  perceive silence
+.Cognitive_processor think of response
+.Say I'm find, how about you?

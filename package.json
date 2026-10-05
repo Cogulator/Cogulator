@@ -66,9 +66,7 @@
     }
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.102.1",
     "custom-electron-titlebar": "^4.2.8",
-    "dotenv": "^17.4.1",
     "electron-json-config": "^2.1.0",
     "electron-squirrel-startup": "^1.0.1",
     "glob": "^13.0.6",

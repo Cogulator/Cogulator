@@ -1,0 +1,20 @@
+* Mixed devices: keyboard file naming, then mouse-based file selection.
+Goal: Upload a desktop file
+. Goal: Open upload dialog
+.. Look at <upload button>
+.. Point to <upload button>
+.. Click <upload button>
+. Goal: Find file
+.. Recall <file name>
+.. Hands to keyboard
+.. Type <file name>
+.. Keystroke Enter
+.. Search for <file name>
+. Goal: Select and upload file
+.. Hands to mouse
+.. Look at <file name>
+.. Point to <file name>
+.. Click <file name>
+.. Look at <open button>
+.. Click <open button>
+.. Verify upload is complete

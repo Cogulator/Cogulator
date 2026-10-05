@@ -1,0 +1,32 @@
+*User does mental math
+* In the Mental-Math example, we demonstrate automated working memory modeling. This model is very similar, but we use the more powerful Chunk Naming tool. Chunk Naming is simply the process of putting memory items inside angled brackets. For an example, a number that is familiar to you would be a single chunk like so: <123-4567>.An unfamiliar number would be consider seven chunks: <1><2><3> - <4><5><6><7>. Chunk naming allows for a couple of cool things, including forgetting. In this example, the model shows the user forgetting one of the numbers they are asked to add in their head.  The forgotten chunk is marked in red. Check out the primer at cogulator.io for more information.
+
+Goal Listen To Problem
+*What is 354 plus 412?
+.Hear What is <3 of 354> *retain he number 3 in 354
+. Hear <5 of 354> *fifty
+. Hear <4 of 354> * four
+. Hear plus
+. Hear <4 of 412>
+. Hear and <1 of 412>
+. Hear and <2 of 412>
+
+Goal  Calculate Answer
+. Goal Add 4 plus 2
+*Internal thought
+. . Say Well, <4 of 354> plus <2 of 412> is 6
+. . Recall <1st6_of766> (150 ms)
+. Goal Add_5_plus_1
+. . Say <5 of 354> plus <1 of 412> is 6
+. . Recall <2nd6_of766> (150 ms)
+. Goal Add_3_plus_4
+. . Goal: Ask for Forgotten Number
+. . . Say What was that first number again?
+. . . Hear <4 of 412> <1 of 412> <2 of 412>
+
+Goal Encode Answer
+.Store <766>
+
+Goal  Speak Answer
+. Verify answer (5 seconds)
+. Say <7_of766> <2nd6_of766> <1st6_of766> 766

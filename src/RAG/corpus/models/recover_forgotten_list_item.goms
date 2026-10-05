@@ -1,0 +1,16 @@
+* Chunk naming: use a recovery step when an item may no longer be available in working memory.
+Goal: Find a previously named list item
+. Goal: Acquire item name
+.. Hear <budget report>
+. Goal: Perform an intervening task
+.. Look at <notifications>
+.. Search for <unread notification>
+.. Read <unread notification>
+. Goal: Recover item name
+.. Say What was the item name
+.. Hear <budget report>
+. Goal: Find item
+.. Search for <budget report>
+.. Look at <budget report>
+.. Touch <budget report>
+.. Verify <budget report> is open

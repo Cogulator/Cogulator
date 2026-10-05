@@ -1,0 +1,14 @@
+* Chunk naming: acquire a contact name, retain it while navigating, then use it.
+Goal: Call a remembered contact
+. Goal: Acquire contact name
+.. Hear <Jordan Lee>
+. Goal: Open contacts
+.. Look at <contacts button>
+.. Touch <contacts button>
+.. Verify contacts are open
+. Goal: Find and call contact
+.. Recall <Jordan Lee>
+.. Search for <Jordan Lee>
+.. Look at <Jordan Lee>
+.. Touch <Jordan Lee>
+.. Verify call is connected

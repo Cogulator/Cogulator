@@ -1,0 +1,16 @@
+* Decision pattern: search result selection includes a separate disambiguation step.
+Goal: Open the correct search result
+. Goal: Search for item
+.. Look at <search field>
+.. Click <search field>
+.. Hands to keyboard
+.. Type <item name>
+.. Keystroke Enter
+. Goal: Disambiguate result
+.. Search for <item name>
+.. Read <result details>
+.. Verify <result details> match <item name>
+. Goal: Open result
+.. Look at <correct result>
+.. Click <correct result>
+.. Verify <correct result> is open

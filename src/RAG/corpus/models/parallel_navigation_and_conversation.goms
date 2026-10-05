@@ -1,0 +1,14 @@
+* Parallelism with named threads: maintain a conversation while navigating a list.
+Goal: Find a contact while speaking
+. Goal: Navigate list
+.. Also: Search contact list as visual
+... Search for <contact name>
+... Look at <contact name>
+. Goal: Continue conversation
+.. Also: Speak with caller as speech
+... Hear <caller question>
+... Think of <answer>
+... Say <answer>
+. Goal: Select contact
+.. Touch <contact name>
+.. Verify <contact name> is selected

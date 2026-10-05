@@ -1,0 +1,25 @@
+*User dials a friend while driving",
+* This model includes @Goal, which allows the modeler to reference a goal that appears earlier in the model
+Goal Dial a Friend While Driving
+
+.Goal Check Traffic Ahead
+.. Look at <red_car_ahead>
+.. Look at <white_truck_left>
+
+.Goal Dial Friend
+.. Think dial <John>
+..  Hands to phone
+
+..Goal Touch Button <home>
+...Look at <home>
+...Point to <home>
+...Cognitive_processor verify finger is over <home>
+...Touch <home>
+... Ignore <home>
+
+..@Goal Touch Button <phone-app>
+..@Goal Touch Button <favorites>
+
+.@Goal Check Traffic Ahead
+..Search for <John> in favorites
+..@Goal Touch Button <John-Button>

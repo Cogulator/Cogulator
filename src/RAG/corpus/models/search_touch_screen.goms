@@ -1,0 +1,18 @@
+
+*User searches through a list on a touchscreen
+Goal:  Swipe & Search * Touch screen
+.Store looking for <Fred>
+. Goal: Swipe
+.. Look at <target>
+.. Point to <target>
+.. Cognitive_processor verify finger is over <target>
+.. Swipe <target>
+.. Ignore <target>
+.Search for <Fred>
+. Goal: Swipe
+.. Look at <target>
+.. Point to <target>
+.. Cognitive_processor verify finger is over <target>
+.. Swipe <target>
+.. Ignore <target>
+.Search for <Fred> * assume found after two swipes

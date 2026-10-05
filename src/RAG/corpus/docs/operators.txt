@@ -1,0 +1,30 @@
+operator,time in ms,label required,definition,model type
+Look,550,no,Looking at item at a known position, NGOMSL CPM
+Perceptual_processor,50,no, One cycle of perceptual processor, HIP
+Proofread,330,no, Time to carefully read one word, NGOMSL
+Read,260,no,Time to read one word, NGOMSL
+Search,1250,no,Search for item at an unknown position,NGOMSL
+Saccade,30,no,One saccade (rapid eye movement),CPM-GOMS
+Hear,400,yes,Listen to someone speak,NGOMSL | CPM
+Say,400,yes,Speak to someone,NGOMSL | CPM
+Attend,50,no,Shifting of attention to stimuli,CPM-GOMS
+Cognitive_processor,70,no,One cycle of the cognitive processor,HIP
+Ignore,50,no,Remove item from working memory,NGOMSL CPM
+Initiate,50,no,Initiate motor process,CPM-GOMS
+Recall,550,no,Retrieve information from memory,NGOMSL CPM
+Store,50,yes,Place item in working memory,NGOMSL CPM
+Think,1250,no,Generic operator for thinking,NGOMSL
+Verify,1250,no,Generic operator for thinking,NGOMSL
+Click,320,no,Click of a mouse,NGOMSL CPM
+Drag,230,no,Drag item across touchscreen, NGOMSL CPM
+Grasp,750,no,Reach and grasp an object with hand,NGOMSL | CPM
+Hands,450,no,Move hands to mouse or keyboard,NGOMS | CPM
+Keystroke,280,no,Pressing a single key (e.g.,NGOMSL | CPM
+Motor_processor,70,no,One cycle of motor processor,HIP
+Point,950,no,Movement of cursor via a mouse,NGOMSL| CPM
+Write,2000,yes,Handwriting (2 seconds per word in label),NGOMSL
+Swipe,170,no,Swipe or flick touchscreen gesture,NGOMSL
+Tap,450,no,Touch a series of touchscreen buttons,NGOMSL
+Turn,800,no,One turn of a knob or dial,NGOMSL
+Touch,490,no,Press a touchscreen button,NGOMSL
+Type,280,yes,Typing a series of keys,NGOMSL
