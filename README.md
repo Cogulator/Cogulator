@@ -12,33 +12,20 @@ More for information about Cogulator can be found at [cogulator.io](http://cogul
 2. You're ready to roll.  Check out the [primer](http://cogulator.github.io/Cogulator/primer.html) & [screencast](http://cogulator.github.io/Cogulator/screencast.html)
 
 # Working With Source
-Cogulator is developed with electron.  If you'd like to modify or expand Cogulator, you'll need [npm](https://www.npmjs.com/get-npm) and [electron-forge](https://electronforge.io). You'll also need the following dependencies. Before using these install commands, clone the repo, and then cd inside of the repo folder:
-- jquery with the command "npm install jquery --save"
-- trash with the command "npm install trash --save"
-- electron-titlebar with the command "npm install electron-titlebar --save"
-- electron-json-storage with the command "npm install --save electron-json-storage"
-- update.electron.org service with the command "npm install update-electron-app --save"
+Cogulator is developed with Electron. Clone the repository, run `nvm use`
+to select Node 24, then run `npm install` and `npm start` from the repository
+directory. The dependencies and Electron Forge tools are declared in
+`package.json`.
 
-## Assist reference corpus
-
-Assist searches a bundled reference corpus locally, using the same MiniLM
-embedding model already included with Cogulator. Retrieval needs no hosted
-database, Supabase configuration, or additional packages. Groq generation still
-requires an internet connection and the user's API key.
-
-The search corpus is `src/assist/corpus.json` (approximately 2.1 MB). To update
-it after editing reference material in `src/RAG/corpus/`, install dependencies
-in `src/RAG` and run `npm run embed` from that directory. Commit the regenerated
-corpus with the source changes; app releases include it automatically.
-
-## AI Assist
-
-AI Assist uses a Groq API key supplied by the person using Cogulator. The first
-time they open Assist, Cogulator guides them to create a free Groq account and
-API key, validates it, and stores it with the operating system's secure
-credential storage. The key is never written to the project `.env` file or
-included in release packages. They can replace or remove the key from **Groq
-settings** in Assist.
+For macOS releases, use Node 24 and run `npm run release:mac -- --universal`
+for one app that runs on Intel and Apple Silicon. Architecture-specific builds
+remain available with `arm64` or `x64` in place of `--universal`. The script signs the
+app, notarizes it using the `Cogulator_2026` keychain profile (override with
+`NOTARY_PROFILE`), staples the app, and creates a ZIP with `ditto`. It verifies
+the extracted signature, staple, and Gatekeeper acceptance before saving
+`out/release/Cogulator-darwin-<arch>-<version>.zip`, its checksum, and the
+notarization log. Failed builds retain diagnostic files. Add `--local-only`
+to check signing and ZIP extraction without submitting to Apple.
 
 # License
 Cogulator is provided gratis under an Apache 2.0 license. Feel free to look under the hood or pull the code. If you’d like to contribute to the project, get in touch.

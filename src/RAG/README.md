@@ -13,8 +13,6 @@ the search-ready corpus is included separately.
 - `corpus/models/` — public example `.goms` models.
 - `ingest.js` — chunks corpus files and creates local embeddings.
 - `../assist/corpus.json` — committed search corpus bundled with the app.
-- `supabase_setup.sql` and `supabase_hardening.sql` — legacy hosted retrieval setup.
-- `env.example` — configuration template only; it contains no credentials.
 
 ## Update the bundled corpus
 
@@ -26,29 +24,8 @@ the search-ready corpus is included separately.
 
 The first generation downloads the local `Xenova/all-MiniLM-L6-v2` embedding
 model. Keep that model and its 384-dimensional vectors to match the query
-embedder bundled with Cogulator. No Supabase credentials are needed.
+embedder bundled with Cogulator. No hosted database credentials are needed.
 
 Search uses cosine similarity greater than 0.3 and returns at most six chunks.
 The search corpus is loaded once when Assist first retrieves context. Reference
 updates reach users through app releases. Groq generation still requires internet.
-
-## Legacy Supabase ingestion
-
-These tools remain available for maintaining an old hosted corpus; Cogulator
-no longer calls Supabase.
-
-1. Create a Supabase project and run `supabase_setup.sql` in its SQL Editor.
-2. From this directory, install dependencies with `npm install`.
-3. Copy `env.example` to `.env` and provide your own Supabase URL and
-   **service-role** key. The service-role key is only for this local ingestion
-   process; never commit or ship it with Cogulator.
-4. Run `npm run ingest`.
-
-The first ingestion downloads the local `Xenova/all-MiniLM-L6-v2` embedding
-model. The schema uses 384-dimensional vectors for that model.
-
-Use `npm run ingest:fresh` only when you intentionally want to delete all
-previously ingested chunks before rebuilding them.
-
-Groq keys are configured in the desktop app's Assist settings. Do not put the
-service-role key or an ingestion `.env` in a packaged application.

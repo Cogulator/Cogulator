@@ -1,25 +1,10 @@
 /**
- * Cogulator RAG Ingestion Script
- *
- * Chunks and embeds Cogulator docs + .goms example models into Supabase pgvector.
- * Run once (or whenever your corpus changes): node ingest.js
- * To regenerate the bundled Assist corpus without uploading:
- *   npm run embed
- *   node ingest.js --output ../assist/corpus.json
- *
- * Prerequisites:
- *   npm install @supabase/supabase-js @xenova/transformers glob dotenv
- *
- * .env file required:
- *   SUPABASE_URL=https://your-project.supabase.co
- *   SUPABASE_SERVICE_KEY=your-service-role-key
- *   EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2   # free, runs locally
+ * Generate the bundled Assist corpus from Cogulator docs and .goms examples.
+ * Run npm run embed from this directory after editing the corpus.
  */
 
-import "dotenv/config";
 import fs from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
 import { pipeline } from "@xenova/transformers";
 import { glob } from "glob";
 
@@ -35,21 +20,11 @@ const CORPUS_DIRS = {
 };
 
 const outputFlagIndex = process.argv.indexOf("--output");
-const outputPath = outputFlagIndex === -1 ? null : process.argv[outputFlagIndex + 1];
+const outputPath = outputFlagIndex === -1 ? "../assist/corpus.json" : process.argv[outputFlagIndex + 1];
 if (outputFlagIndex !== -1 && (!outputPath || outputPath.startsWith("--"))) {
   throw new Error("--output requires a file path");
 }
-const offlineOutput = outputPath !== null;
 const generatedRows = [];
-
-// ─── Supabase setup ───────────────────────────────────────────────────────────
-
-const supabase = offlineOutput
-  ? null
-  : createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
-    );
 
 // ─── Embedding ────────────────────────────────────────────────────────────────
 
@@ -352,39 +327,7 @@ function chunkOperatorsFile(text, filePath) {
   }));
 }
 
-// ─── Supabase helpers ─────────────────────────────────────────────────────────
-
-async function ensureTable() {
-  // Run this SQL once in the Supabase SQL editor — included here for reference.
-  const sql = `
-    -- Enable pgvector
-    create extension if not exists vector;
-
-    -- Main chunks table
-    create table if not exists cogulator_chunks (
-      id          bigserial primary key,
-      text        text        not null,
-      embedding   vector(384),          -- 384 dims = all-MiniLM-L6-v2
-      source      text,
-      source_type text,
-      model_name  text,
-      goal_name   text,
-      chunk_index int,
-      inserted_at timestamptz default now()
-    );
-
-    -- HNSW index for fast cosine similarity search
-    create index if not exists cogulator_chunks_embedding_idx
-      on cogulator_chunks
-      using hnsw (embedding vector_cosine_ops);
-  `;
-  console.log("\n⚠️  Make sure you have run the table setup SQL in Supabase.");
-  console.log(
-    "   (See the SQL comment at the top of ensureTable() in this script)\n",
-  );
-}
-
-async function upsertChunks(chunks) {
+function collectChunks(chunks) {
   const rows = chunks.map((c) => ({
     text: c.text,
     embedding: c.embedding,
@@ -395,14 +338,7 @@ async function upsertChunks(chunks) {
     chunk_index: c.metadata.chunk_index ?? null,
   }));
 
-  if (offlineOutput) {
-    generatedRows.push(...rows);
-    return;
-  }
-
-  const { error } = await supabase.from("cogulator_chunks").insert(rows);
-
-  if (error) throw new Error(`Supabase insert error: ${error.message}`);
+  generatedRows.push(...rows);
 }
 
 // ─── Main ingestion loop ──────────────────────────────────────────────────────
@@ -438,27 +374,13 @@ async function ingestFile(filePath) {
   }
   console.log();
 
-  await upsertChunks(embeddedChunks);
+  collectChunks(embeddedChunks);
   return embeddedChunks.length;
 }
 
 async function main() {
   console.log("=== Cogulator RAG Ingestion ===\n");
-  if (offlineOutput) {
-    console.log(`Offline mode: writing embeddings to ${outputPath}\n`);
-  } else {
-    await ensureTable();
-  }
-
-  // Optionally wipe existing chunks before re-ingesting
-  if (process.argv.includes("--fresh")) {
-    if (offlineOutput) {
-      throw new Error("--fresh cannot be used with --output because no database is being modified");
-    }
-    console.log("--fresh flag detected: deleting existing chunks...");
-    await supabase.from("cogulator_chunks").delete().neq("id", 0);
-    console.log("Done.\n");
-  }
+  console.log(`Writing embeddings to ${outputPath}\n`);
 
   let totalChunks = 0;
 
@@ -488,21 +410,13 @@ async function main() {
     console.log(`⚠️  No .goms files found in ${CORPUS_DIRS.models}`);
   }
 
-  if (offlineOutput) {
-    const resolvedOutputPath = path.resolve(outputPath);
-    fs.mkdirSync(path.dirname(resolvedOutputPath), { recursive: true });
-    fs.writeFileSync(
-      resolvedOutputPath,
-      `${JSON.stringify({ embedding_model: process.env.EMBEDDING_MODEL || "Xenova/all-MiniLM-L6-v2", chunks: generatedRows })}\n`,
-    );
-    console.log(
-      `\n✅ Embedding complete. ${totalChunks} chunks written to ${resolvedOutputPath}.\n`,
-    );
-  } else {
-    console.log(
-      `\n✅ Ingestion complete. ${totalChunks} total chunks stored in Supabase.\n`,
-    );
-  }
+  const resolvedOutputPath = path.resolve(outputPath);
+  fs.mkdirSync(path.dirname(resolvedOutputPath), { recursive: true });
+  fs.writeFileSync(
+    resolvedOutputPath,
+    `${JSON.stringify({ embedding_model: process.env.EMBEDDING_MODEL || "Xenova/all-MiniLM-L6-v2", chunks: generatedRows })}\n`,
+  );
+  console.log(`\nEmbedding complete. ${totalChunks} chunks written to ${resolvedOutputPath}.\n`);
 }
 
 main().catch((err) => {

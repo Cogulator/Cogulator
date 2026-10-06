@@ -6,6 +6,11 @@ const fs = require('fs');
 const os = require('os');
 const trash = require('trash').default;
 const config = require('electron-json-config').factory();
+const { createUpdateController } = require('./appUpdates');
+const { updateElectronApp, UpdateSourceType } = require('update-electron-app');
+const updates = createUpdateController({
+  app, autoUpdater: electron.autoUpdater, dialog, updateElectronApp, UpdateSourceType,
+});
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -124,6 +129,8 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
+app.on('ready', () => updates.start());
+app.on('before-quit', () => updates.stop());
 
 ipcMain.handle('groq-key-status', () => ({
   configured: Boolean(getGroqApiKey()),
@@ -459,6 +466,10 @@ const template = [
 			},
             {
                 label: "Version: " + app.getVersion()
+            },
+            {
+                label: 'Check for Updates…',
+                click () { void updates.checkForUpdates().catch(error => console.warn('Update check failed:', error)); }
             }
 		]
 	}
